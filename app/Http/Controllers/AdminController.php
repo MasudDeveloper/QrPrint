@@ -20,8 +20,6 @@ class AdminController extends Controller
         
         $recentJobs = PrintJob::with('shop')->latest()->take(10)->get();
         $videoUrl = Setting::get('homepage_video_url', '');
-        $videoTitle = Setting::get('homepage_video_title', '');
-
         return view('admin.dashboard', compact(
             'totalShops',
             'activeShops',
@@ -32,6 +30,37 @@ class AdminController extends Controller
             'videoUrl',
             'videoTitle'
         ));
+    }
+
+    public function liveStatus()
+    {
+        $totalShops = Shop::count();
+        $activeShops = Shop::where('is_active', true)->count();
+        $totalJobs = PrintJob::count();
+        $completedJobs = PrintJob::where('print_status', 'printed')->count();
+        $totalRevenue = PrintJob::where('payment_status', 'paid')->sum('total_amount');
+        
+        $recentJobs = PrintJob::with('shop')->latest()->take(10)->get()->map(function ($job) {
+            return [
+                'job_token' => $job->job_token,
+                'shop_name' => $job->shop->name ?? 'N/A',
+                'original_name' => $job->original_name,
+                'color_mode' => $job->color_mode,
+                'total_amount' => $job->total_amount,
+                'payment_status' => $job->payment_status,
+                'print_status' => $job->print_status,
+            ];
+        });
+
+        return response()->json([
+            'status' => 'success',
+            'total_shops' => $totalShops,
+            'active_shops' => $activeShops,
+            'total_jobs' => $totalJobs,
+            'completed_jobs' => $completedJobs,
+            'total_revenue' => number_format($totalRevenue, 2),
+            'recent_jobs' => $recentJobs,
+        ]);
     }
 
     public function settings()

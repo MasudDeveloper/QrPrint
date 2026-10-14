@@ -63,6 +63,7 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 */
 Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
+    Route::get('/live-status', [AdminController::class, 'liveStatus'])->name('live_status');
     Route::get('/settings', [AdminController::class, 'settings'])->name('settings');
     Route::post('/settings', [AdminController::class, 'updateSettings'])->name('settings.update');
     Route::get('/shops', [AdminController::class, 'shops'])->name('shops');
@@ -79,6 +80,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
 */
 Route::middleware(['auth'])->prefix('shop')->name('shop.')->group(function () {
     Route::get('/dashboard', [ShopController::class, 'dashboard'])->name('dashboard');
+    Route::get('/live-status', [ShopController::class, 'liveStatus'])->name('live_status');
     Route::post('/jobs/{job}/approve', [ShopController::class, 'approvePayment'])->name('jobs.approve');
     Route::post('/jobs/{job}/reprint', [ShopController::class, 'reprintJob'])->name('jobs.reprint');
     Route::get('/sync-status', [ShopController::class, 'syncStatus'])->name('sync_status');

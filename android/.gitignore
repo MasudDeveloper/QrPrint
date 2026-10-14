@@ -1,0 +1,20 @@
+.gradle
+/build
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build
+/captures
+
+# IntelliJ IDEA
+.idea
+*.iml
+out
+
+# Keystore files
+*.jks
+*.keystore
+
+# Google Services keys
+google-services.json
+
+# Local configuration
+local.properties

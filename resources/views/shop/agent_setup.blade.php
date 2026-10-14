@@ -81,11 +81,17 @@
         </div>
     </div>
 
-    <!-- 3 STEP SETUP INSTRUCTIONS -->
+    <!-- 3 STEP SETUP INSTRUCTIONS (WINDOWS AGENT) -->
     <div class="bg-slate-900/80 rounded-3xl p-6 sm:p-8 border border-slate-800 shadow-xl space-y-6">
-        <h3 class="text-base font-bold text-white uppercase tracking-wider">
-            🚀 কীভাবে সেটআপ করবেন? (মাত্র ২ মিনিট)
-        </h3>
+        <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+            <div>
+                <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                    <span>💻 উইন্ডোজ এজেন্ট (.EXE) সেটআপ গাইড</span>
+                </h3>
+                <p class="text-xs text-slate-400">কম্পিউটারে কোনো কিছু ইনস্টল ছাড়াই ২ মিনিটে স্বয়ংক্রিয় প্রিন্টিং চালু করুন</p>
+            </div>
+            <span class="px-3 py-1 rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-400 font-bold text-xs">Windows 7/8/10/11</span>
+        </div>
 
         <div class="grid md:grid-cols-3 gap-6">
             <!-- Step 1 -->
@@ -93,7 +99,7 @@
                 <span class="w-8 h-8 rounded-xl bg-rose-500 text-white font-black text-sm flex items-center justify-center">১</span>
                 <h4 class="text-sm font-black text-white">ফাইল দুটি ডাউনলোড করুন</h4>
                 <p class="text-xs text-slate-400 leading-relaxed">
-                    উপরে দেওয়া বাটন থেকে <strong>PrintShebaAgent.exe</strong> এবং <strong>config.json</strong> ফাইল দুটি ডাউনলোড করে একই ফোল্ডারে (যেমন ডেস্কটপে) রাখুন।
+                    উপরের বাটন থেকে <strong>PrintShebaAgent.exe</strong> এবং <strong>config.json</strong> ফাইল দুটি ডাউনলোড করুন এবং আপনার কম্পিউটারের একই ফোল্ডারে (যেমন: ডেস্কটপে 'PrintSheba' ফোল্ডার বানিয়ে) রাখুন।
                 </p>
             </div>
 
@@ -102,16 +108,58 @@
                 <span class="w-8 h-8 rounded-xl bg-purple-600 text-white font-black text-sm flex items-center justify-center">২</span>
                 <h4 class="text-sm font-black text-white">সফটওয়্যারটি ওপেন করুন</h4>
                 <p class="text-xs text-slate-400 leading-relaxed">
-                    <strong>PrintShebaAgent.exe</strong> ফাইলে ডাবল ক্লিক করুন। আপনার কম্পিউটারের সাথে কানেক্ট থাকা Canon, Epson বা HP প্রিন্টার ড্রপডাউনে সিলেক্ট করুন।
+                    <strong>PrintShebaAgent.exe</strong> ফাইলে ডাবল ক্লিক করে রান করুন। আপনার কানেক্ট থাকা Canon, HP বা Epson প্রিন্টারটি সাদাকালো ও রঙিন ড্রপডাউন থেকে সিলেক্ট করে <strong>"💾 সেটিংস সেভ করুন"</strong> বাটনে ক্লিক করুন।
                 </p>
             </div>
 
             <!-- Step 3 -->
             <div class="bg-slate-950 rounded-2xl p-5 border border-slate-800 space-y-3">
                 <span class="w-8 h-8 rounded-xl bg-emerald-500 text-white font-black text-sm flex items-center justify-center">৩</span>
-                <h4 class="text-sm font-black text-white">টেস্ট প্রিন্ট দিয়ে নিশ্চিন্ত থাকুন</h4>
+                <h4 class="text-sm font-black text-white">টেস্ট প্রিন্ট পাঠান ও মিনিমাইজ করুন</h4>
                 <p class="text-xs text-slate-400 leading-relaxed">
-                    সফটওয়্যারটির <strong>"🖨️ টেস্ট প্রিন্ট পাঠান"</strong> বাটনে ক্লিক করে প্রিন্টার নিশ্চিত করুন। মিনিমাইজ করে রাখুন—কাস্টমার পেইড ফাইল দিলে নিজে নিজেই পেজ বের হবে!
+                    <strong>"🖨️ টেস্ট পেজ প্রিন্ট করুন"</strong> বাটনে চাপ দিয়ে টেস্ট পেজ বের করুন। এরপর মিনিমাইজ করে রাখুন—সফটওয়্যারটি ঘড়ির পাশে ব্যাকগ্রাউন্ডে নীরবে কাজ করতে থাকবে।
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ANDROID APP DETAILED SETUP INSTRUCTIONS -->
+    <div class="bg-slate-900/80 rounded-3xl p-6 sm:p-8 border border-emerald-500/30 shadow-xl space-y-6">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+            <div>
+                <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                    <span>📱 অ্যান্ড্রয়েড পেমেন্ট লিসেনার (APK) সেটআপ গাইড</span>
+                </h3>
+                <p class="text-xs text-slate-400">যে ফোনে আপনার বিকাশ ও নগদ পার্সোনাল সিম রয়েছে, সেই ফোনে এটি চালু রাখুন</p>
+            </div>
+            <span class="px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-bold text-xs">Android 7.0 - 14+</span>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-6">
+            <!-- App Step 1 -->
+            <div class="bg-slate-950 rounded-2xl p-5 border border-slate-800 space-y-3">
+                <span class="w-8 h-8 rounded-xl bg-emerald-500 text-white font-black text-sm flex items-center justify-center">১</span>
+                <h4 class="text-sm font-black text-white">APK ইনস্টল করুন</h4>
+                <p class="text-xs text-slate-400 leading-relaxed">
+                    উপরের <strong>"📱 ডাউনলোড করুন Android APK"</strong> বাটনে ক্লিক করে ফোনে অ্যাপটি নামিয়ে ওপেন করুন। ফোন থেকে Unknown Sources বা Install Unknown Apps পারমিশনটি অন করে ইনস্টল সম্পন্ন করুন।
+                </p>
+            </div>
+
+            <!-- App Step 2 -->
+            <div class="bg-slate-950 rounded-2xl p-5 border border-slate-800 space-y-3">
+                <span class="w-8 h-8 rounded-xl bg-teal-500 text-white font-black text-sm flex items-center justify-center">২</span>
+                <h4 class="text-sm font-black text-white">SMS ও নোটিফিকেশন পারমিশন দিন</h4>
+                <p class="text-xs text-slate-400 leading-relaxed">
+                    অ্যাপে ঢুকলে লাল রঙের <strong>"⚠️ এসএমএস পারমিশন প্রয়োজন"</strong> ব্যানার দেখতে পাবেন। <strong>"পারমিশন দিন"</strong> বাটনে চাপ দিয়ে <strong>Allow</strong> দিন, যাতে বিকাশ ও নগদের ফিরতি এসএমএস অ্যাপ পড়তে পারে।
+                </p>
+            </div>
+
+            <!-- App Step 3 -->
+            <div class="bg-slate-950 rounded-2xl p-5 border border-slate-800 space-y-3">
+                <span class="w-8 h-8 rounded-xl bg-cyan-500 text-white font-black text-sm flex items-center justify-center">৩</span>
+                <h4 class="text-sm font-black text-white">টোকেন দিয়ে সংযোগ যাচাই করুন</h4>
+                <p class="text-xs text-slate-400 leading-relaxed">
+                    অ্যাপের সার্ভার URL বক্সে <code class="text-emerald-400 font-mono">{{ url('/') }}</code> এবং API Token বক্সে আপনার শপ টোকেনটি বসিয়ে <strong>"সংযোগ যাচাই"</strong> ও <strong>"সেটিংস সেভ"</strong> এ চাপ দিন। ব্যস, কাজ শেষ!
                 </p>
             </div>
         </div>

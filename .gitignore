@@ -22,3 +22,19 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# Android build outputs & local config
+android/.gradle/
+android/.idea/
+android/build/
+android/app/build/
+android/local.properties
+android/*.iml
+android/app/*.iml
+
+# Temporary runtime storage
+storage/app/public/print_jobs/
+storage/framework/cache/
+storage/framework/sessions/
+storage/framework/views/
+storage/logs/

@@ -12,13 +12,21 @@ if (-not (Test-Path $sourceFile)) {
 
 $csharpCode = Get-Content -Path $sourceFile -Raw -Encoding UTF8
 
+$iconFile = Join-Path $PSScriptRoot "app_icon.ico"
 $provider = New-Object Microsoft.CSharp.CSharpCodeProvider
 $parameters = New-Object System.CodeDom.Compiler.CompilerParameters
 $parameters.GenerateExecutable = $true
 $parameters.OutputAssembly = $outputExe
-$parameters.CompilerOptions = "/target:winexe /platform:anycpu /optimize"
+
+if (Test-Path $iconFile) {
+    $parameters.CompilerOptions = "/target:winexe /platform:anycpu /optimize /win32icon:`"$iconFile`""
+} else {
+    $parameters.CompilerOptions = "/target:winexe /platform:anycpu /optimize"
+}
 
 $parameters.ReferencedAssemblies.Add("System.dll") | Out-Null
+$parameters.ReferencedAssemblies.Add("System.Core.dll") | Out-Null
+$parameters.ReferencedAssemblies.Add("Microsoft.CSharp.dll") | Out-Null
 $parameters.ReferencedAssemblies.Add("System.Drawing.dll") | Out-Null
 $parameters.ReferencedAssemblies.Add("System.Windows.Forms.dll") | Out-Null
 $parameters.ReferencedAssemblies.Add("System.Web.Extensions.dll") | Out-Null

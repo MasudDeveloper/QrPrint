@@ -33,8 +33,8 @@
                 <span class="w-9 h-9 rounded-2xl bg-purple-500/10 border border-purple-500/20 text-purple-400 flex items-center justify-center text-sm font-bold">🏪</span>
             </div>
             <div class="mt-4">
-                <span class="text-3xl font-black text-white font-en">{{ $totalShops }}</span>
-                <span class="text-[11px] text-emerald-400 block font-bold mt-1">● {{ $activeShops }} টি সক্রিয়</span>
+                <span id="adminTotalShops" class="text-3xl font-black text-white font-en">{{ $totalShops }}</span>
+                <span id="adminActiveShops" class="text-[11px] text-emerald-400 block font-bold mt-1">● {{ $activeShops }} টি সক্রিয়</span>
             </div>
         </div>
 
@@ -45,8 +45,8 @@
                 <span class="w-9 h-9 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center text-sm font-bold">🖨️</span>
             </div>
             <div class="mt-4">
-                <span class="text-3xl font-black text-white font-en">{{ $completedJobs }}</span>
-                <span class="text-[11px] text-slate-400 block font-bold mt-1">সর্বমোট {{ $totalJobs }} টি টাস্ক</span>
+                <span id="adminCompletedJobs" class="text-3xl font-black text-white font-en">{{ $completedJobs }}</span>
+                <span id="adminTotalJobs" class="text-[11px] text-slate-400 block font-bold mt-1">সর্বমোট {{ $totalJobs }} টি টাস্ক</span>
             </div>
         </div>
 
@@ -57,7 +57,7 @@
                 <span class="w-9 h-9 rounded-2xl bg-pink-500/10 border border-pink-500/20 text-pink-400 flex items-center justify-center text-sm font-bold">৳</span>
             </div>
             <div class="mt-4">
-                <span class="text-3xl font-black text-emerald-400 font-en">৳ {{ number_format($totalRevenue, 2) }}</span>
+                <span id="adminTotalRevenue" class="text-3xl font-black text-emerald-400 font-en">৳ {{ number_format($totalRevenue, 2) }}</span>
                 <span class="text-[11px] text-slate-400 block font-bold mt-1">দোকানদারদের মোট সেলস</span>
             </div>
         </div>
@@ -130,7 +130,7 @@
                         <th class="px-6 py-3.5">প্রিন্ট স্ট্যাটাস</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-800/80">
+                <tbody id="adminRecentJobsTbody" class="divide-y divide-slate-800/80">
                     @forelse($recentJobs as $job)
                         <tr class="hover:bg-slate-800/40 transition-colors">
                             <td class="px-6 py-3.5 font-mono font-bold text-white">{{ $job->job_token }}</td>
@@ -154,7 +154,7 @@
                             </td>
                         </tr>
                     @empty
-                        <tr>
+                        <tr id="adminRecentJobsEmptyRow">
                             <td colspan="7" class="px-6 py-8 text-center text-slate-500">কোনো প্রিন্ট জব পাওয়া যায়নি</td>
                         </tr>
                     @endforelse
@@ -164,4 +164,86 @@
     </div>
 
 </div>
+
+<script>
+    function escapeHtml(str) {
+        if (!str) return '';
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    }
+
+    function renderAdminRecentJobs(jobs) {
+        const tbody = document.getElementById('adminRecentJobsTbody');
+        if (!tbody) return;
+
+        if (!jobs || jobs.length === 0) {
+            tbody.innerHTML = `
+                <tr id="adminRecentJobsEmptyRow">
+                    <td colspan="7" class="px-6 py-8 text-center text-slate-500">কোনো প্রিন্ট জব পাওয়া যায়নি</td>
+                </tr>
+            `;
+            return;
+        }
+
+        let html = '';
+        jobs.forEach(job => {
+            const isColor = job.color_mode === 'color';
+            const isPrinted = job.print_status === 'printed';
+            const isPaid = job.payment_status === 'paid';
+
+            html += `
+                <tr class="hover:bg-slate-800/40 transition-colors">
+                    <td class="px-6 py-3.5 font-mono font-bold text-white">${escapeHtml(job.job_token)}</td>
+                    <td class="px-6 py-3.5 font-medium text-slate-300">${escapeHtml(job.shop_name || 'N/A')}</td>
+                    <td class="px-6 py-3.5 text-slate-400 max-w-xs truncate">${escapeHtml(job.original_name)}</td>
+                    <td class="px-6 py-3.5">
+                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold ${isColor ? 'bg-pink-500/10 text-pink-400 border border-pink-500/20' : 'bg-slate-800 text-slate-300'}">
+                            ${isColor ? 'Color' : 'B&W'}
+                        </span>
+                    </td>
+                    <td class="px-6 py-3.5 font-mono font-bold text-emerald-400">৳${job.total_amount}</td>
+                    <td class="px-6 py-3.5">
+                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold ${isPaid ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'}">
+                            ${(job.payment_status || '').toUpperCase()}
+                        </span>
+                    </td>
+                    <td class="px-6 py-3.5">
+                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold ${isPrinted ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-blue-500/15 text-blue-400 border border-blue-500/20'}">
+                            ${(job.print_status || '').toUpperCase()}
+                        </span>
+                    </td>
+                </tr>
+            `;
+        });
+
+        tbody.innerHTML = html;
+    }
+
+    function refreshAdminDashboardLive() {
+        fetch('{{ route("admin.live_status") }}')
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    const shopsEl = document.getElementById('adminTotalShops');
+                    const activeShopsEl = document.getElementById('adminActiveShops');
+                    const completedEl = document.getElementById('adminCompletedJobs');
+                    const totalJobsEl = document.getElementById('adminTotalJobs');
+                    const revenueEl = document.getElementById('adminTotalRevenue');
+
+                    if (shopsEl) shopsEl.textContent = data.total_shops;
+                    if (activeShopsEl) activeShopsEl.textContent = '● ' + data.active_shops + ' টি সক্রিয়';
+                    if (completedEl) completedEl.textContent = data.completed_jobs;
+                    if (totalJobsEl) totalJobsEl.textContent = 'সর্বমোট ' + data.total_jobs + ' টি টাস্ক';
+                    if (revenueEl) revenueEl.textContent = '৳ ' + data.total_revenue;
+
+                    renderAdminRecentJobs(data.recent_jobs);
+                }
+            })
+            .catch(() => {});
+    }
+
+    // Auto-update admin central audit dashboard every 4 seconds
+    setInterval(refreshAdminDashboardLive, 4000);
+</script>
 @endsection

@@ -252,4 +252,62 @@ class ShopController extends Controller
             'app_last_seen' => $shop->last_app_heartbeat_at ? $shop->last_app_heartbeat_at->diffForHumans() : 'কখনও কানেক্ট হয়নি',
         ]);
     }
+
+    public function liveStatus()
+    {
+        $shop = $this->getShop();
+        $todayJobs = PrintJob::where('shop_id', $shop->id)->whereDate('created_at', today())->get();
+        $todayEarnings = $todayJobs->where('payment_status', 'paid')->sum('total_amount');
+        $todayPrintsCount = $todayJobs->where('print_status', 'printed')->count();
+
+        $pendingJobs = PrintJob::where('shop_id', $shop->id)
+            ->whereIn('print_status', ['queued', 'spooling'])
+            ->latest()
+            ->take(15)
+            ->get()
+            ->map(function ($job) {
+                return [
+                    'id' => $job->id,
+                    'job_token' => $job->job_token,
+                    'customer_name' => $job->customer_name,
+                    'customer_phone' => $job->customer_phone,
+                    'original_name' => $job->original_name,
+                    'color_mode' => $job->color_mode,
+                    'total_amount' => $job->total_amount,
+                    'payment_status' => $job->payment_status,
+                    'payment_trx_id' => $job->payment_trx_id,
+                    'print_status' => $job->print_status,
+                    'approve_url' => route('shop.jobs.approve', $job),
+                    'reprint_url' => route('shop.jobs.reprint', $job),
+                ];
+            });
+
+        $completedJobs = PrintJob::where('shop_id', $shop->id)
+            ->where('print_status', 'printed')
+            ->latest()
+            ->take(15)
+            ->get()
+            ->map(function ($job) {
+                return [
+                    'id' => $job->id,
+                    'job_token' => $job->job_token,
+                    'original_name' => $job->original_name,
+                    'total_pages' => $job->total_pages,
+                    'paper_size' => $job->paper_size,
+                    'total_amount' => $job->total_amount,
+                    'payment_method' => $job->payment_method,
+                    'time_str' => $job->printed_at ? $job->printed_at->format('h:i A') : $job->created_at->format('h:i A'),
+                    'reprint_url' => route('shop.jobs.reprint', $job),
+                ];
+            });
+
+        return response()->json([
+            'status' => 'success',
+            'today_earnings' => number_format($todayEarnings, 2),
+            'today_prints_count' => $todayPrintsCount,
+            'pending_count' => $pendingJobs->count(),
+            'pending_jobs' => $pendingJobs,
+            'completed_jobs' => $completedJobs,
+        ]);
+    }
 }

@@ -69,7 +69,7 @@
                 <span class="w-9 h-9 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-sm">৳</span>
             </div>
             <div class="mt-4">
-                <span class="text-3xl font-black text-emerald-400 font-en">৳ {{ number_format($todayEarnings, 2) }}</span>
+                <span id="metricTodayEarnings" class="text-3xl font-black text-emerald-400 font-en">৳ {{ number_format($todayEarnings, 2) }}</span>
                 <span class="text-[11px] text-slate-400 block font-bold mt-1">১০০% আপনার নিজস্ব বিকাশ/নগদে</span>
             </div>
         </div>
@@ -81,7 +81,7 @@
                 <span class="w-9 h-9 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-400 flex items-center justify-center font-bold text-sm">📄</span>
             </div>
             <div class="mt-4">
-                <span class="text-3xl font-black text-white font-en">{{ $todayPrintsCount }} টি</span>
+                <span id="metricTodayPrints" class="text-3xl font-black text-white font-en">{{ $todayPrintsCount }} টি</span>
                 <span class="text-[11px] text-slate-400 block font-bold mt-1">স্বয়ংক্রিয় প্রিন্ট সম্পন্ন</span>
             </div>
         </div>
@@ -107,7 +107,7 @@
                 <span class="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse"></span>
                 <h3 class="text-base font-bold text-white">লাইভ প্রিন্ট কিউ (Pending / Printing Queue)</h3>
             </div>
-            <span class="text-xs font-bold px-3 py-1 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
+            <span id="pendingJobsBadge" class="text-xs font-bold px-3 py-1 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
                 {{ $pendingJobs->count() }} টি পেইন্ডিং
             </span>
         </div>
@@ -126,7 +126,7 @@
                         <th class="px-6 py-4 text-right">অ্যাকশন</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-800/80">
+                <tbody id="pendingJobsTbody" class="divide-y divide-slate-800/80">
                     @forelse($pendingJobs as $job)
                         <tr class="hover:bg-slate-800/40 transition-colors">
                             <td class="px-6 py-4 font-mono font-bold text-white">{{ $job->job_token }}</td>
@@ -176,7 +176,7 @@
                             </td>
                         </tr>
                     @empty
-                        <tr>
+                        <tr id="pendingJobsEmptyRow">
                             <td colspan="8" class="px-6 py-8 text-center text-slate-500">
                                 বর্তমানে কোনো প্রিন্ট কিউতে নেই। কাস্টমার QR স্ক্যান করলেই এখানে স্বয়ংক্রিয়ভাবে ভেসে উঠবে।
                             </td>
@@ -207,7 +207,7 @@
                         <th class="px-6 py-4 text-right">রিপ্রিন্ট</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-800/80">
+                <tbody id="completedJobsTbody" class="divide-y divide-slate-800/80">
                     @forelse($completedJobs as $job)
                         <tr class="hover:bg-slate-800/40 transition-colors">
                             <td class="px-6 py-4 font-mono font-bold text-white">{{ $job->job_token }}</td>
@@ -233,7 +233,7 @@
                             </td>
                         </tr>
                     @empty
-                        <tr>
+                        <tr id="completedJobsEmptyRow">
                             <td colspan="7" class="px-6 py-8 text-center text-slate-500">এখনো কোনো প্রিন্ট সম্পন্ন হয়নি</td>
                         </tr>
                     @endforelse
@@ -243,4 +243,171 @@
     </div>
 
 </div>
+
+<script>
+    const csrfToken = '{{ csrf_token() }}';
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    }
+
+    function renderPendingRows(jobs) {
+        const tbody = document.getElementById('pendingJobsTbody');
+        if (!tbody) return;
+
+        if (!jobs || jobs.length === 0) {
+            tbody.innerHTML = `
+                <tr id="pendingJobsEmptyRow">
+                    <td colspan="8" class="px-6 py-8 text-center text-slate-500">
+                        বর্তমানে কোনো প্রিন্ট কিউতে নেই। কাস্টমার QR স্ক্যান করলেই এখানে স্বয়ংক্রিয়ভাবে ভেসে উঠবে।
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        let html = '';
+        jobs.forEach(job => {
+            const isSpooling = job.print_status === 'spooling';
+            const isPaid = job.payment_status === 'paid';
+            const isColor = job.color_mode === 'color';
+
+            const phoneHtml = job.customer_phone ? `<span class="text-[10px] text-slate-500 font-mono">${escapeHtml(job.customer_phone)}</span>` : '';
+            const trxHtml = job.payment_trx_id ? `<span class="text-[9px] text-slate-500 font-mono block mt-0.5">${escapeHtml(job.payment_trx_id)}</span>` : '';
+
+            let actionHtml = '';
+            if (!isPaid) {
+                actionHtml = `
+                    <form action="${job.approve_url}" method="POST" class="inline">
+                        <input type="hidden" name="_token" value="${csrfToken}">
+                        <button type="submit" class="px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold text-xs shadow-md shadow-emerald-500/20 transition-all cursor-pointer flex items-center gap-1">
+                            <span>✓</span>
+                            <span>ক্যাশ পেলাম / প্রিন্ট দিন</span>
+                        </button>
+                    </form>
+                `;
+            } else {
+                actionHtml = `
+                    <form action="${job.reprint_url}" method="POST" class="inline">
+                        <input type="hidden" name="_token" value="${csrfToken}">
+                        <button type="submit" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold text-xs transition-colors cursor-pointer">
+                            🔄 ফোর্স প্রিন্ট
+                        </button>
+                    </form>
+                `;
+            }
+
+            html += `
+                <tr class="hover:bg-slate-800/40 transition-colors">
+                    <td class="px-6 py-4 font-mono font-bold text-white">${escapeHtml(job.job_token)}</td>
+                    <td class="px-6 py-4 font-medium text-slate-300">
+                        <div>${escapeHtml(job.customer_name || 'কাস্টমার')}</div>
+                        ${phoneHtml}
+                    </td>
+                    <td class="px-6 py-4 text-slate-400 max-w-xs truncate">${escapeHtml(job.original_name)}</td>
+                    <td class="px-6 py-4">
+                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold ${isColor ? 'bg-pink-500/10 text-pink-400 border border-pink-500/20' : 'bg-slate-800 text-slate-300'}">
+                            ${isColor ? 'কালার' : 'সাদাকালো'}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 font-mono font-bold text-emerald-400">৳${job.total_amount}</td>
+                    <td class="px-6 py-4">
+                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold ${isPaid ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'}">
+                            ${isPaid ? 'পরিশোধিত' : 'ক্যাশ/পেন্ডিং'}
+                        </span>
+                        ${trxHtml}
+                    </td>
+                    <td class="px-6 py-4">
+                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold ${isSpooling ? 'bg-rose-500/20 text-rose-400 animate-pulse border border-rose-500/30' : 'bg-blue-500/15 text-blue-400 border border-blue-500/20'}">
+                            ${isSpooling ? 'স্পুল হচ্ছে...' : 'কিউতে আছে'}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 text-right">
+                        ${actionHtml}
+                    </td>
+                </tr>
+            `;
+        });
+
+        tbody.innerHTML = html;
+    }
+
+    function renderCompletedRows(jobs) {
+        const tbody = document.getElementById('completedJobsTbody');
+        if (!tbody) return;
+
+        if (!jobs || jobs.length === 0) {
+            tbody.innerHTML = `
+                <tr id="completedJobsEmptyRow">
+                    <td colspan="7" class="px-6 py-8 text-center text-slate-500">এখনো কোনো প্রিন্ট সম্পন্ন হয়নি</td>
+                </tr>
+            `;
+            return;
+        }
+
+        let html = '';
+        jobs.forEach(job => {
+            const method = (job.payment_method || 'cash').toLowerCase();
+            let methodClass = 'bg-slate-800 text-slate-300';
+            if (method === 'bkash') methodClass = 'bg-pink-500/10 text-pink-400 border border-pink-500/20';
+            else if (method === 'nagad') methodClass = 'bg-amber-500/10 text-amber-400 border border-amber-500/20';
+
+            html += `
+                <tr class="hover:bg-slate-800/40 transition-colors">
+                    <td class="px-6 py-4 font-mono font-bold text-white">${escapeHtml(job.job_token)}</td>
+                    <td class="px-6 py-4 text-slate-400 max-w-xs truncate">${escapeHtml(job.original_name)}</td>
+                    <td class="px-6 py-4 font-bold text-slate-200">${job.total_pages} পেজ (${escapeHtml(job.paper_size)})</td>
+                    <td class="px-6 py-4 font-mono font-bold text-emerald-400">৳${job.total_amount}</td>
+                    <td class="px-6 py-4">
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase ${methodClass}">
+                            ${escapeHtml(job.payment_method || 'CASH')}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 text-slate-500 text-[11px]">
+                        ${escapeHtml(job.time_str)}
+                    </td>
+                    <td class="px-6 py-4 text-right">
+                        <form action="${job.reprint_url}" method="POST" class="inline" onsubmit="return confirm('আপনি কি এই ডকুমেন্টটি পুনরায় প্রিন্ট করতে চান?')">
+                            <input type="hidden" name="_token" value="${csrfToken}">
+                            <button type="submit" class="px-3 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 font-bold text-xs transition-colors cursor-pointer flex items-center gap-1 ml-auto">
+                                <span>🖨️</span>
+                                <span>রি-প্রিন্ট করুন</span>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            `;
+        });
+
+        tbody.innerHTML = html;
+    }
+
+    function refreshShopDashboardLive() {
+        fetch('{{ route("shop.live_status") }}')
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // 1. Update Metrics Cards
+                    const earningsEl = document.getElementById('metricTodayEarnings');
+                    const printsEl = document.getElementById('metricTodayPrints');
+                    const badgeEl = document.getElementById('pendingJobsBadge');
+
+                    if (earningsEl) earningsEl.textContent = '৳ ' + data.today_earnings;
+                    if (printsEl) printsEl.textContent = data.today_prints_count + ' টি';
+                    if (badgeEl) badgeEl.textContent = data.pending_count + ' টি পেইন্ডিং';
+
+                    // 2. Update Queue & Completed tables
+                    renderPendingRows(data.pending_jobs);
+                    renderCompletedRows(data.completed_jobs);
+                }
+            })
+            .catch(() => {});
+    }
+
+    // Live Auto-Refresh every 3 seconds (Zero manual browser refresh needed)
+    setInterval(refreshShopDashboardLive, 3000);
+</script>
 @endsection
