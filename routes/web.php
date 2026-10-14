@@ -1,0 +1,120 @@
+<?php
+
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\ShopController;
+use App\Http\Controllers\CustomerPrintController;
+use App\Http\Controllers\Api\AgentController;
+use App\Http\Controllers\Api\SmsListenerController;
+use App\Models\Setting;
+
+/*
+|--------------------------------------------------------------------------
+| Public Homepage
+|--------------------------------------------------------------------------
+*/
+Route::get('/', function () {
+    $videoUrl = Setting::get('homepage_video_url');
+    $videoTitle = Setting::get('homepage_video_title', 'কীভাবে ২ মিনিটে কাস্টমার নিজে নিজে প্রিন্ট করবে — লাইভ ভিডিও ডেমো');
+    return view('welcome', compact('videoUrl', 'videoTitle'));
+})->name('home');
+
+Route::get('/features', function () {
+    return view('features');
+})->name('features');
+
+Route::get('/how-it-works', function () {
+    return view('how-it-works');
+})->name('how_it_works');
+
+Route::get('/faq', function () {
+    return view('faq');
+})->name('faq');
+
+Route::get('/contact', function () {
+    return view('contact');
+})->name('contact');
+
+Route::post('/contact', function (\Illuminate\Http\Request $request) {
+    $request->validate([
+        'name' => 'required|string|max:100',
+        'phone' => 'required|string|max:20',
+        'message' => 'required|string|max:1000',
+    ]);
+    return back()->with('success', 'ধন্যবাদ! আপনার বার্তাটি সফলভাবে পাঠানো হয়েছে। আমাদের টিম খুব দ্রুত আপনার সাথে যোগাযোগ করবে।');
+})->name('contact.submit');
+
+/*
+|--------------------------------------------------------------------------
+| Authentication Routes
+|--------------------------------------------------------------------------
+*/
+Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [AuthController::class, 'login']);
+Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+/*
+|--------------------------------------------------------------------------
+| Super Admin Routes (Protected)
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
+    Route::get('/settings', [AdminController::class, 'settings'])->name('settings');
+    Route::post('/settings', [AdminController::class, 'updateSettings'])->name('settings.update');
+    Route::get('/shops', [AdminController::class, 'shops'])->name('shops');
+    Route::post('/shops/{shop}/toggle', [AdminController::class, 'toggleShopStatus'])->name('shops.toggle');
+    Route::get('/print-jobs', [AdminController::class, 'printJobs'])->name('jobs');
+    Route::post('/jobs/{job}/approve', [AdminController::class, 'approvePayment'])->name('jobs.approve');
+    Route::post('/jobs/{job}/reprint', [AdminController::class, 'reprintJob'])->name('jobs.reprint');
+});
+
+/*
+|--------------------------------------------------------------------------
+| Shop Owner Routes (Protected)
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth'])->prefix('shop')->name('shop.')->group(function () {
+    Route::get('/dashboard', [ShopController::class, 'dashboard'])->name('dashboard');
+    Route::post('/jobs/{job}/approve', [ShopController::class, 'approvePayment'])->name('jobs.approve');
+    Route::post('/jobs/{job}/reprint', [ShopController::class, 'reprintJob'])->name('jobs.reprint');
+    Route::get('/sync-status', [ShopController::class, 'syncStatus'])->name('sync_status');
+    Route::get('/qr-poster', [ShopController::class, 'qrPoster'])->name('qr_poster');
+    Route::get('/rates', [ShopController::class, 'rates'])->name('rates');
+    Route::post('/rates', [ShopController::class, 'updateRates'])->name('rates.update');
+    Route::get('/printers', [ShopController::class, 'printers'])->name('printers');
+    Route::post('/printers', [ShopController::class, 'addPrinter'])->name('printers.add');
+    Route::delete('/printers/{printer}', [ShopController::class, 'deletePrinter'])->name('printers.delete');
+    Route::get('/agent-setup', [ShopController::class, 'agentSetup'])->name('agent_setup');
+    Route::get('/agent-download/exe', [ShopController::class, 'downloadAgentExe'])->name('agent_download_exe');
+    Route::get('/agent-download/config', [ShopController::class, 'downloadAgentConfig'])->name('agent_download_config');
+    Route::get('/agent-download/apk', [ShopController::class, 'downloadAndroidApk'])->name('agent_download_apk');
+});
+
+/*
+|--------------------------------------------------------------------------
+| Customer Public Mobile Print Portal
+|--------------------------------------------------------------------------
+*/
+Route::get('/print/{slug}', [CustomerPrintController::class, 'showUploadPage'])->name('customer.upload');
+Route::post('/print/{slug}', [CustomerPrintController::class, 'submitJob'])->name('customer.submit');
+Route::get('/print/status/{jobToken}', [CustomerPrintController::class, 'jobStatus'])->name('customer.status');
+Route::get('/api/customer/status/{jobToken}', [CustomerPrintController::class, 'apiJobStatus']);
+
+/*
+|--------------------------------------------------------------------------
+| Windows Agent & Android SMS Listener APIs
+|--------------------------------------------------------------------------
+*/
+Route::prefix('api/agent')->group(function () {
+    Route::get('/jobs', [AgentController::class, 'pollJobs']);
+    Route::post('/jobs/{jobToken}/printed', [AgentController::class, 'markJobPrinted']);
+    Route::post('/heartbeat', [AgentController::class, 'heartbeat']);
+});
+
+Route::post('/api/app/heartbeat', [SmsListenerController::class, 'appHeartbeat']);
+Route::post('/api/webhook/sms-payment', [SmsListenerController::class, 'receiveSms']);
+

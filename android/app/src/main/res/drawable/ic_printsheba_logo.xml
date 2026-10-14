@@ -1,0 +1,56 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="120dp"
+    android:height="120dp"
+    android:viewportWidth="120"
+    android:viewportHeight="120">
+    
+    <!-- Outer Card Background Glow -->
+    <path
+        android:fillColor="#131D31"
+        android:pathData="M16,10 L104,10 A16,16 0 0,1 120,26 L120,94 A16,16 0 0,1 104,110 L16,110 A16,16 0 0,1 0,94 L0,26 A16,16 0 0,1 16,10 Z" />
+
+    <!-- Paper Top -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M44,22 L76,22 A4,4 0 0,1 80,26 L80,44 L40,44 L40,26 A4,4 0 0,1 44,22 Z" />
+    <path
+        android:fillColor="#CBD5E1"
+        android:pathData="M46,28 L74,28 A2,2 0 0,1 76,30 L76,30 A2,2 0 0,1 74,32 L46,32 A2,2 0 0,1 44,30 L44,30 A2,2 0 0,1 46,28 Z" />
+
+    <!-- Printer Body -->
+    <path
+        android:fillColor="#F43F5E"
+        android:pathData="M26,42 L94,42 A8,8 0 0,1 102,50 L102,74 A8,8 0 0,1 94,82 L26,82 A8,8 0 0,1 18,74 L18,50 A8,8 0 0,1 26,42 Z" />
+
+    <!-- Slot -->
+    <path
+        android:fillColor="#090D16"
+        android:pathData="M28,58 L92,58 A3,3 0 0,1 95,61 L95,63 A3,3 0 0,1 92,66 L28,66 A3,3 0 0,1 25,63 L25,61 A3,3 0 0,1 28,58 Z" />
+
+    <!-- Printed Sheet Bottom with QR -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M36,62 L84,62 A4,4 0 0,1 88,66 L88,96 A4,4 0 0,1 84,100 L36,100 A4,4 0 0,1 32,96 L32,66 A4,4 0 0,1 36,62 Z" />
+
+    <!-- QR Finder 1 -->
+    <path
+        android:fillColor="#E11D48"
+        android:pathData="M38,70 L50,70 L50,82 L38,82 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M41,73 L47,73 L47,79 L41,79 Z" />
+
+    <!-- QR Finder 2 -->
+    <path
+        android:fillColor="#E11D48"
+        android:pathData="M70,70 L82,70 L82,82 L70,82 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M73,73 L79,73 L79,79 L73,79 Z" />
+
+    <!-- Status Green Light -->
+    <path
+        android:fillColor="#10B981"
+        android:pathData="M26,48 A3,3 0 1,1 26,48.01" />
+
+</vector>
