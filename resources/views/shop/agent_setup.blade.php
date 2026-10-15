@@ -34,13 +34,20 @@
             </div>
 
             <!-- Action Download Buttons -->
-            <div class="flex flex-col gap-3 shrink-0">
-                <a href="{{ route('shop.agent_download_exe') }}" class="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white font-black text-sm shadow-xl shadow-rose-500/25 transition-all hover:scale-105 text-center cursor-pointer">
-                    <span>📥 ডাউনলোড করুন PrintShebaAgent.exe</span>
+            <div class="flex flex-col gap-2.5 shrink-0 sm:w-72">
+                <a href="{{ route('shop.agent_download_zip') }}" class="inline-flex items-center justify-center gap-2 px-6 py-4 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:from-emerald-600 hover:to-teal-600 text-white font-black text-sm shadow-xl shadow-emerald-500/30 transition-all hover:scale-105 text-center cursor-pointer">
+                    <span>📦 সম্পূর্ণ প্যাকেজ জিপ (ZIP) ডাউনলোড</span>
                 </a>
-                <a href="{{ route('shop.agent_download_config') }}" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold text-xs transition-colors text-center cursor-pointer">
-                    <span>⚙️ ডাউনলোড করুন রেডি config.json</span>
-                </a>
+                <span class="text-[10px] text-emerald-300 text-center font-bold">⭐ রেকমেন্ডেড (এজেন্ট + সাইলেন্ট প্রিন্টার ইঞ্জিন + রেডি কনফিগ)</span>
+                
+                <div class="flex items-center gap-2 pt-1">
+                    <a href="{{ route('shop.agent_download_exe') }}" class="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold text-[11px] transition-colors text-center cursor-pointer">
+                        <span>📥 শুধু .EXE ফাইল</span>
+                    </a>
+                    <a href="{{ route('shop.agent_download_config') }}" class="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold text-[11px] transition-colors text-center cursor-pointer">
+                        <span>⚙️ শুধু config.json</span>
+                    </a>
+                </div>
                 
                 <!-- Quick Copy API Token Box -->
                 <div class="p-3 rounded-2xl bg-slate-950/90 border border-slate-800 space-y-1.5">
@@ -119,10 +126,10 @@
         <div class="grid md:grid-cols-3 gap-6">
             <!-- Step 1 -->
             <div class="bg-slate-950 rounded-2xl p-5 border border-slate-800 space-y-3">
-                <span class="w-8 h-8 rounded-xl bg-rose-500 text-white font-black text-sm flex items-center justify-center">১</span>
-                <h4 class="text-sm font-black text-white">ফাইল দুটি ডাউনলোড করুন</h4>
+                <span class="w-8 h-8 rounded-xl bg-emerald-500 text-white font-black text-sm flex items-center justify-center">১</span>
+                <h4 class="text-sm font-black text-white">সম্পূর্ণ প্যাকেজ (ZIP) ডাউনলোড করুন</h4>
                 <p class="text-xs text-slate-400 leading-relaxed">
-                    উপরের বাটন থেকে <strong>PrintShebaAgent.exe</strong> এবং <strong>config.json</strong> ফাইল দুটি ডাউনলোড করুন এবং আপনার কম্পিউটারের একই ফোল্ডারে (যেমন: ডেস্কটপে 'PrintSheba' ফোল্ডার বানিয়ে) রাখুন।
+                    উপরের সবুজ <strong>"📦 সম্পূর্ণ প্যাকেজ জিপ (ZIP) ডাউনলোড"</strong> বাটনে ক্লিক করে ফাইলটি ডাউনলোড করুন এবং রাইট ক্লিক করে <strong>Extract / আনজিপ</strong> করুন। এতে এজেন্ট, সাইলেন্ট প্রিন্টার ইঞ্জিন এবং আপনার দোকানের টোকেনসহ কনফিগ ফাইল একসাথে পেয়ে যাবেন।
                 </p>
             </div>
 

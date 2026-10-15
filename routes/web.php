@@ -107,6 +107,7 @@ Route::middleware(['auth'])->prefix('shop')->name('shop.')->group(function () {
     Route::get('/subscription', [ShopController::class, 'subscription'])->name('subscription');
     Route::post('/subscription/purchase', [ShopController::class, 'purchaseSubscription'])->name('subscription.purchase');
     Route::get('/agent-setup', [ShopController::class, 'agentSetup'])->name('agent_setup');
+    Route::get('/agent-download/zip', [ShopController::class, 'downloadAgentZip'])->name('agent_download_zip');
     Route::get('/agent-download/exe', [ShopController::class, 'downloadAgentExe'])->name('agent_download_exe');
     Route::get('/agent-download/config', [ShopController::class, 'downloadAgentConfig'])->name('agent_download_config');
     Route::get('/agent-download/apk', [ShopController::class, 'downloadAndroidApk'])->name('agent_download_apk');
