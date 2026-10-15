@@ -191,25 +191,47 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void checkPermissions() {
-        boolean receiveSms = ContextCompat.checkSelfPermission(this, Manifest.permission.RECEIVE_SMS) == PackageManager.PERMISSION_GRANTED;
-        boolean readSms = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_SMS) == PackageManager.PERMISSION_GRANTED;
+        boolean notificationListenerEnabled = isNotificationServiceEnabled();
+        boolean postNotifications = true;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            postNotifications = ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED;
+        }
 
-        if (!receiveSms || !readSms) {
+        if (!notificationListenerEnabled || !postNotifications) {
             layoutPermissionAlert.setVisibility(View.VISIBLE);
         } else {
             layoutPermissionAlert.setVisibility(View.GONE);
         }
     }
 
+    private boolean isNotificationServiceEnabled() {
+        String pkgName = getPackageName();
+        final String flat = android.provider.Settings.Secure.getString(getContentResolver(), "enabled_notification_listeners");
+        if (flat != null && !flat.isEmpty()) {
+            final String[] names = flat.split(":");
+            for (String name : names) {
+                if (name.contains(pkgName)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     private void requestAppPermissions() {
-        ActivityCompat.requestPermissions(this,
-                new String[]{
-                        Manifest.permission.RECEIVE_SMS,
-                        Manifest.permission.READ_SMS,
-                        Manifest.permission.POST_NOTIFICATIONS
-                },
-                PERMISSION_REQ_CODE
-        );
+        // 1. Request POST_NOTIFICATIONS if Android 13+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.POST_NOTIFICATIONS}, PERMISSION_REQ_CODE);
+            }
+        }
+
+        // 2. Open Notification Listener Settings if not enabled
+        if (!isNotificationServiceEnabled()) {
+            Toast.makeText(this, "তালিকায় 'PrintSheba Payment Listener' খুঁজে চালু করে দিন", Toast.LENGTH_LONG).show();
+            Intent intent = new Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS");
+            startActivity(intent);
+        }
     }
 
     @Override

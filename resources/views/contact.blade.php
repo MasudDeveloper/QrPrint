@@ -65,58 +65,7 @@
 <body class="selection:bg-pink-500 selection:text-white">
 
     <!-- Top Navbar -->
-    <header class="sticky top-0 z-50 backdrop-blur-md bg-white/90 border-b border-slate-200/80 transition-all">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-            <!-- Brand Logo -->
-            <a href="/" class="flex items-center gap-3 group">
-                <div class="w-11 h-11 rounded-2xl bg-white border border-slate-200 p-1.5 shadow-sm flex items-center justify-center group-hover:scale-105 transition-transform">
-                    <svg class="w-7 h-7 text-rose-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2" />
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 14h12v8H6z" fill="#f43f5e" fill-opacity="0.15" />
-                    </svg>
-                </div>
-                <div>
-                    <div class="text-2xl font-black text-slate-900 font-en tracking-tight flex items-center">
-                        <span>Print</span><span class="text-rose-500">Sheba</span>
-                    </div>
-                    <span class="text-[10px] tracking-widest text-slate-400 font-bold uppercase block -mt-1">
-                        Scan • Upload • Print
-                    </span>
-                </div>
-            </a>
-
-            <!-- Nav Links -->
-            <nav class="hidden lg:flex items-center gap-7 text-sm font-semibold text-slate-600">
-                <a href="/" class="hover:text-rose-600 transition-colors">হোম</a>
-                <a href="{{ route('features') }}" class="hover:text-rose-600 transition-colors">ফিচারসমূহ</a>
-                <a href="{{ route('how_it_works') }}" class="hover:text-rose-600 transition-colors">কীভাবে কাজ করে</a>
-                <a href="{{ route('faq') }}" class="hover:text-rose-600 transition-colors">প্রশ্নোত্তর</a>
-                <a href="{{ route('contact') }}" class="text-rose-600 font-bold border-b-2 border-rose-500 pb-0.5">যোগাযোগ</a>
-            </nav>
-
-            <!-- Actions on Right -->
-            <div class="flex items-center gap-3">
-                @auth
-                    @if(auth()->user()->isSuperAdmin())
-                        <a href="{{ route('admin.dashboard') }}" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 shadow-sm transition-all hover:scale-105">
-                            <span>⚡ সুপার এডমিন</span>
-                        </a>
-                    @else
-                        <a href="{{ route('shop.dashboard') }}" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 shadow-sm transition-all hover:scale-105">
-                            <span>🏪 শপ ড্যাশবোর্ড</span>
-                        </a>
-                    @endif
-                @else
-                    <a href="{{ route('login') }}" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold text-slate-700 hover:text-slate-950 bg-white hover:bg-slate-50 border border-slate-300 shadow-sm transition-all">
-                        <span>🔑 সাইন ইন</span>
-                    </a>
-                    <a href="{{ route('register') }}" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold text-white bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 shadow-md shadow-rose-500/20 transition-all hover:scale-105">
-                        <span>✨ ফ্রি ট্রায়াল</span>
-                    </a>
-                @endauth
-            </div>
-        </div>
-    </header>
+    @include('partials.header')
 
     <!-- HERO HEADER -->
     <section class="relative pt-14 pb-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-white via-rose-50/20 to-slate-50 border-b border-slate-200">
@@ -274,32 +223,7 @@
     </section>
 
     <!-- Global Footer -->
-    <footer class="bg-white border-t border-slate-200 py-12 text-slate-600 text-xs">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-6">
-            <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-xl bg-rose-500 text-white flex items-center justify-center font-black">
-                    P
-                </div>
-                <div>
-                    <div class="font-black text-slate-900 text-sm">PrintSheba (প্রিন্ট সেবা)</div>
-                    <div class="text-[11px] text-slate-400">বাংলাদেশের সাইবার ক্যাফে অটোমেশন সিস্টেম</div>
-                </div>
-            </div>
-
-            <div class="flex flex-wrap items-center justify-center gap-6 font-semibold">
-                <a href="/" class="hover:text-rose-600">হোম</a>
-                <a href="{{ route('features') }}" class="hover:text-rose-600">ফিচারসমূহ</a>
-                <a href="{{ route('how_it_works') }}" class="hover:text-rose-600">কীভাবে কাজ করে</a>
-                <a href="{{ route('faq') }}" class="hover:text-rose-600">প্রশ্নোত্তর</a>
-                <a href="{{ route('contact') }}" class="text-rose-600 font-bold">যোগাযোগ</a>
-            </div>
-
-            <div class="text-center md:text-right text-[11px] text-slate-400">
-                Developed by <a href="https://mrdeveloper.xyz" target="_blank" class="text-rose-600 font-bold hover:underline">MR Developer</a>
-                <div>হটলাইন: 01644416378 | masud.info@gmail.com</div>
-            </div>
-        </div>
-    </footer>
+    @include('partials.footer')
 
 </body>
 </html>

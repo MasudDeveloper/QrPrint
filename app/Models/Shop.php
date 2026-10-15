@@ -29,10 +29,15 @@ class Shop extends Model
         'is_active',
         'last_agent_heartbeat_at',
         'last_app_heartbeat_at',
+        'subscription_plan',
+        'subscription_expires_at',
+        'is_lifetime',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
+        'is_lifetime' => 'boolean',
+        'subscription_expires_at' => 'datetime',
         'has_color_print' => 'boolean',
         'has_duplex_print' => 'boolean',
         'has_passport_photo' => 'boolean',
@@ -75,5 +80,61 @@ class Shop extends Model
     public function transactions(): HasMany
     {
         return $this->hasMany(Transaction::class);
+    }
+
+    public function subscriptions(): HasMany
+    {
+        return $this->hasMany(ShopSubscription::class);
+    }
+
+    /**
+     * Check if shop subscription is currently valid and active
+     */
+    public function isSubscriptionActive(): bool
+    {
+        if ($this->is_lifetime) {
+            return true;
+        }
+
+        if (!$this->subscription_expires_at) {
+            // Default free trial logic or newly registered shop: 30 days trial from created_at
+            return $this->created_at ? $this->created_at->addDays(30)->isFuture() : true;
+        }
+
+        return $this->subscription_expires_at->isFuture();
+    }
+
+    /**
+     * Get remaining days of current subscription
+     */
+    public function getDaysRemainingAttribute(): ?int
+    {
+        if ($this->is_lifetime) {
+            return null; // Unlimited
+        }
+
+        $expiresAt = $this->subscription_expires_at ?? ($this->created_at ? $this->created_at->addDays(30) : null);
+        if (!$expiresAt) {
+            return 0;
+        }
+
+        return max(0, (int) now()->diffInDays($expiresAt, false));
+    }
+
+    /**
+     * Get friendly Bangla plan label
+     */
+    public function getPlanLabelAttribute(): string
+    {
+        if ($this->is_lifetime) {
+            return 'লাইফটাইম আনলিমিটেড (Lifetime)';
+        }
+
+        return match ($this->subscription_plan) {
+            'monthly_starter' => 'মান্থলি স্টার্টার',
+            'yearly_pro' => 'ইয়ারলি প্রো (১ বছর)',
+            'lifetime' => 'লাইফটাইম',
+            default => 'ফ্রি ট্রায়াল (Free Trial)',
+        };
     }
 }

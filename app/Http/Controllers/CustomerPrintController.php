@@ -13,7 +13,7 @@ class CustomerPrintController extends Controller
     public function showUploadPage($slug)
     {
         $shop = Shop::where('slug', $slug)->firstOrFail();
-        if (!$shop->is_active) {
+        if (!$shop->is_active || !$shop->isSubscriptionActive()) {
             return response()->view('customer.shop_closed', compact('shop'), 403);
         }
 
@@ -23,6 +23,9 @@ class CustomerPrintController extends Controller
     public function submitJob(Request $request, $slug)
     {
         $shop = Shop::where('slug', $slug)->firstOrFail();
+        if (!$shop->is_active || !$shop->isSubscriptionActive()) {
+            return response()->view('customer.shop_closed', compact('shop'), 403);
+        }
 
         $request->validate([
             'document' => 'required|file|max:51200|mimes:pdf,doc,docx,jpg,jpeg,png',

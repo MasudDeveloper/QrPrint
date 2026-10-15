@@ -148,9 +148,9 @@
             <!-- App Step 2 -->
             <div class="bg-slate-950 rounded-2xl p-5 border border-slate-800 space-y-3">
                 <span class="w-8 h-8 rounded-xl bg-teal-500 text-white font-black text-sm flex items-center justify-center">২</span>
-                <h4 class="text-sm font-black text-white">SMS ও নোটিফিকেশন পারমিশন দিন</h4>
+                <h4 class="text-sm font-black text-white">নোটিফিকেশন অ্যাক্সেস চালু করুন</h4>
                 <p class="text-xs text-slate-400 leading-relaxed">
-                    অ্যাপে ঢুকলে লাল রঙের <strong>"⚠️ এসএমএস পারমিশন প্রয়োজন"</strong> ব্যানার দেখতে পাবেন। <strong>"পারমিশন দিন"</strong> বাটনে চাপ দিয়ে <strong>Allow</strong> দিন, যাতে বিকাশ ও নগদের ফিরতি এসএমএস অ্যাপ পড়তে পারে।
+                    অ্যাপে ঢুকলে <strong>"🔔 নোটিফিকেশন অ্যাক্সেস চালু করুন"</strong> দেখতে পাবেন। বাটনে চাপ দিয়ে তালিকায় <strong>PrintSheba Payment Listener</strong> চালু করে দিন। এতে কোনো ঝুঁকিপূর্ণ এসএমএস পারমিশন ছাড়াই বিকাশ ও নগদ ১০০% নিরাপদে কাজ করবে এবং কোনো ব্যাংকিং অ্যাপে কোনো ক্ষতিকর সতর্কতা আসবে না।
                 </p>
             </div>
 

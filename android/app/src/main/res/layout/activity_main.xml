@@ -93,7 +93,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <!-- Permission Alert Banner -->
+            <!-- Notification Access Alert Banner -->
             <LinearLayout
                 android:id="@+id/layoutPermissionAlert"
                 android:layout_width="match_parent"
@@ -107,8 +107,8 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="⚠️ এসএমএস রিড পারমিশন প্রয়োজন"
-                    android:textColor="#F87171"
+                    android:text="🔔 নোটিফিকেশন অ্যাক্সেস চালু করুন"
+                    android:textColor="#38BDF8"
                     android:textSize="14sp"
                     android:textStyle="bold" />
 
@@ -116,7 +116,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="6dp"
-                    android:text="বিকাশ ও নগদের এসএমএস পড়ে গ্রাহকের প্রিন্ট স্বয়ংক্রিয়ভাবে চালু করার জন্য নিচের বাটনে চাপ দিয়ে পারমিশন দিন।"
+                    android:text="বিকাশ ও নগদের পেমেন্ট অ্যালার্ট সরাসরি শনাক্ত করার জন্য নিচের বাটনে চাপ দিয়ে PrintSheba-কে নোটিফিকেশন অনুমতি দিন।"
                     android:textColor="@color/text_medium"
                     android:textSize="12sp" />
 
@@ -126,7 +126,7 @@
                     android:layout_height="42dp"
                     android:layout_marginTop="12dp"
                     android:background="@drawable/bg_btn_primary"
-                    android:text="পারমিশন দিন"
+                    android:text="নোটিফিকেশন পারমিশন দিন"
                     android:textColor="#FFFFFF"
                     android:textSize="13sp"
                     android:textStyle="bold" />

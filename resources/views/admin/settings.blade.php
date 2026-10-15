@@ -59,6 +59,40 @@
             @endif
         </div>
 
+        <!-- Super Admin Subscription Payment Account Numbers -->
+        <div class="p-6 rounded-2xl bg-slate-950 border border-slate-800 space-y-4">
+            <div class="flex items-center gap-2">
+                <span class="text-lg">💳</span>
+                <div>
+                    <h3 class="text-sm font-bold text-white">দোকানদারদের সাবস্ক্রিপশন ফি গ্রহণের নম্বর (bKash & Nagad)</h3>
+                    <p class="text-[11px] text-slate-400">দোকানদাররা প্যাকেজ কেনার সময় এই নম্বরে টাকা পাঠাবে</p>
+                </div>
+            </div>
+
+            <div class="grid sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-300 mb-1.5">সুপার এডমিন বিকাশ নম্বর (bKash):</label>
+                    <input type="text" name="admin_bkash_number" value="{{ old('admin_bkash_number', $adminBkash ?? '') }}" 
+                        class="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-800 text-xs sm:text-sm font-mono text-white focus:outline-none focus:border-rose-500"
+                        placeholder="017xxxxxxxx (Personal/Merchant)">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-300 mb-1.5">সুপার এডমিন নগদ নম্বর (Nagad):</label>
+                    <input type="text" name="admin_nagad_number" value="{{ old('admin_nagad_number', $adminNagad ?? '') }}" 
+                        class="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-800 text-xs sm:text-sm font-mono text-white focus:outline-none focus:border-rose-500"
+                        placeholder="017xxxxxxxx (Personal/Merchant)">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-300 mb-1.5">দোকানদারদের জন্য পেমেন্ট নির্দেশিকা (ঐচ্ছিক):</label>
+                <textarea name="admin_payment_instructions" rows="2" 
+                    class="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-xs text-white focus:outline-none focus:border-rose-500"
+                    placeholder="উদাঃ 'সেন্ড মানি করার পর ট্রানজেকশন আইডি ও আপনার সেন্ডার নম্বর দিয়ে সাবমিট করুন।'">{{ old('admin_payment_instructions', $paymentInstructions ?? '') }}</textarea>
+            </div>
+        </div>
+
         <div class="pt-4 flex justify-end">
             <button type="submit" class="px-8 py-3.5 rounded-xl bg-gradient-to-r from-rose-600 to-rose-700 hover:from-rose-500 hover:to-rose-600 text-white font-bold text-sm shadow-lg shadow-rose-600/30 transition-all cursor-pointer">
                 💾 সেটিংস সেভ করুন

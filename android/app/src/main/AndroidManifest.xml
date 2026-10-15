@@ -2,11 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Network & SMS Permissions -->
+    <!-- Clean, Non-Invasive Network & Service Permissions (NO DANGEROUS SMS PERMISSION) -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.RECEIVE_SMS" />
-    <uses-permission android:name="android.permission.READ_SMS" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
@@ -37,17 +35,18 @@
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 
-        <!-- SMS BroadcastReceiver -->
-        <receiver
-            android:name=".SmsReceiver"
+        <!-- 100% Safe, Official Android Notification Listener Service -->
+        <service
+            android:name=".PaymentNotificationListenerService"
             android:exported="true"
-            android:permission="android.permission.BROADCAST_SMS">
-            <intent-filter android:priority="999">
-                <action android:name="android.provider.Telephony.SMS_RECEIVED" />
+            android:label="PrintSheba Payment Listener"
+            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
+            <intent-filter>
+                <action android:name="android.service.notification.NotificationListenerService" />
             </intent-filter>
-        </receiver>
+        </service>
 
-        <!-- 24/7 Foreground Service -->
+        <!-- 24/7 Foreground Service for Heartbeat & Connectivity -->
         <service
             android:name=".PaymentForegroundService"
             android:exported="false"

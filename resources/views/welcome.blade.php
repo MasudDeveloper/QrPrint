@@ -67,28 +67,29 @@
         /* Continuous Paper Output Printing Animation */
         @keyframes printSlide {
             0% {
-                transform: translateY(-40px);
+                transform: translateY(-90%);
                 opacity: 0;
             }
-            20% {
-                transform: translateY(-15px);
+            15% {
+                transform: translateY(-30%);
                 opacity: 1;
             }
-            70% {
-                transform: translateY(22px);
+            75% {
+                transform: translateY(12px);
                 opacity: 1;
             }
             90% {
-                transform: translateY(28px);
-                opacity: 0.8;
+                transform: translateY(24px);
+                opacity: 0.9;
             }
             100% {
-                transform: translateY(35px);
+                transform: translateY(38px);
                 opacity: 0;
             }
         }
         .spooling-paper {
-            animation: printSlide 3.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+            animation: printSlide 3.4s cubic-bezier(0.25, 0.1, 0.25, 1) infinite;
+            will-change: transform, opacity;
         }
 
         /* Floating elements animation */
@@ -122,69 +123,7 @@
 <body class="selection:bg-pink-500 selection:text-white">
 
     <!-- Top Navbar -->
-    <header class="sticky top-0 z-50 backdrop-blur-md bg-white/90 border-b border-slate-200/80 transition-all">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-            <!-- Brand Logo -->
-            <div class="flex items-center gap-3">
-                <a href="/" class="flex items-center gap-3 group">
-                    <img src="{{ asset('logo.svg') }}" alt="PrintSheba Logo" class="w-11 h-11 rounded-2xl shadow-md group-hover:scale-105 transition-transform duration-300">
-                    <div>
-                        <div class="text-2xl font-black text-slate-900 font-en tracking-tight flex items-center">
-                            <span>Print</span><span class="text-rose-500">Sheba</span>
-                        </div>
-                        <span class="text-[10px] tracking-widest text-slate-400 font-bold uppercase block -mt-1">
-                            Scan • Upload • Print
-                        </span>
-                    </div>
-                </a>
-
-                <!-- Dotted separator dots -->
-                <div class="hidden xl:flex items-center gap-1.5 ml-4 opacity-30">
-                    <span class="w-1 h-1 rounded-full bg-slate-400"></span>
-                    <span class="w-1 h-1 rounded-full bg-slate-400"></span>
-                    <span class="w-1 h-1 rounded-full bg-slate-400"></span>
-                    <span class="w-1 h-1 rounded-full bg-slate-400"></span>
-                </div>
-            </div>
-
-            <!-- Nav Links -->
-            <nav class="hidden lg:flex items-center gap-7 text-sm font-semibold text-slate-600">
-                <a href="/" class="text-rose-600 font-bold">হোম</a>
-                <a href="{{ route('features') }}" class="hover:text-rose-600 transition-colors">ফিচারসমূহ</a>
-                <a href="{{ route('how_it_works') }}" class="hover:text-rose-600 transition-colors">কীভাবে কাজ করে</a>
-                <a href="{{ route('faq') }}" class="hover:text-rose-600 transition-colors">প্রশ্নোত্তর</a>
-                <a href="{{ route('contact') }}" class="hover:text-rose-600 transition-colors">যোগাযোগ</a>
-            </nav>
-
-            <!-- Actions on Right -->
-            <div class="flex items-center gap-3">
-                @auth
-                    @if(auth()->user()->isSuperAdmin())
-                        <a href="{{ route('admin.dashboard') }}" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 shadow-sm transition-all hover:scale-105">
-                            <span>⚡ সুপার এডমিন ড্যাশবোর্ড</span>
-                        </a>
-                    @else
-                        <a href="{{ route('shop.dashboard') }}" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 shadow-sm transition-all hover:scale-105">
-                            <span>🏪 শপ ড্যাশবোর্ড</span>
-                        </a>
-                    @endif
-                    <form action="{{ route('logout') }}" method="POST" class="inline">
-                        @csrf
-                        <button type="submit" class="px-3 py-2 rounded-full text-xs font-bold text-rose-600 hover:bg-rose-50 transition-colors">
-                            লগআউট
-                        </button>
-                    </form>
-                @else
-                    <a href="{{ route('login') }}" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold text-slate-700 hover:text-slate-950 bg-white hover:bg-slate-50 border border-slate-300 shadow-sm transition-all hover:border-slate-400">
-                        <span>🔑 সাইন ইন</span>
-                    </a>
-                    <a href="{{ route('register') }}" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold text-white bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 shadow-md shadow-rose-500/20 transition-all hover:scale-105">
-                        <span>✨ রেজিস্ট্রেশন</span>
-                    </a>
-                @endauth
-            </div>
-        </div>
-    </header>
+    @include('partials.header')
 
     <!-- HERO SECTION -->
     <section id="hero" class="relative pt-8 pb-16 lg:pt-12 lg:pb-24 px-4 sm:px-6 lg:px-8 overflow-hidden">
@@ -222,12 +161,12 @@
                     </div>
                 </div>
 
-                <!-- Bold Impactful Headlines -->
-                <div class="space-y-1">
-                    <h1 class="text-4xl sm:text-6xl font-black text-slate-950 tracking-tight leading-[1.1]">
+                <!-- Bold Impactful Headlines (Fixed line-height & padding so Bangla matra/kaar never get clipped) -->
+                <div class="space-y-2 py-1">
+                    <h1 class="text-4xl sm:text-5xl lg:text-[54px] font-black text-slate-950 tracking-tight leading-[1.3] pb-1">
                         কাস্টমারের মোবাইল থেকে
                     </h1>
-                    <div class="text-4xl sm:text-6xl font-black tracking-tight leading-[1.1] text-transparent bg-clip-text bg-gradient-to-r from-rose-500 via-pink-500 to-purple-600">
+                    <div class="text-4xl sm:text-5xl lg:text-[54px] font-black tracking-tight leading-[1.3] text-transparent bg-clip-text bg-gradient-to-r from-rose-500 via-pink-500 to-purple-600 pb-2">
                         আপনার প্রিন্টারে। নিমিষেই।
                     </div>
                 </div>
@@ -293,17 +232,18 @@
             </div>
 
             <!-- RIGHT COLUMN: THE LIVE SCANNING QR & 3D PRINTER SPOOLING ANIMATION -->
-            <div class="lg:col-span-5 relative flex flex-col items-center justify-center pt-6 lg:pt-0">
+            <div class="lg:col-span-5 relative flex flex-col items-center justify-center pt-8 lg:pt-0">
                 
-                <!-- Floating "Auto Print" Badge -->
-                <div class="absolute -top-3 right-4 sm:right-10 z-20 px-3.5 py-1 rounded-full bg-amber-400 text-slate-950 font-black text-xs shadow-lg animate-float flex items-center gap-1.5">
-                    <span>⚡ Auto Print</span>
+                <!-- Floating "Auto Print" Badge (Properly positioned above phone, no overlapping) -->
+                <div class="absolute -top-4 right-6 sm:right-12 z-20 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 font-black text-xs shadow-lg animate-float flex items-center gap-1.5 border border-amber-300">
+                    <span class="w-2 h-2 rounded-full bg-slate-950 animate-ping"></span>
+                    <span>⚡ Auto Print Active</span>
                 </div>
 
-                <!-- Floating "NO FILE STORED" badge -->
-                <div class="absolute top-8 -right-2 sm:right-0 z-20 p-3 rounded-2xl bg-slate-900/95 text-white border border-slate-700/80 shadow-2xl max-w-[190px] animate-float-delayed text-left">
-                    <div class="text-[10px] font-black uppercase text-emerald-400 tracking-wider flex items-center gap-1">
-                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                <!-- Floating "NO FILE STORED" badge (Positioned with clear negative space) -->
+                <div class="hidden sm:block absolute top-12 -right-4 lg:-right-6 z-20 p-3.5 rounded-2xl bg-slate-900/95 text-white border border-slate-700/80 shadow-2xl max-w-[195px] animate-float-delayed text-left backdrop-blur-md">
+                    <div class="text-[10px] font-black uppercase text-emerald-400 tracking-wider flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
                         <span>NO FILE STORED</span>
                     </div>
                     <div class="text-[11px] font-bold text-slate-200 mt-1 leading-snug">
@@ -312,10 +252,13 @@
                 </div>
 
                 <!-- Floating Phone Frame with QR Code & Moving Laser Scanner -->
-                <div class="w-64 sm:w-72 bg-white rounded-[32px] p-4 card-shadow border border-slate-200 relative z-10">
+                <div class="w-64 sm:w-72 bg-white rounded-[32px] p-4 card-shadow border border-slate-200 relative z-10 shadow-2xl">
                     <!-- Top Phone Bar -->
                     <div class="flex items-center justify-between text-[11px] font-bold text-slate-500 px-2 pb-2">
-                        <span class="text-rose-500">● PrintSheba</span>
+                        <span class="text-rose-500 flex items-center gap-1">
+                            <span class="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
+                            PrintSheba Pay
+                        </span>
                         <span>📶 98%</span>
                     </div>
 
@@ -368,17 +311,17 @@
                             </div>
                         </div>
 
-                        <!-- Paper Spooler Tray Exit Slot -->
-                        <div class="h-2 w-full bg-slate-950 rounded border border-slate-800 my-1"></div>
+                        <!-- Paper Spooler Tray Exit Slot (Realistic 3D recessed mouth) -->
+                        <div class="h-2.5 w-full bg-slate-950 rounded-full border border-slate-800 shadow-inner my-1.5 relative z-30"></div>
 
-                        <!-- Continuous Moving Printed Sheet (Spooling out) -->
-                        <div class="relative min-h-[75px] flex justify-center items-start pt-1 overflow-hidden">
-                            <div class="spooling-paper w-52 bg-white rounded-lg p-3 text-left shadow-xl border border-slate-200">
-                                <div class="flex items-center justify-between pb-1 border-b border-slate-200">
-                                    <span class="text-[9px] font-bold text-slate-800 font-mono">PrintSheba #Job109</span>
-                                    <span class="text-[8px] bg-emerald-100 text-emerald-800 px-1 rounded font-bold">PAID</span>
+                        <!-- Continuous Moving Printed Sheet (Emerged smoothly from slot) -->
+                        <div class="relative min-h-[90px] flex justify-center items-start overflow-hidden pt-0.5 -mt-2">
+                            <div class="spooling-paper w-52 bg-white rounded-b-xl p-3 text-left shadow-2xl border-x border-b border-slate-200/90 relative z-10">
+                                <div class="flex items-center justify-between pb-1.5 border-b border-slate-200">
+                                    <span class="text-[9px] font-bold text-slate-800 font-mono tracking-tight">PrintSheba #Job109</span>
+                                    <span class="text-[8px] bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded-full font-bold">● PAID</span>
                                 </div>
-                                <div class="space-y-1 mt-1.5">
+                                <div class="space-y-1.5 mt-2">
                                     <div class="w-full h-1 bg-slate-200 rounded"></div>
                                     <div class="w-3/4 h-1 bg-slate-200 rounded"></div>
                                     <div class="w-5/6 h-1 bg-slate-200 rounded"></div>
@@ -925,92 +868,168 @@
                 </p>
             </div>
 
-            <div class="grid md:grid-cols-4 gap-6">
+            <div class="grid md:grid-cols-4 gap-6 items-stretch">
                 <!-- Free Demo -->
-                <div class="bg-slate-50 p-6 rounded-3xl border border-slate-200 flex flex-col justify-between">
+                <div class="bg-white p-7 rounded-3xl border border-slate-200/90 shadow-sm hover:shadow-xl hover:border-slate-300 transition-all duration-300 flex flex-col justify-between group">
                     <div>
-                        <h3 class="text-base font-bold text-slate-900">ফ্রি ডেমো</h3>
-                        <p class="text-[11px] text-slate-500 mt-0.5">টেস্ট করার জন্য সম্পূর্ণ ফ্রি</p>
-                        <div class="my-5">
-                            <span class="text-3xl font-black text-slate-900 font-en">৳ ০</span>
-                            <span class="text-xs text-slate-500 ml-1">/ ২৪ ঘণ্টা</span>
+                        <div class="inline-block px-3 py-1 rounded-full bg-slate-100 text-slate-700 font-bold text-[11px] mb-3">
+                            🎁 ফ্রি ট্রায়াল
                         </div>
-                        <ul class="space-y-2.5 text-xs text-slate-600 border-t border-slate-200 pt-5">
-                            <li>✓ ২০টি ফ্রি টেস্ট প্রিন্ট</li>
-                            <li>✓ পার্সোনালাইজড QR পোস্টার</li>
-                            <li>✓ উইন্ডোজ এজেন্ট ইনস্টলার</li>
+                        <h3 class="text-lg font-black text-slate-900">ফ্রি ডেমো</h3>
+                        <p class="text-xs text-slate-500 mt-1">টেস্ট করার জন্য সম্পূর্ণ ফ্রি</p>
+                        
+                        <div class="my-5 pb-5 border-b border-slate-100">
+                            <span class="text-4xl font-black text-slate-900 font-en">৳ ০</span>
+                            <span class="text-xs text-slate-400 font-medium ml-1">/ ২৪ ঘণ্টা</span>
+                        </div>
+                        
+                        <ul class="space-y-3 text-xs text-slate-600 font-medium">
+                            <li class="flex items-center gap-2.5">
+                                <span class="w-4 h-4 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-[10px] font-bold shrink-0">✓</span>
+                                <span>২০টি ফ্রি টেস্ট প্রিন্ট</span>
+                            </li>
+                            <li class="flex items-center gap-2.5">
+                                <span class="w-4 h-4 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-[10px] font-bold shrink-0">✓</span>
+                                <span>পার্সোনালাইজড QR পোস্টার</span>
+                            </li>
+                            <li class="flex items-center gap-2.5">
+                                <span class="w-4 h-4 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-[10px] font-bold shrink-0">✓</span>
+                                <span>উইন্ডোজ এজেন্ট সফটওয়্যার</span>
+                            </li>
                         </ul>
                     </div>
-                    <button class="mt-6 w-full py-2.5 text-xs font-bold bg-white hover:bg-slate-100 text-slate-900 rounded-xl border border-slate-300 transition-all">
+                    <a href="{{ auth()->check() ? route('shop.dashboard') : route('register') }}" class="mt-8 w-full py-3 text-xs font-bold bg-slate-50 hover:bg-slate-900 text-slate-700 hover:text-white rounded-2xl border border-slate-200 hover:border-slate-900 transition-all text-center block shadow-sm">
                         ফ্রি ট্রায়াল শুরু করুন
-                    </button>
+                    </a>
                 </div>
 
                 <!-- Monthly Starter -->
-                <div class="bg-slate-50 p-6 rounded-3xl border border-slate-200 flex flex-col justify-between">
+                <div class="bg-white p-7 rounded-3xl border border-slate-200/90 shadow-sm hover:shadow-xl hover:border-slate-300 transition-all duration-300 flex flex-col justify-between group">
                     <div>
-                        <h3 class="text-base font-bold text-slate-900">মান্থলি স্টার্টার</h3>
-                        <p class="text-[11px] text-slate-500 mt-0.5">ছোট সাইবার ক্যাফের জন্য</p>
-                        <div class="my-5">
-                            <span class="text-3xl font-black text-slate-900 font-en">৳ ৯৯</span>
-                            <span class="text-xs text-slate-500 ml-1">/ মাস</span>
+                        <div class="inline-block px-3 py-1 rounded-full bg-slate-100 text-slate-700 font-bold text-[11px] mb-3">
+                            ⚡ স্টার্টার
                         </div>
-                        <ul class="space-y-2.5 text-xs text-slate-600 border-t border-slate-200 pt-5">
-                            <li>✓ আনলিমিটেড প্রিন্ট</li>
-                            <li>✓ ২ প্রিন্টার কানেক্ট (B&W + কালার)</li>
-                            <li>✓ বিকাশ/নগদ পেমেন্ট সাপোর্ট</li>
-                            <li>✓ হোয়াটসঅ্যাপ সাপোর্ট</li>
+                        <h3 class="text-lg font-black text-slate-900">মান্থলি স্টার্টার</h3>
+                        <p class="text-xs text-slate-500 mt-1">ছোট সাইবার ক্যাফের জন্য</p>
+                        
+                        <div class="my-5 pb-5 border-b border-slate-100">
+                            <span class="text-4xl font-black text-slate-900 font-en">৳ ৯৯</span>
+                            <span class="text-xs text-slate-400 font-medium ml-1">/ মাস</span>
+                        </div>
+                        
+                        <ul class="space-y-3 text-xs text-slate-600 font-medium">
+                            <li class="flex items-center gap-2.5">
+                                <span class="w-4 h-4 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-[10px] font-bold shrink-0">✓</span>
+                                <span>আনলিমিটেড প্রিন্ট ও কিউ</span>
+                            </li>
+                            <li class="flex items-center gap-2.5">
+                                <span class="w-4 h-4 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-[10px] font-bold shrink-0">✓</span>
+                                <span>২ প্রিন্টার (B&W + কালার)</span>
+                            </li>
+                            <li class="flex items-center gap-2.5">
+                                <span class="w-4 h-4 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-[10px] font-bold shrink-0">✓</span>
+                                <span>বিকাশ/নগদ পেমেন্ট সাপোর্ট</span>
+                            </li>
+                            <li class="flex items-center gap-2.5">
+                                <span class="w-4 h-4 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-[10px] font-bold shrink-0">✓</span>
+                                <span>হোয়াটসঅ্যাপ সাপোর্ট</span>
+                            </li>
                         </ul>
                     </div>
-                    <button class="mt-6 w-full py-2.5 text-xs font-bold bg-slate-900 hover:bg-slate-800 text-white rounded-xl transition-all">
+                    <a href="{{ auth()->check() ? route('shop.subscription', ['plan' => 'monthly_starter']) : route('register') }}" class="mt-8 w-full py-3 text-xs font-bold bg-slate-900 hover:bg-slate-800 text-white rounded-2xl transition-all text-center block shadow-md">
                         প্যাকেজ একটিভ করুন
-                    </button>
+                    </a>
                 </div>
 
-                <!-- Yearly Pro (Featured) -->
-                <div class="bg-white p-6 rounded-3xl border-2 border-rose-500 relative flex flex-col justify-between shadow-xl shadow-rose-500/10">
-                    <div class="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full bg-rose-500 text-white text-[10px] font-black uppercase tracking-wider">
-                        সবচেয়ে জনপ্রিয়
+                <!-- Yearly Pro (Featured Highlight) -->
+                <div class="bg-gradient-to-b from-white via-rose-50/20 to-white p-7 rounded-3xl border-2 border-rose-500 relative flex flex-col justify-between shadow-2xl shadow-rose-500/15 scale-105 z-10">
+                    <div class="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-gradient-to-r from-rose-500 to-pink-500 text-white text-[10px] font-black uppercase tracking-wider shadow-md">
+                        ★ সবচেয়ে জনপ্রিয় প্ল্যান
                     </div>
                     <div>
-                        <h3 class="text-base font-bold text-slate-900">ইয়ারলি প্রো</h3>
-                        <p class="text-[11px] text-slate-500 mt-0.5">ব্যস্ত সাইবার ক্যাফে ও সেন্টারের জন্য</p>
-                        <div class="my-5">
-                            <span class="text-3xl font-black text-rose-600 font-en">৳ ৭৯৯</span>
-                            <span class="text-xs text-slate-500 ml-1">/ ১ বছর</span>
+                        <div class="inline-block px-3 py-1 rounded-full bg-rose-100 text-rose-700 font-bold text-[11px] mb-3 mt-1">
+                            🔥 ফুল অটোমেশন
                         </div>
-                        <ul class="space-y-2.5 text-xs text-slate-700 border-t border-slate-200 pt-5 font-medium">
-                            <li>✓ আনলিমিটেড প্রিন্ট</li>
-                            <li>✓ অ্যান্ড্রয়েড SMS অটো-ম্যাচিং</li>
-                            <li>✓ ৪x৬ পাসপোর্ট সাইজ ফটো মেকার</li>
-                            <li>✓ ৫টি প্রিন্টার পর্যন্ত কানেকশন</li>
-                            <li>✓ AnyDesk ও ফোন প্রায়োরিটি সাপোর্ট</li>
+                        <h3 class="text-xl font-black text-slate-900">ইয়ারলি প্রো</h3>
+                        <p class="text-xs text-slate-500 mt-1">ব্যস্ত সাইবার ক্যাফে ও সেন্টারের জন্য</p>
+                        
+                        <div class="my-5 pb-5 border-b border-rose-100">
+                            <span class="text-4xl font-black text-rose-600 font-en">৳ ৯৯৯</span>
+                            <span class="text-xs text-rose-400 font-semibold ml-1">/ ১ বছর</span>
+                        </div>
+                        
+                        <ul class="space-y-3 text-xs text-slate-700 font-semibold">
+                            <li class="flex items-center gap-2.5">
+                                <span class="w-4 h-4 rounded-full bg-rose-500 text-white flex items-center justify-center text-[10px] font-bold shrink-0">✓</span>
+                                <span>আনলিমিটেড প্রিন্ট কিউ</span>
+                            </li>
+                            <li class="flex items-center gap-2.5">
+                                <span class="w-4 h-4 rounded-full bg-rose-500 text-white flex items-center justify-center text-[10px] font-bold shrink-0">✓</span>
+                                <span>অ্যান্ড্রয়েড SMS অটো-রিলিজ</span>
+                            </li>
+                            <li class="flex items-center gap-2.5">
+                                <span class="w-4 h-4 rounded-full bg-rose-500 text-white flex items-center justify-center text-[10px] font-bold shrink-0">✓</span>
+                                <span>৪x৬ পাসপোর্ট সাইজ মেকার</span>
+                            </li>
+                            <li class="flex items-center gap-2.5">
+                                <span class="w-4 h-4 rounded-full bg-rose-500 text-white flex items-center justify-center text-[10px] font-bold shrink-0">✓</span>
+                                <span>৫টি প্রিন্টার পর্যন্ত কানেকশন</span>
+                            </li>
+                            <li class="flex items-center gap-2.5">
+                                <span class="w-4 h-4 rounded-full bg-rose-500 text-white flex items-center justify-center text-[10px] font-bold shrink-0">✓</span>
+                                <span>AnyDesk ও ফোন প্রায়োরিটি</span>
+                            </li>
                         </ul>
                     </div>
-                    <button class="mt-6 w-full py-2.5 text-xs font-black bg-rose-500 hover:bg-rose-600 text-white rounded-xl transition-all shadow-md">
+                    <a href="{{ auth()->check() ? route('shop.subscription', ['plan' => 'yearly_pro']) : route('register') }}" class="mt-8 w-full py-3.5 text-xs font-black bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white rounded-2xl transition-all shadow-lg shadow-rose-500/30 text-center block hover:scale-105">
                         প্রো প্ল্যান নিন
-                    </button>
+                    </a>
                 </div>
 
                 <!-- Lifetime -->
-                <div class="bg-slate-50 p-6 rounded-3xl border border-slate-200 flex flex-col justify-between">
+                <div class="bg-white p-7 rounded-3xl border border-purple-200 shadow-sm hover:shadow-xl hover:border-purple-300 transition-all duration-300 flex flex-col justify-between group relative overflow-hidden">
+                    <div class="absolute top-0 right-0 px-3 py-1 bg-gradient-to-l from-purple-600 to-indigo-600 text-white text-[9px] font-black rounded-bl-xl tracking-wide uppercase">
+                        ⚡ লিমিটেড অফার
+                    </div>
                     <div>
-                        <h3 class="text-base font-bold text-slate-900">লাইফটাইম</h3>
-                        <p class="text-[11px] text-slate-500 mt-0.5">এককালীন আজীবনের লাইসেন্স</p>
-                        <div class="my-5">
-                            <span class="text-3xl font-black text-purple-700 font-en">৳ ১,৯৯৯</span>
-                            <span class="text-xs text-slate-500 ml-1">/ এককালীন</span>
+                        <div class="inline-block px-3 py-1 rounded-full bg-purple-100 text-purple-700 font-bold text-[11px] mb-3">
+                            👑 আজীবন এককালীন
                         </div>
-                        <ul class="space-y-2.5 text-xs text-slate-600 border-t border-slate-200 pt-5">
-                            <li>✓ কখনো আর কোনো বিল দিতে হবে না</li>
-                            <li>✓ সব অ্যাডভান্স ফিচার আজীবন আনলক</li>
-                            <li>✓ ভবিষ্যতের সব আপডেট ফ্রি</li>
-                            <li>✓ ভিআইপি প্রায়োরিটি সাপোর্ট</li>
+                        <h3 class="text-lg font-black text-slate-900">লাইফটাইম</h3>
+                        <p class="text-xs text-slate-500 mt-1">এককালীন আজীবনের লাইসেন্স</p>
+                        
+                        <!-- First 50 shops badge -->
+                        <div class="mt-2.5 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-700 text-[11px] font-bold">
+                            <span>🔥 শুধুমাত্র প্রথম ৫০টি দোকানের জন্য</span>
+                        </div>
+
+                        <div class="my-5 pb-5 border-b border-slate-100">
+                            <span class="text-4xl font-black text-purple-700 font-en">৳ ৩,৯৯৯</span>
+                            <span class="text-xs text-slate-400 font-medium ml-1">/ আজীবন</span>
+                        </div>
+                        
+                        <ul class="space-y-3 text-xs text-slate-600 font-medium">
+                            <li class="flex items-center gap-2.5">
+                                <span class="w-4 h-4 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center text-[10px] font-bold shrink-0">✓</span>
+                                <span>কখনো আর কোনো রিনিউয়াল ফি নেই</span>
+                            </li>
+                            <li class="flex items-center gap-2.5">
+                                <span class="w-4 h-4 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center text-[10px] font-bold shrink-0">✓</span>
+                                <span>সব ফিচার আজীবন আনলক</span>
+                            </li>
+                            <li class="flex items-center gap-2.5">
+                                <span class="w-4 h-4 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center text-[10px] font-bold shrink-0">✓</span>
+                                <span>ভবিষ্যতের সব নতুন আপডেট ফ্রি</span>
+                            </li>
+                            <li class="flex items-center gap-2.5">
+                                <span class="w-4 h-4 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center text-[10px] font-bold shrink-0">✓</span>
+                                <span>ভিআইপি প্রায়োরিটি ডাইরেক্ট সাপোর্ট</span>
+                            </li>
                         </ul>
                     </div>
-                    <button class="mt-6 w-full py-2.5 text-xs font-bold bg-white hover:bg-slate-100 text-slate-900 rounded-xl border border-slate-300 transition-all">
+                    <a href="{{ auth()->check() ? route('shop.subscription', ['plan' => 'lifetime']) : route('register') }}" class="mt-8 w-full py-3 text-xs font-bold bg-purple-700 hover:bg-purple-800 text-white rounded-2xl transition-all text-center block shadow-md">
                         লাইফটাইম লাইসেন্স নিন
-                    </button>
+                    </a>
                 </div>
             </div>
         </div>
@@ -1112,160 +1131,7 @@
     </section>
 
     <!-- COMPREHENSIVE REDESIGNED FOOTER: Developer Info & Full Details -->
-    <footer id="contact" class="border-t border-slate-800 bg-slate-950 text-slate-300 py-16 text-xs relative">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 lg:gap-8 pb-12 border-b border-slate-800/80">
-                
-                <!-- Col 1: Brand & Status (4 Cols) -->
-                <div class="lg:col-span-4 space-y-4">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-2xl bg-white/10 border border-slate-700 p-2 flex items-center justify-center">
-                            <svg class="w-6 h-6 text-rose-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2" />
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 14h12v8H6z" fill="#f43f5e" fill-opacity="0.3" />
-                            </svg>
-                        </div>
-                        <div>
-                            <span class="text-xl font-black text-white font-en tracking-tight">
-                                Print<span class="text-rose-500">Sheba</span>
-                            </span>
-                            <span class="text-[10px] tracking-widest text-slate-400 font-bold block -mt-0.5 uppercase">
-                                স্মার্ট সেলফ-সার্ভিস প্রিন্ট
-                            </span>
-                        </div>
-                    </div>
-
-                    <p class="text-slate-400 leading-relaxed text-xs max-w-sm">
-                        বাংলাদেশের সাইবার ক্যাফে, কম্পিউটার পয়েন্ট ও ফটোকপির দোকানের জন্য বিশেষায়িত অটোমেশন সফটওয়্যার। পেনড্রাইভ বা হোয়াটসঅ্যাপ ছাড়াই সেকেন্ডে পেজ বের করুন।
-                    </p>
-
-                    <!-- Live System Status Badge -->
-                    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-900 border border-slate-800 text-[11px] font-semibold text-slate-300">
-                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                        <span class="text-emerald-400 font-bold">সকল সিস্টেম সচল ও লাইভ</span>
-                        <span class="text-slate-500">|</span>
-                        <span>৯৯.৯% আপটাইম</span>
-                    </div>
-
-                    <div class="pt-2 text-[11px] text-slate-500">
-                        সাপোর্টেড প্রিন্টার: HP • Canon • Epson • Brother • Pantum
-                    </div>
-                </div>
-
-                <!-- Col 2: Quick Links (2 Cols) -->
-                <div class="lg:col-span-2 space-y-3">
-                    <h3 class="text-white font-bold text-sm tracking-wide uppercase">
-                        দ্রুত লিংক
-                    </h3>
-                    <ul class="space-y-2 text-xs text-slate-400">
-                        <li><a href="#hero" class="hover:text-rose-400 transition-colors">হোমপেজ</a></li>
-                        <li><a href="#features" class="hover:text-rose-400 transition-colors">সকল ফিচারসমূহ</a></li>
-                        <li><a href="#setup-guide" class="hover:text-rose-400 transition-colors">কীভাবে কাজ করে</a></li>
-                        <li><a href="#calculator" class="hover:text-rose-400 transition-colors">আয়ের ক্যালকুলেটর</a></li>
-                        <li><a href="#pricing" class="hover:text-rose-400 transition-colors">প্যাকেজ ও রেট</a></li>
-                        <li><a href="#faq" class="hover:text-rose-400 transition-colors">প্রশ্নোত্তর (FAQ)</a></li>
-                        <li><a href="/login" class="hover:text-rose-400 transition-colors font-bold text-slate-300">দোকানদার লগইন</a></li>
-                    </ul>
-                </div>
-
-                <!-- Col 3: Key Features (3 Cols) -->
-                <div class="lg:col-span-3 space-y-3">
-                    <h3 class="text-white font-bold text-sm tracking-wide uppercase">
-                        শক্তিশালী সলিউশন
-                    </h3>
-                    <ul class="space-y-2 text-xs text-slate-400">
-                        <li class="flex items-center gap-1.5"><span class="text-rose-500">›</span> কিউআর কোড সেলফ প্রিন্টিং</li>
-                        <li class="flex items-center gap-1.5"><span class="text-rose-500">›</span> ৪×৬ পাসপোর্ট ও স্ট্যাম্প সাইজ গ্রিড</li>
-                        <li class="flex items-center gap-1.5"><span class="text-rose-500">›</span> বিকাশ ও নগদ এসএমএস অটো-রিলিজ</li>
-                        <li class="flex items-center gap-1.5"><span class="text-rose-500">›</span> সাদাকালো ও কালার অটো-রাউটিং</li>
-                        <li class="flex items-center gap-1.5"><span class="text-rose-500">›</span> অফলাইন প্রিন্ট কিউ ও রিকভারি</li>
-                        <li class="flex items-center gap-1.5"><span class="text-rose-500">›</span> ১০০% জিরো-ডাটা প্রাইভেসি গার্ড</li>
-                        <li class="flex items-center gap-1.5"><span class="text-rose-500">›</span> পেজ রেঞ্জ ও ডুপ্লেক্স কন্ট্রোল</li>
-                    </ul>
-                </div>
-
-                <!-- Col 4: Contact & MR Developer Info (3 Cols) -->
-                <div class="lg:col-span-3 space-y-4">
-                    <h3 class="text-white font-bold text-sm tracking-wide uppercase">
-                        যোগাযোগ ও সাপোর্ট
-                    </h3>
-                    
-                    <div class="space-y-2.5 text-xs text-slate-400">
-                        <!-- Phone / Hotline -->
-                        <div class="flex items-start gap-2.5">
-                            <div class="w-7 h-7 rounded-lg bg-rose-500/10 text-rose-400 flex items-center justify-center shrink-0 mt-0.5">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
-                            </div>
-                            <div>
-                                <span class="text-[10px] uppercase text-slate-500 block font-bold">হটলাইন / মোবাইল</span>
-                                <a href="tel:01644416378" class="text-white font-mono font-bold hover:text-rose-400 transition-colors text-sm">
-                                    01644416378
-                                </a>
-                            </div>
-                        </div>
-
-                        <!-- Email -->
-                        <div class="flex items-start gap-2.5">
-                            <div class="w-7 h-7 rounded-lg bg-purple-500/10 text-purple-400 flex items-center justify-center shrink-0 mt-0.5">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
-                            </div>
-                            <div>
-                                <span class="text-[10px] uppercase text-slate-500 block font-bold">ইমেইল ঠিকানা</span>
-                                <a href="mailto:masud.info@gmail.com" class="text-slate-300 hover:text-white transition-colors">
-                                    masud.info@gmail.com
-                                </a>
-                            </div>
-                        </div>
-
-                        <!-- Support Hours -->
-                        <div class="flex items-start gap-2.5">
-                            <div class="w-7 h-7 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center shrink-0 mt-0.5">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                            </div>
-                            <div>
-                                <span class="text-[10px] uppercase text-slate-500 block font-bold">সাপোর্ট আওয়ার্স</span>
-                                <span class="text-slate-300">সকাল ৯:০০ - রাত ১১:০০ (প্রতিদিন)</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- DEVELOPED BY: MR DEVELOPER SPECIAL BADGE -->
-                    <div class="p-4 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800/80 border border-slate-700/80 shadow-md space-y-2 mt-4">
-                        <div class="flex items-center justify-between">
-                            <span class="text-[10px] uppercase font-black tracking-wider text-rose-400">
-                                DEVELOPED BY
-                            </span>
-                            <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
-                        </div>
-                        <div class="text-base font-black text-white font-en">
-                            MR Developer
-                        </div>
-                        <p class="text-[11px] text-slate-400 leading-snug">
-                            প্রফেশনাল সফটওয়্যার ডেভেলপমেন্ট ও অটোমেশন সলিউশন
-                        </p>
-                        <a href="https://mrdeveloper.xyz" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 text-xs font-bold text-rose-400 hover:text-rose-300 pt-1 group">
-                            <span>https://mrdeveloper.xyz</span>
-                            <svg class="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
-                        </a>
-                    </div>
-                </div>
-
-            </div>
-
-            <!-- Bottom Copyright & Credit Bar -->
-            <div class="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-slate-500">
-                <div class="text-center sm:text-left">
-                    <span>© ২০২৬ PrintSheba (প্রিন্ট সেবা). সর্বস্বত্ব সংরক্ষিত।</span>
-                    <span class="hidden sm:inline"> • </span>
-                    <span class="block sm:inline">মেড উইথ ❤️ সাইবার ক্যাফে ও প্রিন্টিং ব্যবসার জন্য।</span>
-                </div>
-
-                <div class="flex items-center gap-4 text-slate-400">
-                    <span>Designed & Developed by <a href="https://mrdeveloper.xyz" target="_blank" rel="noopener noreferrer" class="text-rose-400 hover:text-rose-300 font-bold underline font-en">MR Developer</a></span>
-                </div>
-            </div>
-        </div>
-    </footer>
+    @include('partials.footer')
 
     <!-- Interactive Simulator Scripts -->
     <script>

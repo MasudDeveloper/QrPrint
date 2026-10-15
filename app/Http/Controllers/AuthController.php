@@ -63,7 +63,7 @@ class AuthController extends Controller
             'status' => 'active',
         ]);
 
-        // Auto-create shop for owner
+        // Auto-create shop for owner with 24 Hours Free Demo (20 test prints)
         $shop = Shop::create([
             'user_id' => $user->id,
             'name' => $request->shop_name,
@@ -77,6 +77,9 @@ class AuthController extends Controller
             'rate_color_double' => 18.00,
             'rate_photo_passport' => 30.00,
             'api_token' => Str::random(40),
+            'subscription_plan' => 'free_trial',
+            'subscription_expires_at' => now()->addHours(24),
+            'is_lifetime' => false,
             'is_active' => true,
         ]);
 

@@ -68,10 +68,18 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::post('/settings', [AdminController::class, 'updateSettings'])->name('settings.update');
     Route::get('/shops', [AdminController::class, 'shops'])->name('shops');
     Route::post('/shops/{shop}/toggle', [AdminController::class, 'toggleShopStatus'])->name('shops.toggle');
+    Route::post('/shops/{shop}/plan', [AdminController::class, 'updateShopPlan'])->name('shops.plan');
+    Route::get('/shops/{shop}/login', [AdminController::class, 'loginAsShop'])->name('shops.login_as');
+    Route::get('/subscriptions', [AdminController::class, 'subscriptions'])->name('subscriptions');
+    Route::post('/subscriptions/{subscription}/approve', [AdminController::class, 'approveSubscription'])->name('subscriptions.approve');
+    Route::post('/subscriptions/{subscription}/reject', [AdminController::class, 'rejectSubscription'])->name('subscriptions.reject');
     Route::get('/print-jobs', [AdminController::class, 'printJobs'])->name('jobs');
     Route::post('/jobs/{job}/approve', [AdminController::class, 'approvePayment'])->name('jobs.approve');
     Route::post('/jobs/{job}/reprint', [AdminController::class, 'reprintJob'])->name('jobs.reprint');
 });
+
+// Impersonation Revert Route
+Route::get('/admin/revert-impersonation', [AdminController::class, 'revertImpersonation'])->name('admin.revert_impersonation');
 
 /*
 |--------------------------------------------------------------------------
@@ -90,6 +98,8 @@ Route::middleware(['auth'])->prefix('shop')->name('shop.')->group(function () {
     Route::get('/printers', [ShopController::class, 'printers'])->name('printers');
     Route::post('/printers', [ShopController::class, 'addPrinter'])->name('printers.add');
     Route::delete('/printers/{printer}', [ShopController::class, 'deletePrinter'])->name('printers.delete');
+    Route::get('/subscription', [ShopController::class, 'subscription'])->name('subscription');
+    Route::post('/subscription/purchase', [ShopController::class, 'purchaseSubscription'])->name('subscription.purchase');
     Route::get('/agent-setup', [ShopController::class, 'agentSetup'])->name('agent_setup');
     Route::get('/agent-download/exe', [ShopController::class, 'downloadAgentExe'])->name('agent_download_exe');
     Route::get('/agent-download/config', [ShopController::class, 'downloadAgentConfig'])->name('agent_download_config');

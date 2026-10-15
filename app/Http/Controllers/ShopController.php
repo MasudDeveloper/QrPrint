@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Shop;
 use App\Models\Printer;
 use App\Models\PrintJob;
+use App\Models\Setting;
+use App\Models\ShopSubscription;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -309,5 +311,64 @@ class ShopController extends Controller
             'pending_jobs' => $pendingJobs,
             'completed_jobs' => $completedJobs,
         ]);
+    }
+
+    /**
+     * Shop subscription details and purchase view
+     */
+    public function subscription(Request $request)
+    {
+        $shop = $this->getShop();
+        $preselectedPlan = $request->query('plan', 'yearly_pro');
+        $adminBkash = Setting::get('admin_bkash_number', '01644416378');
+        $adminNagad = Setting::get('admin_nagad_number', '01644416378');
+        $paymentInstructions = Setting::get('admin_payment_instructions', 'বিকাশ বা নগদ সেন্ড মানি করে নিচে আপনার Transaction ID ও সেন্ডার নাম্বার দিন।');
+        
+        $subscriptionsHistory = ShopSubscription::where('shop_id', $shop->id)->latest()->get();
+
+        return view('shop.subscription', compact(
+            'shop',
+            'preselectedPlan',
+            'adminBkash',
+            'adminNagad',
+            'paymentInstructions',
+            'subscriptionsHistory'
+        ));
+    }
+
+    /**
+     * Submit subscription request with bKash/Nagad TrxID
+     */
+    public function purchaseSubscription(Request $request)
+    {
+        $shop = $this->getShop();
+
+        $request->validate([
+            'plan' => 'required|string|in:monthly_starter,yearly_pro,lifetime',
+            'payment_method' => 'required|string|in:bkash,nagad',
+            'sender_number' => 'required|string|max:20',
+            'transaction_id' => 'required|string|max:50',
+        ]);
+
+        $plans = [
+            'monthly_starter' => ['name' => 'মান্থলি স্টার্টার', 'amount' => 99.00],
+            'yearly_pro' => ['name' => 'ইয়ারলি প্রো (১ বছর)', 'amount' => 999.00],
+            'lifetime' => ['name' => 'লাইফটাইম আনলিমিটেড (প্রথম ৫০ শপ)', 'amount' => 3999.00],
+        ];
+
+        $selectedPlan = $plans[$request->plan];
+
+        ShopSubscription::create([
+            'shop_id' => $shop->id,
+            'plan' => $request->plan,
+            'plan_name' => $selectedPlan['name'],
+            'amount' => $selectedPlan['amount'],
+            'payment_method' => $request->payment_method,
+            'transaction_id' => strtoupper(trim($request->transaction_id)),
+            'sender_number' => trim($request->sender_number),
+            'status' => 'pending',
+        ]);
+
+        return back()->with('success', 'আপনার সাবস্ক্রিপশন ও পেমেন্টের আবেদনটি সফলভাবে জমা হয়েছে! সুপার এডমিন পেমেন্ট ভেরিফাই করার সাথে সাথেই আপনার প্যাকেজটি সক্রিয় হয়ে যাবে।');
     }
 }

@@ -73,6 +73,22 @@
                     <span>দোকানসমূহ (Shops)</span>
                 </a>
 
+                <a href="{{ route('admin.subscriptions') }}" 
+                   class="flex items-center justify-between px-3.5 py-3 rounded-xl text-sm font-semibold transition-all duration-200 {{ request()->routeIs('admin.subscriptions') ? 'bg-gradient-to-r from-rose-600 to-rose-700 text-white shadow-lg shadow-rose-600/30' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
+                    <span class="flex items-center gap-3">
+                        <span class="text-lg">💎</span>
+                        <span>সাবস্ক্রিপশন কিউ</span>
+                    </span>
+                    @php
+                        $pendingSubs = \App\Models\ShopSubscription::where('status', 'pending')->count();
+                    @endphp
+                    @if($pendingSubs > 0)
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-rose-500 text-white animate-pulse">
+                            {{ $pendingSubs }}
+                        </span>
+                    @endif
+                </a>
+
                 <a href="{{ route('admin.jobs') }}" 
                    class="flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-semibold transition-all duration-200 {{ request()->routeIs('admin.jobs') ? 'bg-gradient-to-r from-rose-600 to-rose-700 text-white shadow-lg shadow-rose-600/30' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
                     <span class="text-lg">📄</span>
@@ -147,6 +163,7 @@
                         <nav class="mt-4 space-y-1.5">
                             <a href="{{ route('admin.dashboard') }}" class="block px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('admin.dashboard') ? 'bg-rose-600 text-white' : 'text-slate-300 hover:bg-slate-800' }}">📊 সেন্ট্রাল ড্যাশবোর্ড</a>
                             <a href="{{ route('admin.shops') }}" class="block px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('admin.shops') ? 'bg-rose-600 text-white' : 'text-slate-300 hover:bg-slate-800' }}">🏪 দোকানসমূহ (Shops)</a>
+                            <a href="{{ route('admin.subscriptions') }}" class="block px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('admin.subscriptions') ? 'bg-rose-600 text-white' : 'text-slate-300 hover:bg-slate-800' }}">💎 সাবস্ক্রিপশন কিউ</a>
                             <a href="{{ route('admin.jobs') }}" class="block px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('admin.jobs') ? 'bg-rose-600 text-white' : 'text-slate-300 hover:bg-slate-800' }}">📄 সকল প্রিন্ট টাস্ক</a>
                             <a href="{{ route('admin.settings') }}" class="block px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('admin.settings') ? 'bg-rose-600 text-white' : 'text-slate-300 hover:bg-slate-800' }}">🎬 ভিডিও ও সাইট সেটিংস</a>
                         </nav>

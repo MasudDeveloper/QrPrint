@@ -145,6 +145,19 @@
                     <span>উইন্ডোজ এজেন্ট (.EXE)</span>
                 </a>
 
+                <a href="{{ route('shop.subscription') }}" 
+                   class="flex items-center justify-between px-3.5 py-3 rounded-xl text-sm font-semibold transition-all duration-200 {{ request()->routeIs('shop.subscription') ? 'bg-gradient-to-r from-rose-500 to-rose-600 text-white shadow-lg shadow-rose-500/25' : 'text-slate-300 hover:bg-slate-800/70 hover:text-white' }}">
+                    <span class="flex items-center gap-3">
+                        <span class="text-lg">💎</span>
+                        <span>প্যাকেজ ও বিলিং</span>
+                    </span>
+                    @if(isset($shop) && $shop->is_lifetime)
+                        <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30">LIFETIME</span>
+                    @elseif(isset($shop) && !$shop->isSubscriptionActive())
+                        <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-rose-500/20 text-rose-400 border border-rose-500/30 animate-pulse">EXPIRED</span>
+                    @endif
+                </a>
+
                 <div class="pt-4 text-[10px] font-bold tracking-wider text-slate-500 uppercase px-3 py-1">কাস্টমার পোর্টাল</div>
 
                 @if(isset($shop))
@@ -218,6 +231,7 @@
                             <a href="{{ route('shop.rates') }}" class="block px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('shop.rates') ? 'bg-rose-500 text-white' : 'text-slate-300 hover:bg-slate-800' }}">💰 রেট ও পেমেন্ট নম্বর</a>
                             <a href="{{ route('shop.printers') }}" class="block px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('shop.printers') ? 'bg-rose-500 text-white' : 'text-slate-300 hover:bg-slate-800' }}">🖨️ প্রিন্টার সেটিংস</a>
                             <a href="{{ route('shop.agent_setup') }}" class="block px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('shop.agent_setup') ? 'bg-rose-500 text-white' : 'text-slate-300 hover:bg-slate-800' }}">💻 উইন্ডোজ সফটওয়্যার</a>
+                            <a href="{{ route('shop.subscription') }}" class="block px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('shop.subscription') ? 'bg-rose-500 text-white' : 'text-slate-300 hover:bg-slate-800' }}">💎 প্যাকেজ ও বিলিং</a>
                         </nav>
                     </div>
                     <form action="{{ route('logout') }}" method="POST" class="pt-4 border-t border-slate-800">
@@ -231,6 +245,22 @@
 
             <!-- Page Content Container -->
             <main class="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto bg-slate-950">
+                @if(session('impersonator_id'))
+                    <!-- Super Admin Impersonation Notice Bar -->
+                    <div class="mb-6 p-4 rounded-2xl bg-gradient-to-r from-amber-500/20 via-rose-500/20 to-amber-500/20 border-2 border-amber-500/50 text-white flex flex-col sm:flex-row items-center justify-between gap-3 shadow-xl">
+                        <div class="flex items-center gap-3">
+                            <span class="text-2xl animate-bounce">⚡</span>
+                            <div>
+                                <span class="font-black text-amber-300 text-sm block">সুপার এডমিন লাইভ মোড (Super Admin Impersonation)</span>
+                                <span class="text-xs text-slate-300">আপনি বর্তমানে দোকানদার হিসেবে সিস্টেমটি পরীক্ষা করছেন।</span>
+                            </div>
+                        </div>
+                        <a href="{{ route('admin.revert_impersonation') }}" class="px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs shadow-lg transition-all flex items-center gap-1.5 shrink-0">
+                            <span>🔙 সুপার এডমিনে ফিরে যান</span>
+                        </a>
+                    </div>
+                @endif
+
                 @if(session('success'))
                     <div class="mb-6 p-4 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs sm:text-sm font-bold flex items-center justify-between">
                         <span>✓ {{ session('success') }}</span>
