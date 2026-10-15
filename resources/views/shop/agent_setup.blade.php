@@ -41,6 +41,19 @@
                 <a href="{{ route('shop.agent_download_config') }}" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold text-xs transition-colors text-center cursor-pointer">
                     <span>⚙️ ডাউনলোড করুন রেডি config.json</span>
                 </a>
+                
+                <!-- Quick Copy API Token Box -->
+                <div class="p-3 rounded-2xl bg-slate-950/90 border border-slate-800 space-y-1.5">
+                    <div class="flex items-center justify-between text-[11px] text-slate-400">
+                        <span>আপনার দোকানের API Token:</span>
+                        <button type="button" onclick="navigator.clipboard.writeText('{{ $shop->api_token }}'); this.innerText='কপি হয়েছে!'; setTimeout(() => this.innerText='কপি করুন', 2000)" class="text-rose-400 hover:text-rose-300 font-bold cursor-pointer text-[10px]">
+                            কপি করুন 📋
+                        </button>
+                    </div>
+                    <div class="flex items-center justify-between gap-2 p-1.5 bg-slate-900 rounded-lg border border-slate-800">
+                        <code class="text-[11px] font-mono text-rose-300 truncate select-all">{{ $shop->api_token }}</code>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -72,10 +85,20 @@
                 <a href="{{ route('shop.agent_download_apk') }}" class="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-black text-sm shadow-xl shadow-emerald-500/25 transition-all hover:scale-105 text-center cursor-pointer">
                     <span>📱 ডাউনলোড করুন Android APK</span>
                 </a>
-                <div class="p-3 rounded-xl bg-slate-950/80 border border-emerald-500/30 text-[11px] space-y-1">
-                    <div class="text-slate-400">অ্যাপের সেটিংস এ এই তথ্যগুলো দিন:</div>
-                    <div class="font-mono text-emerald-400 select-all font-bold">URL: {{ url('/') }}</div>
-                    <div class="font-mono text-emerald-400 select-all font-bold truncate max-w-[200px]">Token: {{ $shop->api_token }}</div>
+                <div class="p-3.5 rounded-2xl bg-slate-950/90 border border-emerald-500/30 text-[11px] space-y-2">
+                    <div class="text-slate-400 font-bold">অ্যাপের সেটিংস এ এই তথ্যগুলো দিন:</div>
+                    <div class="flex items-center justify-between gap-2 p-1.5 bg-slate-900 rounded-lg border border-slate-800">
+                        <span class="font-mono text-emerald-400 text-[10px] truncate">URL: {{ url('/') }}</span>
+                        <button type="button" onclick="navigator.clipboard.writeText('{{ url('/') }}'); this.innerText='কপি!'; setTimeout(() => this.innerText='কপি', 2000)" class="text-emerald-400 hover:text-emerald-300 font-bold cursor-pointer text-[10px] shrink-0">
+                            কপি
+                        </button>
+                    </div>
+                    <div class="flex items-center justify-between gap-2 p-1.5 bg-slate-900 rounded-lg border border-slate-800">
+                        <span class="font-mono text-emerald-400 text-[10px] truncate max-w-[140px]">Token: {{ $shop->api_token }}</span>
+                        <button type="button" onclick="navigator.clipboard.writeText('{{ $shop->api_token }}'); this.innerText='কপি!'; setTimeout(() => this.innerText='কপি', 2000)" class="text-emerald-400 hover:text-emerald-300 font-bold cursor-pointer text-[10px] shrink-0">
+                            কপি
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -108,7 +131,11 @@
                 <span class="w-8 h-8 rounded-xl bg-purple-600 text-white font-black text-sm flex items-center justify-center">২</span>
                 <h4 class="text-sm font-black text-white">সফটওয়্যারটি ওপেন করুন</h4>
                 <p class="text-xs text-slate-400 leading-relaxed">
-                    <strong>PrintShebaAgent.exe</strong> ফাইলে ডাবল ক্লিক করে রান করুন। আপনার কানেক্ট থাকা Canon, HP বা Epson প্রিন্টারটি সাদাকালো ও রঙিন ড্রপডাউন থেকে সিলেক্ট করে <strong>"💾 সেটিংস সেভ করুন"</strong> বাটনে ক্লিক করুন।
+                    <strong>PrintShebaAgent.exe</strong> ফাইলে ডাবল ক্লিক করে রান করুন। 
+                    <span class="block mt-1.5 p-2 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-300 text-[11px]">
+                        💡 <em>উইন্ডোজ স্ক্রিনে <strong>"Windows protected your PC"</strong> আসলে নিচে থাকা <strong>"Run anyway"</strong> বাটনে একবার ক্লিক করলেই ওপেন হয়ে যাবে।</em>
+                    </span>
+                    এরপর আপনার Canon/HP/Epson প্রিন্টারটি সিলেক্ট করে <strong>"💾 সেটিংস সেভ করুন"</strong> বাটনে ক্লিক করুন।
                 </p>
             </div>
 

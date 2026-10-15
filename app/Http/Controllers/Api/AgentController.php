@@ -41,7 +41,7 @@ class AgentController extends Controller
         $data = $jobs->map(function ($job) {
             return [
                 'job_token' => $job->job_token,
-                'file_url' => asset('storage/' . $job->file_path),
+                'file_url' => url('/api/agent/jobs/' . $job->job_token . '/file'),
                 'file_name' => $job->file_name,
                 'original_name' => $job->original_name,
                 'file_type' => $job->file_type,
@@ -175,6 +175,32 @@ class AgentController extends Controller
             'status' => 'ok',
             'message' => 'Heartbeat received and printers synced successfully',
             'printers' => Printer::where('shop_id', $shop->id)->get(),
+        ]);
+    }
+
+    public function downloadJobFile(Request $request, $jobToken)
+    {
+        $shop = $this->authenticateShop($request);
+        if (!$shop) {
+            return response()->json(['error' => 'Unauthorized shop token'], 401);
+        }
+
+        $job = PrintJob::where('shop_id', $shop->id)
+            ->where('job_token', $jobToken)
+            ->firstOrFail();
+
+        $storagePath = storage_path('app/public/' . $job->file_path);
+        if (!file_exists($storagePath)) {
+            $storagePath = storage_path('app/' . $job->file_path);
+        }
+
+        if (!file_exists($storagePath)) {
+            return response()->json(['error' => 'File not found on server disk'], 404);
+        }
+
+        return response()->file($storagePath, [
+            'Content-Type' => 'application/octet-stream',
+            'Content-Disposition' => 'attachment; filename="' . basename($job->file_name) . '"'
         ]);
     }
 }

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="bn" class="scroll-smooth">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -48,10 +49,22 @@
 
         /* Continuous Laser Scan Animation */
         @keyframes laserSweep {
-            0% { top: 12%; opacity: 0.2; }
-            50% { top: 82%; opacity: 1; }
-            100% { top: 12%; opacity: 0.2; }
+            0% {
+                top: 12%;
+                opacity: 0.2;
+            }
+
+            50% {
+                top: 82%;
+                opacity: 1;
+            }
+
+            100% {
+                top: 12%;
+                opacity: 0.2;
+            }
         }
+
         .laser-line {
             position: absolute;
             left: 8%;
@@ -70,23 +83,28 @@
                 transform: translateY(-90%);
                 opacity: 0;
             }
+
             15% {
                 transform: translateY(-30%);
                 opacity: 1;
             }
+
             75% {
                 transform: translateY(12px);
                 opacity: 1;
             }
+
             90% {
                 transform: translateY(24px);
                 opacity: 0.9;
             }
+
             100% {
                 transform: translateY(38px);
                 opacity: 0;
             }
         }
+
         .spooling-paper {
             animation: printSlide 3.4s cubic-bezier(0.25, 0.1, 0.25, 1) infinite;
             will-change: transform, opacity;
@@ -94,17 +112,33 @@
 
         /* Floating elements animation */
         @keyframes floatSlow {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-7px); }
+
+            0%,
+            100% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-7px);
+            }
         }
+
         .animate-float {
             animation: floatSlow 4s ease-in-out infinite;
         }
 
         @keyframes floatDelayed {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(6px); }
+
+            0%,
+            100% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(6px);
+            }
         }
+
         .animate-float-delayed {
             animation: floatDelayed 4.5s ease-in-out infinite 1s;
         }
@@ -113,6 +147,7 @@
         .card-shadow {
             box-shadow: 0 20px 45px -15px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.04);
         }
+
         .printer-shadow {
             box-shadow: 0 30px 60px -15px rgba(15, 23, 42, 0.25);
         }
@@ -120,6 +155,7 @@
     <!-- Favicon & Brand Icon -->
     <link rel="icon" type="image/svg+xml" href="{{ asset('logo.svg') }}">
 </head>
+
 <body class="selection:bg-pink-500 selection:text-white">
 
     <!-- Top Navbar -->
@@ -132,10 +168,10 @@
         <div class="absolute top-1/3 left-10 w-[350px] h-[350px] bg-gradient-to-tr from-emerald-100/50 to-cyan-100/30 rounded-full blur-3xl pointer-events-none -z-10"></div>
 
         <div class="max-w-7xl mx-auto grid lg:grid-cols-12 gap-12 items-center">
-            
+
             <!-- LEFT COLUMN: Typography & Value Proposition -->
             <div class="lg:col-span-7 space-y-7 text-left">
-                
+
                 <!-- Privacy Badge -->
                 <div class="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-slate-900 text-slate-100 text-xs font-medium shadow-md">
                     <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
@@ -162,12 +198,14 @@
                 </div>
 
                 <!-- Bold Impactful Headlines (Fixed line-height & padding so Bangla matra/kaar never get clipped) -->
-                <div class="space-y-2 py-1">
-                    <h1 class="text-4xl sm:text-5xl lg:text-[54px] font-black text-slate-950 tracking-tight leading-[1.3] pb-1">
+                <div class="space-y-3 pt-1">
+                    <h1 class="text-4xl sm:text-5xl lg:text-[54px] font-black text-slate-950 tracking-tight leading-[1.35] pt-1">
                         কাস্টমারের মোবাইল থেকে
                     </h1>
-                    <div class="text-4xl sm:text-5xl lg:text-[54px] font-black tracking-tight leading-[1.3] text-transparent bg-clip-text bg-gradient-to-r from-rose-500 via-pink-500 to-purple-600 pb-2">
-                        আপনার প্রিন্টারে। নিমিষেই।
+                    <div>
+                        <span class="inline-block text-4xl sm:text-5xl lg:text-[54px] font-black tracking-tight leading-[1.35] text-transparent bg-clip-text bg-gradient-to-r from-rose-500 via-pink-500 to-purple-600 pt-2 pb-3 pr-2">
+                            আপনার প্রিন্টারে। নিমিষেই।
+                        </span>
                     </div>
                 </div>
 
@@ -185,7 +223,9 @@
                     <!-- Step 1: Scan -->
                     <div class="flex flex-col items-center text-center group cursor-pointer">
                         <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-rose-50 border border-rose-200/80 flex items-center justify-center text-rose-500 group-hover:bg-rose-500 group-hover:text-white transition-all shadow-sm">
-                            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
+                            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path>
+                            </svg>
                         </div>
                         <span class="text-xs font-black text-slate-900 mt-2 uppercase tracking-wider">১. SCAN</span>
                         <span class="text-[10px] text-slate-500 font-semibold">QR Code</span>
@@ -194,7 +234,9 @@
                     <!-- Step 2: Upload -->
                     <div class="flex flex-col items-center text-center group cursor-pointer">
                         <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-purple-50 border border-purple-200/80 flex items-center justify-center text-purple-600 group-hover:bg-purple-600 group-hover:text-white transition-all shadow-sm">
-                            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+                            </svg>
                         </div>
                         <span class="text-xs font-black text-slate-900 mt-2 uppercase tracking-wider">২. UPLOAD</span>
                         <span class="text-[10px] text-slate-500 font-semibold">Document</span>
@@ -203,7 +245,9 @@
                     <!-- Step 3: Pay -->
                     <div class="flex flex-col items-center text-center group cursor-pointer">
                         <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-pink-50 border border-pink-200/80 flex items-center justify-center text-pink-600 group-hover:bg-pink-600 group-hover:text-white transition-all shadow-sm">
-                            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
+                            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+                            </svg>
                         </div>
                         <span class="text-xs font-black text-slate-900 mt-2 uppercase tracking-wider">৩. PAY</span>
                         <span class="text-[10px] text-slate-500 font-semibold">বিকাশ / নগদ</span>
@@ -212,7 +256,9 @@
                     <!-- Step 4: Auto Print -->
                     <div class="flex flex-col items-center text-center group cursor-pointer">
                         <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-emerald-50 border border-emerald-200/80 flex items-center justify-center text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition-all shadow-sm">
-                            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+                            </svg>
                         </div>
                         <span class="text-xs font-black text-slate-900 mt-2 uppercase tracking-wider">৪. PRINT</span>
                         <span class="text-[10px] text-slate-500 font-semibold">অটোমেটিক</span>
@@ -224,7 +270,7 @@
                     <a href="#pricing" class="w-full sm:w-auto px-8 py-4 rounded-full text-sm font-black text-white bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 hover:from-rose-600 hover:to-pink-600 shadow-xl shadow-rose-500/25 transition-all hover:scale-105 flex items-center justify-center gap-2">
                         <span>💰 সেটআপ ও প্যাকেজ রেট দেখুন ⬇</span>
                     </a>
-                    
+
                     <a href="#demo-live" class="w-full sm:w-auto px-8 py-4 rounded-full text-sm font-black text-rose-600 bg-white hover:bg-rose-50 border-2 border-rose-500 shadow-sm transition-all hover:scale-105 flex items-center justify-center gap-2">
                         <span>🎯 ফ্রি ডেমো টেস্ট করুন</span>
                     </a>
@@ -233,7 +279,7 @@
 
             <!-- RIGHT COLUMN: THE LIVE SCANNING QR & 3D PRINTER SPOOLING ANIMATION -->
             <div class="lg:col-span-5 relative flex flex-col items-center justify-center pt-8 lg:pt-0">
-                
+
                 <!-- Floating "Auto Print" Badge (Properly positioned above phone, no overlapping) -->
                 <div class="absolute -top-4 right-6 sm:right-12 z-20 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 font-black text-xs shadow-lg animate-float flex items-center gap-1.5 border border-amber-300">
                     <span class="w-2 h-2 rounded-full bg-slate-950 animate-ping"></span>
@@ -270,7 +316,7 @@
                         <!-- Real QR Graphic -->
                         <div class="w-36 h-36 bg-white p-2.5 rounded-xl shadow-inner border border-slate-200">
                             <svg class="w-full h-full text-slate-900" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M2 2h8v8H2V2zm2 2v4h4V4H4zm-2 8h8v8H2v-8zm2 2v4h4v-4H4zm8-12h8v8h-8V2zm2 2v4h4V4h-4zm2 8h2v2h-2v-2zm-2 2h2v2h-2v-2zm4 0h2v2h-2v-2zm-2 2h2v2h-2v-2zm2 2h2v2h-2v-2zm-4 0h2v2h-2v-2zm4-6h2v2h-2v-2zm-4 0h2v2h-2v-2zm0-2h2v2h-2v-2z"/>
+                                <path d="M2 2h8v8H2V2zm2 2v4h4V4H4zm-2 8h8v8H2v-8zm2 2v4h4v-4H4zm8-12h8v8h-8V2zm2 2v4h4V4h-4zm2 8h2v2h-2v-2zm-2 2h2v2h-2v-2zm4 0h2v2h-2v-2zm-2 2h2v2h-2v-2zm2 2h2v2h-2v-2zm-4 0h2v2h-2v-2zm4-6h2v2h-2v-2zm-4 0h2v2h-2v-2zm0-2h2v2h-2v-2z" />
                             </svg>
                         </div>
                     </div>
@@ -293,7 +339,7 @@
                 <div class="w-80 sm:w-96 -mt-8 relative z-20">
                     <!-- Printer Main Body -->
                     <div class="bg-gradient-to-b from-slate-900 via-slate-950 to-black rounded-3xl p-5 border-t border-slate-700 printer-shadow text-center relative overflow-visible">
-                        
+
                         <!-- Top Input Paper Slots -->
                         <div class="w-48 mx-auto -mt-8 mb-2 h-4 bg-slate-800 rounded-t-lg border-t border-slate-600 flex justify-center gap-1">
                             <div class="w-36 h-3 bg-white/90 rounded-t-sm shadow-sm"></div>
@@ -337,11 +383,13 @@
         <!-- FLOATING BOTTOM METRICS RIBBON (Exact match to reference) -->
         <div class="max-w-7xl mx-auto mt-16 bg-white rounded-3xl p-5 sm:p-7 card-shadow border border-slate-200">
             <div class="grid grid-cols-2 md:grid-cols-5 gap-6 items-center">
-                
+
                 <!-- Col 1 -->
                 <div class="col-span-2 md:col-span-1 flex items-center gap-3">
                     <div class="w-10 h-10 rounded-2xl bg-purple-100 text-purple-700 flex items-center justify-center shrink-0">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                        </svg>
                     </div>
                     <div>
                         <div class="text-xs font-bold text-slate-800 leading-snug">
@@ -356,7 +404,9 @@
                 <!-- Col 2 -->
                 <div class="flex items-center gap-3 border-l border-slate-100 pl-4">
                     <div class="w-9 h-9 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center shrink-0">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+                        </svg>
                     </div>
                     <div>
                         <div class="text-xs font-black text-slate-900">All Printer</div>
@@ -367,7 +417,9 @@
                 <!-- Col 3 -->
                 <div class="flex items-center gap-3 border-l border-slate-100 pl-4">
                     <div class="w-9 h-9 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center shrink-0">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636a9 9 0 010 12.728m0 0l-2.829-2.829m2.829 2.829L21 21M15.536 8.464a5 5 0 010 7.072m0 0l-2.829-2.829m-4.243 4.243a9 9 0 01-2.828-5.657m0 0l2.828 2.828M3 3l18 18"></path></svg>
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636a9 9 0 010 12.728m0 0l-2.829-2.829m2.829 2.829L21 21M15.536 8.464a5 5 0 010 7.072m0 0l-2.829-2.829m-4.243 4.243a9 9 0 01-2.828-5.657m0 0l2.828 2.828M3 3l18 18"></path>
+                        </svg>
                     </div>
                     <div>
                         <div class="text-xs font-black text-slate-900">No Wi-Fi Printer</div>
@@ -378,7 +430,9 @@
                 <!-- Col 4 -->
                 <div class="flex items-center gap-3 border-l border-slate-100 pl-4">
                     <div class="w-9 h-9 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center shrink-0">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path></svg>
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path>
+                        </svg>
                     </div>
                     <div>
                         <div class="text-xs font-black text-slate-900">B&W & Color</div>
@@ -389,7 +443,9 @@
                 <!-- Col 5 -->
                 <div class="flex items-center gap-3 border-l border-slate-100 pl-4">
                     <div class="w-9 h-9 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center shrink-0">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
                     </div>
                     <div>
                         <div class="text-xs font-black text-slate-900">Setup in 2 Mins</div>
@@ -451,12 +507,14 @@
 
             <!-- 8 Rich Feature Cards Grid -->
             <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-                
+
                 <!-- Feature 1: Mobile Crop & Adjust -->
                 <div class="bg-white rounded-3xl p-6 border border-slate-200/90 card-shadow hover:border-rose-400 hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between group">
                     <div>
                         <div class="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
                         </div>
                         <div class="flex items-center gap-2 mb-2">
                             <span class="text-[10px] font-black uppercase px-2 py-0.5 rounded bg-rose-100 text-rose-700">ফটোশপ মুক্ত</span>
@@ -478,7 +536,9 @@
                 <div class="bg-white rounded-3xl p-6 border border-slate-200/90 card-shadow hover:border-purple-400 hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between group">
                     <div>
                         <div class="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zm10 0a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zm10 0a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"></path></svg>
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zm10 0a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zm10 0a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"></path>
+                            </svg>
                         </div>
                         <div class="flex items-center gap-2 mb-2">
                             <span class="text-[10px] font-black uppercase px-2 py-0.5 rounded bg-purple-100 text-purple-700">১-ক্লিক পাসপোর্ট</span>
@@ -500,7 +560,9 @@
                 <div class="bg-white rounded-3xl p-6 border border-slate-200/90 card-shadow hover:border-emerald-400 hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between group">
                     <div>
                         <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
+                            </svg>
                         </div>
                         <div class="flex items-center gap-2 mb-2">
                             <span class="text-[10px] font-black uppercase px-2 py-0.5 rounded bg-emerald-100 text-emerald-700">অটো রাউটিং</span>
@@ -522,7 +584,9 @@
                 <div class="bg-white rounded-3xl p-6 border border-slate-200/90 card-shadow hover:border-pink-400 hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between group">
                     <div>
                         <div class="w-12 h-12 rounded-2xl bg-pink-50 text-pink-600 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                            </svg>
                         </div>
                         <div class="flex items-center gap-2 mb-2">
                             <span class="text-[10px] font-black uppercase px-2 py-0.5 rounded bg-pink-100 text-pink-700">০% বাকি</span>
@@ -544,7 +608,9 @@
                 <div class="bg-white rounded-3xl p-6 border border-slate-200/90 card-shadow hover:border-amber-400 hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between group">
                     <div>
                         <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                            </svg>
                         </div>
                         <div class="flex items-center gap-2 mb-2">
                             <span class="text-[10px] font-black uppercase px-2 py-0.5 rounded bg-amber-100 text-amber-800">অফলাইন ব্যাকআপ</span>
@@ -566,7 +632,9 @@
                 <div class="bg-white rounded-3xl p-6 border border-slate-200/90 card-shadow hover:border-blue-400 hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between group">
                     <div>
                         <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                            </svg>
                         </div>
                         <div class="flex items-center gap-2 mb-2">
                             <span class="text-[10px] font-black uppercase px-2 py-0.5 rounded bg-blue-100 text-blue-700">১০০% প্রাইভেসি</span>
@@ -588,7 +656,9 @@
                 <div class="bg-white rounded-3xl p-6 border border-slate-200/90 card-shadow hover:border-indigo-400 hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between group">
                     <div>
                         <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
                         </div>
                         <div class="flex items-center gap-2 mb-2">
                             <span class="text-[10px] font-black uppercase px-2 py-0.5 rounded bg-indigo-100 text-indigo-700">ডুপ্লেক্স ও রেঞ্জ</span>
@@ -610,7 +680,9 @@
                 <div class="bg-white rounded-3xl p-6 border border-slate-200/90 card-shadow hover:border-cyan-400 hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between group">
                     <div>
                         <div class="w-12 h-12 rounded-2xl bg-cyan-50 text-cyan-600 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                            </svg>
                         </div>
                         <div class="flex items-center gap-2 mb-2">
                             <span class="text-[10px] font-black uppercase px-2 py-0.5 rounded bg-cyan-100 text-cyan-700">দৈনিক হিসাব</span>
@@ -701,38 +773,38 @@
             </div>
 
             @if(!empty($videoUrl))
-                @php
-                    $embedUrl = $videoUrl;
-                    if (preg_match('/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i', $videoUrl, $ytMatch)) {
-                        $embedUrl = 'https://www.youtube.com/embed/' . $ytMatch[1] . '?rel=0&modestbranding=1';
-                    }
-                @endphp
-                <!-- DYNAMIC VIDEO PRESENTATION SECTION (Controlled from Super Admin) -->
-                <div id="video-demo" class="mt-16 pt-12 border-t border-slate-200/90 max-w-4xl mx-auto">
-                    <div class="text-center mb-8 space-y-2">
-                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-100 text-rose-700 text-xs font-black uppercase tracking-wider">
-                            🎬 লাইভ ভিডিও ডেমো
-                        </span>
-                        <h3 class="text-2xl sm:text-3xl font-black text-slate-900">
-                            {{ $videoTitle ?: 'কীভাবে ২ মিনিটে কাস্টমার নিজে নিজে প্রিন্ট করবে' }}
-                        </h3>
-                        <p class="text-xs sm:text-sm text-slate-500">
-                            নিচের ভিডিওটি দেখে সরাসরি পুরো অটোমেটিক প্রিন্টিং প্রক্রিয়াটি লাইভ দেখুন
-                        </p>
-                    </div>
-
-                    <!-- Video Player Container with Glowing Shadow -->
-                    <div class="relative bg-black rounded-3xl overflow-hidden card-shadow border-4 border-white shadow-2xl aspect-video">
-                        <iframe 
-                            class="w-full h-full"
-                            src="{{ $embedUrl }}" 
-                            title="PrintSheba Demo Video" 
-                            frameborder="0" 
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-                            allowfullscreen>
-                        </iframe>
-                    </div>
+            @php
+            $embedUrl = $videoUrl;
+            if (preg_match('/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i', $videoUrl, $ytMatch)) {
+            $embedUrl = 'https://www.youtube.com/embed/' . $ytMatch[1] . '?rel=0&modestbranding=1';
+            }
+            @endphp
+            <!-- DYNAMIC VIDEO PRESENTATION SECTION (Controlled from Super Admin) -->
+            <div id="video-demo" class="mt-16 pt-12 border-t border-slate-200/90 max-w-4xl mx-auto">
+                <div class="text-center mb-8 space-y-2">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-100 text-rose-700 text-xs font-black uppercase tracking-wider">
+                        🎬 লাইভ ভিডিও ডেমো
+                    </span>
+                    <h3 class="text-2xl sm:text-3xl font-black text-slate-900">
+                        {{ $videoTitle ?: 'কীভাবে ২ মিনিটে কাস্টমার নিজে নিজে প্রিন্ট করবে' }}
+                    </h3>
+                    <p class="text-xs sm:text-sm text-slate-500">
+                        নিচের ভিডিওটি দেখে সরাসরি পুরো অটোমেটিক প্রিন্টিং প্রক্রিয়াটি লাইভ দেখুন
+                    </p>
                 </div>
+
+                <!-- Video Player Container with Glowing Shadow -->
+                <div class="relative bg-black rounded-3xl overflow-hidden card-shadow border-4 border-white shadow-2xl aspect-video">
+                    <iframe
+                        class="w-full h-full"
+                        src="{{ $embedUrl }}"
+                        title="PrintSheba Demo Video"
+                        frameborder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        allowfullscreen>
+                    </iframe>
+                </div>
+            </div>
             @endif
         </div>
     </section>
@@ -877,12 +949,12 @@
                         </div>
                         <h3 class="text-lg font-black text-slate-900">ফ্রি ডেমো</h3>
                         <p class="text-xs text-slate-500 mt-1">টেস্ট করার জন্য সম্পূর্ণ ফ্রি</p>
-                        
+
                         <div class="my-5 pb-5 border-b border-slate-100">
                             <span class="text-4xl font-black text-slate-900 font-en">৳ ০</span>
                             <span class="text-xs text-slate-400 font-medium ml-1">/ ২৪ ঘণ্টা</span>
                         </div>
-                        
+
                         <ul class="space-y-3 text-xs text-slate-600 font-medium">
                             <li class="flex items-center gap-2.5">
                                 <span class="w-4 h-4 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-[10px] font-bold shrink-0">✓</span>
@@ -911,12 +983,12 @@
                         </div>
                         <h3 class="text-lg font-black text-slate-900">মান্থলি স্টার্টার</h3>
                         <p class="text-xs text-slate-500 mt-1">ছোট সাইবার ক্যাফের জন্য</p>
-                        
+
                         <div class="my-5 pb-5 border-b border-slate-100">
                             <span class="text-4xl font-black text-slate-900 font-en">৳ ৯৯</span>
                             <span class="text-xs text-slate-400 font-medium ml-1">/ মাস</span>
                         </div>
-                        
+
                         <ul class="space-y-3 text-xs text-slate-600 font-medium">
                             <li class="flex items-center gap-2.5">
                                 <span class="w-4 h-4 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-[10px] font-bold shrink-0">✓</span>
@@ -952,12 +1024,12 @@
                         </div>
                         <h3 class="text-xl font-black text-slate-900">ইয়ারলি প্রো</h3>
                         <p class="text-xs text-slate-500 mt-1">ব্যস্ত সাইবার ক্যাফে ও সেন্টারের জন্য</p>
-                        
+
                         <div class="my-5 pb-5 border-b border-rose-100">
                             <span class="text-4xl font-black text-rose-600 font-en">৳ ৯৯৯</span>
                             <span class="text-xs text-rose-400 font-semibold ml-1">/ ১ বছর</span>
                         </div>
-                        
+
                         <ul class="space-y-3 text-xs text-slate-700 font-semibold">
                             <li class="flex items-center gap-2.5">
                                 <span class="w-4 h-4 rounded-full bg-rose-500 text-white flex items-center justify-center text-[10px] font-bold shrink-0">✓</span>
@@ -997,7 +1069,7 @@
                         </div>
                         <h3 class="text-lg font-black text-slate-900">লাইফটাইম</h3>
                         <p class="text-xs text-slate-500 mt-1">এককালীন আজীবনের লাইসেন্স</p>
-                        
+
                         <!-- First 50 shops badge -->
                         <div class="mt-2.5 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-700 text-[11px] font-bold">
                             <span>🔥 শুধুমাত্র প্রথম ৫০টি দোকানের জন্য</span>
@@ -1007,7 +1079,7 @@
                             <span class="text-4xl font-black text-purple-700 font-en">৳ ৩,৯৯৯</span>
                             <span class="text-xs text-slate-400 font-medium ml-1">/ আজীবন</span>
                         </div>
-                        
+
                         <ul class="space-y-3 text-xs text-slate-600 font-medium">
                             <li class="flex items-center gap-2.5">
                                 <span class="w-4 h-4 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center text-[10px] font-bold shrink-0">✓</span>
@@ -1118,11 +1190,15 @@
 
                 <div class="flex flex-col sm:flex-row gap-4 shrink-0 w-full lg:w-auto">
                     <a href="tel:01644416378" class="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-rose-500 hover:bg-rose-600 text-white font-bold text-sm shadow-lg shadow-rose-500/30 transition-all hover:scale-105">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                        </svg>
                         <span>কল করুন: 01644416378</span>
                     </a>
                     <a href="https://wa.me/8801644416378?text=Hello%20PrintSheba%2C%20I%20want%20to%20know%20more" target="_blank" class="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm shadow-lg shadow-emerald-600/30 transition-all hover:scale-105">
-                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z" />
+                        </svg>
                         <span>হোয়াটসঅ্যাপ চ্যাট</span>
                     </a>
                 </div>
@@ -1164,10 +1240,13 @@
                 confetti({
                     particleCount: 80,
                     spread: 70,
-                    origin: { y: 0.6 }
+                    origin: {
+                        y: 0.6
+                    }
                 });
             });
         }
     </script>
 </body>
+
 </html>

@@ -40,11 +40,12 @@ public class MainActivity extends AppCompatActivity {
     private EditText etServerUrl;
     private EditText etApiToken;
     private Button btnSaveConfig;
-    private Button btnTestBkash;
-    private Button btnTestNagad;
     private TextView tvLogs;
     private TextView btnClearLogs;
     private TextView tvTestHeartbeat;
+    private TextView tvServerStatusDot;
+    private TextView tvServerStatusText;
+    private TextView tvServerStatusBadge;
 
     private SharedPreferences prefs;
 
@@ -88,31 +89,24 @@ public class MainActivity extends AppCompatActivity {
         etServerUrl = findViewById(R.id.etServerUrl);
         etApiToken = findViewById(R.id.etApiToken);
         btnSaveConfig = findViewById(R.id.btnSaveConfig);
-        btnTestBkash = findViewById(R.id.btnTestBkash);
-        btnTestNagad = findViewById(R.id.btnTestNagad);
         tvLogs = findViewById(R.id.tvLogs);
         btnClearLogs = findViewById(R.id.btnClearLogs);
         tvTestHeartbeat = findViewById(R.id.tvTestHeartbeat);
+        tvServerStatusDot = findViewById(R.id.tvServerStatusDot);
+        tvServerStatusText = findViewById(R.id.tvServerStatusText);
+        tvServerStatusBadge = findViewById(R.id.tvServerStatusBadge);
 
         btnGrantPermission.setOnClickListener(v -> requestAppPermissions());
 
-        btnSaveConfig.setOnClickListener(v -> saveConfig());
+        btnSaveConfig.setOnClickListener(v -> {
+            saveConfig();
+            checkServerConnection();
+        });
 
         if (tvTestHeartbeat != null) {
             tvTestHeartbeat.setOnClickListener(v -> {
                 saveConfig();
-                Toast.makeText(this, "সার্ভার সংযোগ টেস্ট করা হচ্ছে...", Toast.LENGTH_SHORT).show();
-                ApiClient.sendHeartbeat(this, new ApiClient.ApiCallback() {
-                    @Override
-                    public void onSuccess(String response) {
-                        runOnUiThread(() -> Toast.makeText(MainActivity.this, "✅ " + response, Toast.LENGTH_SHORT).show());
-                    }
-
-                    @Override
-                    public void onError(String error) {
-                        runOnUiThread(() -> Toast.makeText(MainActivity.this, "❌ " + error, Toast.LENGTH_LONG).show());
-                    }
-                });
+                checkServerConnection();
             });
         }
 
@@ -127,9 +121,6 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(this, "পেমেন্ট লিসেনার সার্ভিস বন্ধ করা হয়েছে", Toast.LENGTH_SHORT).show();
             }
         });
-
-        btnTestBkash.setOnClickListener(v -> triggerTestPayment("bkash", 20.0));
-        btnTestNagad.setOnClickListener(v -> triggerTestPayment("nagad", 50.0));
 
         btnClearLogs.setOnClickListener(v -> {
             prefs.edit().putString("transactions_log", "").apply();
@@ -147,6 +138,44 @@ public class MainActivity extends AppCompatActivity {
         etApiToken.setText(apiToken);
         switchService.setChecked(serviceEnabled);
         updateServiceStatus(serviceEnabled);
+        checkServerConnection();
+    }
+
+    private void checkServerConnection() {
+        if (tvServerStatusText == null) return;
+        tvServerStatusText.setText("সার্ভার সংযোগ যাচাই হচ্ছে...");
+        tvServerStatusBadge.setText("যাচাই...");
+        tvServerStatusBadge.setBackgroundResource(R.drawable.bg_status_badge_red);
+
+        ApiClient.sendHeartbeat(this, new ApiClient.ApiCallback() {
+            @Override
+            public void onSuccess(String response) {
+                runOnUiThread(() -> {
+                    if (tvServerStatusText != null) {
+                        tvServerStatusText.setText("সার্ভার: অনলাইন ও সংযুক্ত (HTTP 200)");
+                        tvServerStatusText.setTextColor(0xFF34D399);
+                        tvServerStatusBadge.setText("কানেক্টেড");
+                        tvServerStatusBadge.setTextColor(0xFF34D399);
+                        tvServerStatusBadge.setBackgroundResource(R.drawable.bg_status_badge);
+                        tvServerStatusDot.setBackgroundResource(R.drawable.bg_status_badge);
+                    }
+                });
+            }
+
+            @Override
+            public void onError(String error) {
+                runOnUiThread(() -> {
+                    if (tvServerStatusText != null) {
+                        tvServerStatusText.setText("সংযোগ ত্রুটি: " + error);
+                        tvServerStatusText.setTextColor(0xFFF87171);
+                        tvServerStatusBadge.setText("ডিসকানেক্টেড");
+                        tvServerStatusBadge.setTextColor(0xFFF87171);
+                        tvServerStatusBadge.setBackgroundResource(R.drawable.bg_status_badge_red);
+                        tvServerStatusDot.setBackgroundResource(R.drawable.bg_status_badge_red);
+                    }
+                });
+            }
+        });
     }
 
     private void saveConfig() {
@@ -163,16 +192,18 @@ public class MainActivity extends AppCompatActivity {
                 .putString("api_token", token)
                 .apply();
 
-        Toast.makeText(this, "সেটিংস সফলভাবে সংরক্ষিত হয়েছে!", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "সেটিংস সংরক্ষিত হয়েছে!", Toast.LENGTH_SHORT).show();
     }
 
     private void updateServiceStatus(boolean enabled) {
         if (enabled) {
             tvLiveBadge.setText("● সক্রিয়");
-            tvLiveBadge.setBackgroundColor(0xFF10B981);
+            tvLiveBadge.setTextColor(0xFF34D399);
+            tvLiveBadge.setBackgroundResource(R.drawable.bg_status_badge);
         } else {
             tvLiveBadge.setText("● বন্ধ");
-            tvLiveBadge.setBackgroundColor(0xFFEF4444);
+            tvLiveBadge.setTextColor(0xFFF87171);
+            tvLiveBadge.setBackgroundResource(R.drawable.bg_status_badge_red);
         }
     }
 

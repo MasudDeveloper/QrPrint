@@ -56,6 +56,12 @@ Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('regi
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
+// Password Reset Routes
+Route::get('/forgot-password', [AuthController::class, 'showForgotPasswordForm'])->name('password.request');
+Route::post('/forgot-password', [AuthController::class, 'sendResetLinkEmail'])->name('password.email');
+Route::get('/reset-password/{token}', [AuthController::class, 'showResetPasswordForm'])->name('password.reset');
+Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
+
 /*
 |--------------------------------------------------------------------------
 | Super Admin Routes (Protected)
@@ -123,6 +129,7 @@ Route::get('/api/customer/status/{jobToken}', [CustomerPrintController::class, '
 */
 Route::prefix('api/agent')->group(function () {
     Route::get('/jobs', [AgentController::class, 'pollJobs']);
+    Route::get('/jobs/{jobToken}/file', [AgentController::class, 'downloadJobFile']);
     Route::post('/jobs/{jobToken}/printed', [AgentController::class, 'markJobPrinted']);
     Route::post('/heartbeat', [AgentController::class, 'heartbeat']);
 });

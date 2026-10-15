@@ -12,11 +12,15 @@
         <div class="absolute -top-24 -left-24 w-72 h-72 bg-rose-500/10 rounded-full blur-3xl pointer-events-none"></div>
         <div class="absolute -bottom-24 -right-24 w-72 h-72 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
+        @php
+            $isAgentOnline = $shop && $shop->last_agent_heartbeat_at && $shop->last_agent_heartbeat_at->gte(now()->subMinutes(3));
+        @endphp
+
         <!-- Left: Shop Info -->
         <div class="space-y-2.5 z-10">
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-400 text-xs font-bold border border-emerald-500/30">
-                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-                <span>লাইভ অটো-প্রিন্ট ক্লাউড লিংক সক্রিয়</span>
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full {{ $isAgentOnline ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30' : 'bg-amber-500/15 text-amber-400 border-amber-500/30' }} text-xs font-bold border">
+                <span class="w-2 h-2 rounded-full {{ $isAgentOnline ? 'bg-emerald-400 animate-ping' : 'bg-amber-400' }}"></span>
+                <span>{{ $isAgentOnline ? 'লাইভ অটো-প্রিন্ট ক্লাউড লিংক সক্রিয়' : 'উইন্ডোজ এজেন্ট ডিসকানেক্টেড (অফলাইন)' }}</span>
             </div>
             <h1 class="text-2xl sm:text-3xl font-black tracking-tight text-white flex items-center gap-2">
                 <span>{{ $shop->name }}</span>
@@ -40,9 +44,9 @@
         <!-- Right: Animated Compact Hardware Visualizer -->
         <div class="w-64 bg-slate-900/90 rounded-2xl p-4 border border-slate-800 shadow-xl flex flex-col items-center relative overflow-hidden shrink-0 z-10">
             <div class="flex items-center justify-between w-full text-[10px] font-mono text-slate-400 pb-2 border-b border-slate-800">
-                <span class="text-emerald-400 flex items-center gap-1.5 font-bold">
-                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                    RELAY ACTIVE
+                <span class="{{ $isAgentOnline ? 'text-emerald-400' : 'text-amber-400' }} flex items-center gap-1.5 font-bold">
+                    <span class="w-1.5 h-1.5 rounded-full {{ $isAgentOnline ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400' }}"></span>
+                    {{ $isAgentOnline ? 'RELAY ACTIVE' : 'RELAY STANDBY' }}
                 </span>
                 <span class="text-slate-500 font-bold">PORT #{{ $shop->id }}</span>
             </div>
@@ -50,11 +54,13 @@
             <div class="w-44 bg-slate-950 rounded-xl p-3 border border-slate-800 text-center relative mt-2 shadow-inner">
                 <div class="w-24 h-1.5 bg-slate-800 rounded mx-auto mb-2"></div>
                 <!-- Continuous spooling sheet -->
-                <div class="w-32 h-7 bg-white rounded-md shadow-md text-[9px] text-slate-900 font-mono font-bold flex items-center justify-center mx-auto animate-pulse">
-                    📄 PrintSheba Spool
+                <div class="w-32 h-7 {{ $isAgentOnline ? 'bg-white text-slate-900 animate-pulse' : 'bg-slate-800 text-slate-400' }} rounded-md shadow-md text-[9px] font-mono font-bold flex items-center justify-center mx-auto">
+                    {{ $isAgentOnline ? '📄 PrintSheba Spool' : '⏳ Agent Waiting' }}
                 </div>
             </div>
-            <div class="text-[10px] text-slate-500 mt-2 font-mono">Status: Ready for Prints</div>
+            <div class="text-[10px] {{ $isAgentOnline ? 'text-slate-500' : 'text-amber-400 font-semibold' }} mt-2 font-mono">
+                {{ $isAgentOnline ? 'Status: Ready for Prints' : 'Status: Windows Agent Offline' }}
+            </div>
         </div>
 
     </div>
@@ -235,6 +241,57 @@
                     @empty
                         <tr id="completedJobsEmptyRow">
                             <td colspan="7" class="px-6 py-8 text-center text-slate-500">এখনো কোনো প্রিন্ট সম্পন্ন হয়নি</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+    </div>
+
+    <!-- Live bKash/Nagad Payments & SMS Listener Log -->
+    <div class="bg-slate-900/80 rounded-3xl border border-slate-800 shadow-sm overflow-hidden">
+        <div class="p-6 border-b border-slate-800 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                <h3 class="text-base font-bold text-white">📱 লাইভ বিকাশ ও নগদ পেমেন্ট লগ (SMS Received)</h3>
+            </div>
+            <span class="text-xs text-slate-400">অ্যান্ড্রয়েড লিসেনার থেকে রিসিভ হওয়া সকল ট্রানজেকশন</span>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+                <thead class="bg-slate-950/70 text-slate-400 font-bold border-b border-slate-800 uppercase text-[10px] tracking-wider">
+                    <tr>
+                        <th class="px-6 py-4">পেমেন্ট মেথড</th>
+                        <th class="px-6 py-4">টাকার পরিমাণ</th>
+                        <th class="px-6 py-4">ট্রানজেকশন আইডি (TrxID)</th>
+                        <th class="px-6 py-4">প্রেরকের নম্বর (Sender)</th>
+                        <th class="px-6 py-4">স্ট্যাটাস</th>
+                        <th class="px-6 py-4 text-right">সময়</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-800/80">
+                    @forelse($recentTransactions as $tx)
+                        <tr class="hover:bg-slate-800/40 transition-colors">
+                            <td class="px-6 py-4">
+                                <span class="px-2.5 py-1 rounded-lg text-xs font-bold uppercase {{ $tx->payment_method === 'bkash' ? 'bg-pink-500/10 text-pink-400 border border-pink-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20' }}">
+                                    {{ $tx->payment_method }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 font-en font-black text-emerald-400 text-sm">৳ {{ number_format($tx->amount, 2) }}</td>
+                            <td class="px-6 py-4 font-mono font-bold text-white select-all">{{ $tx->trx_id }}</td>
+                            <td class="px-6 py-4 font-mono text-slate-300">{{ $tx->sender_number ?: 'N/A' }}</td>
+                            <td class="px-6 py-4">
+                                <span class="px-2 py-0.5 rounded text-[10px] font-bold {{ $tx->print_job_id ? 'bg-emerald-500/20 text-emerald-300' : 'bg-slate-800 text-slate-300' }}">
+                                    {{ $tx->print_job_id ? '✓ প্রিন্টে ব্যবহৃত' : 'স্বতন্ত্র পেমেন্ট' }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 text-right text-slate-400 font-mono text-[11px]">
+                                {{ $tx->created_at->format('h:i:s A, d M') }}
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="6" class="px-6 py-8 text-center text-slate-500">এখনো কোনো বিকাশ বা নগদ এসএমএস পেমেন্ট রিসিভ হয়নি</td>
                         </tr>
                     @endforelse
                 </tbody>

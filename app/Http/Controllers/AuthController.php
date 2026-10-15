@@ -96,6 +96,54 @@ class AuthController extends Controller
         return redirect('/')->with('info', 'আপনি সফলভাবে লগআউট হয়েছেন।');
     }
 
+    public function showForgotPasswordForm()
+    {
+        return view('auth.forgot-password');
+    }
+
+    public function sendResetLinkEmail(Request $request)
+    {
+        $request->validate(['email' => 'required|email']);
+
+        $status = \Illuminate\Support\Facades\Password::sendResetLink(
+            $request->only('email')
+        );
+
+        return $status === \Illuminate\Support\Facades\Password::RESET_LINK_SENT
+            ? back()->with('status', 'আপনার ইমেইলে পাসওয়ার্ড রিসেট করার লিঙ্ক সফলভাবে পাঠানো হয়েছে!')
+            : back()->withErrors(['email' => 'এই ইমেইল দিয়ে কোনো অ্যাকাউন্ট পাওয়া যায়নি।']);
+    }
+
+    public function showResetPasswordForm(Request $request, $token = null)
+    {
+        return view('auth.reset-password')->with(
+            ['token' => $token, 'email' => $request->email]
+        );
+    }
+
+    public function resetPassword(Request $request)
+    {
+        $request->validate([
+            'token' => 'required',
+            'email' => 'required|email',
+            'password' => 'required|min:6|confirmed',
+        ]);
+
+        $status = \Illuminate\Support\Facades\Password::reset(
+            $request->only('email', 'password', 'password_confirmation', 'token'),
+            function ($user, $password) {
+                $user->password = Hash::make($password);
+                $user->setRememberToken(Str::random(60));
+                $user->save();
+                Auth::login($user);
+            }
+        );
+
+        return $status === \Illuminate\Support\Facades\Password::PASSWORD_RESET
+            ? redirect()->route('login')->with('success', 'পাসওয়ার্ড সফলভাবে পরিবর্তন করা হয়েছে!')
+            : back()->withErrors(['email' => 'পাসওয়ার্ড রিসেট টোকেনটি সঠিক নয় বা মেয়াদ উত্তীর্ণ হয়েছে।']);
+    }
+
     protected function redirectBasedOnRole(User $user)
     {
         if ($user->isSuperAdmin()) {

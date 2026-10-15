@@ -1,0 +1,19 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Prevent direct access to sensitive files and directories
+    RewriteRule ^(\.env|\.git|composer\.(json|lock)|package(-lock)?\.json|artisan|storage/logs/.*)$ - [F,L,NC]
+
+    # Ensure requests are redirected to the /public directory seamlessly
+    RewriteCond %{REQUEST_URI} !^/public/
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
+
+# Disable Directory Browsing
+Options -Indexes
+
+# Block sensitive hidden files (.env, .git, etc.)
+<FilesMatch "^\.(env|git|editorconfig)">
+    Order allow,deny
+    Deny from all
+</FilesMatch>

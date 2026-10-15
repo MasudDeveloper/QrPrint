@@ -68,7 +68,7 @@
                 @csrf
                 <div>
                     <label class="block text-xs font-bold text-slate-700 mb-1.5">ইমেইল ঠিকানা</label>
-                    <input type="email" name="email" value="{{ old('email', 'masud.info@gmail.com') }}" required 
+                    <input type="email" name="email" value="{{ old('email') }}" required autofocus
                         class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20 transition-all"
                         placeholder="yourname@gmail.com">
                 </div>
@@ -76,11 +76,13 @@
                 <div>
                     <div class="flex items-center justify-between mb-1.5">
                         <label class="block text-xs font-bold text-slate-700">পাসওয়ার্ড</label>
-                        <span class="text-[11px] text-slate-400">ডিফল্ট: password</span>
+                        <a href="{{ route('password.request') }}" class="text-[11px] font-bold text-rose-600 hover:underline">
+                            পাসওয়ার্ড ভুলে গেছেন?
+                        </a>
                     </div>
-                    <input type="password" name="password" value="password" required 
+                    <input type="password" name="password" required 
                         class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20 transition-all"
-                        placeholder="••••••••">
+                        placeholder="আপনার গোপন পাসওয়ার্ড দিন">
                 </div>
 
                 <div class="flex items-center justify-between text-xs pt-1">
@@ -99,13 +101,6 @@
                 নতুন দোকানদার? 
                 <a href="{{ route('register') }}" class="font-bold text-rose-600 hover:underline">নতুন দোকান রেজিস্টার করুন</a>
             </div>
-        </div>
-
-        <!-- Quick Demo Switcher Info -->
-        <div class="mt-6 p-4 rounded-2xl bg-white/80 backdrop-blur border border-slate-200 text-xs text-slate-600 text-center">
-            <span class="font-bold text-slate-800">টেস্ট লগইন তথ্য:</span><br>
-            সুপার এডমিন: <span class="font-mono text-rose-600 font-bold">masud.info@gmail.com</span> | পাসওয়ার্ড: <span class="font-mono">password</span><br>
-            দোকানদার ডেমো: <span class="font-mono text-purple-600 font-bold">shop@printsheba.com</span> | পাসওয়ার্ড: <span class="font-mono">password</span>
         </div>
     </div>
 </body>

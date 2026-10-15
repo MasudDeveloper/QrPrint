@@ -207,9 +207,53 @@
                         android:id="@+id/tvTestHeartbeat"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="সংযোগ যাচাই"
-                        android:textColor="@color/brand_cyan_start"
+                        android:background="@drawable/bg_btn_primary"
+                        android:paddingHorizontal="12dp"
+                        android:paddingVertical="5dp"
+                        android:text="🔄 সংযোগ টেস্ট"
+                        android:textColor="#FFFFFF"
+                        android:textSize="11sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <!-- Live Server Connection Status Indicator -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:background="@drawable/bg_card_modern"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="14dp"
+                    android:paddingVertical="10dp">
+
+                    <TextView
+                        android:id="@+id/tvServerStatusDot"
+                        android:layout_width="10dp"
+                        android:layout_height="10dp"
+                        android:background="@drawable/bg_status_badge"
+                        android:layout_marginEnd="8dp" />
+
+                    <TextView
+                        android:id="@+id/tvServerStatusText"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="সার্ভার স্ট্যাটাস: চেক করা হচ্ছে..."
+                        android:textColor="@color/text_medium"
                         android:textSize="12sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tvServerStatusBadge"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/bg_status_badge_red"
+                        android:paddingHorizontal="10dp"
+                        android:paddingVertical="3dp"
+                        android:text="ডিসকানেক্টেড"
+                        android:textColor="@color/status_red_text"
+                        android:textSize="10sp"
                         android:textStyle="bold" />
                 </LinearLayout>
 
@@ -273,65 +317,7 @@
 
             </LinearLayout>
 
-            <!-- 4. SIMULATION & TEST BUTTONS -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/bg_card_modern"
-                android:orientation="vertical"
-                android:padding="20dp"
-                android:layout_marginBottom="16dp">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="🧪 ডেমো টেস্ট পেমেন্ট (ভার্চুয়াল টেস্ট)"
-                    android:textColor="@color/text_high"
-                    android:textSize="15sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:text="আসল টাকা না পাঠিয়ে সরাসরি সিস্টেম যাচাই করতে নিচের বাটনে চাপ দিন।"
-                    android:textColor="@color/text_medium"
-                    android:textSize="12sp" />
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="14dp"
-                    android:orientation="horizontal">
-
-                    <!-- bKash Test Button -->
-                    <Button
-                        android:id="@+id/btnTestBkash"
-                        android:layout_width="0dp"
-                        android:layout_height="48dp"
-                        android:layout_marginEnd="6dp"
-                        android:layout_weight="1"
-                        android:background="@drawable/bg_btn_bkash"
-                        android:text="বিকাশ টেস্ট (৳২০)"
-                        android:textColor="#FFFFFF"
-                        android:textSize="13sp"
-                        android:textStyle="bold" />
-
-                    <!-- Nagad Test Button -->
-                    <Button
-                        android:id="@+id/btnTestNagad"
-                        android:layout_width="0dp"
-                        android:layout_height="48dp"
-                        android:layout_marginStart="6dp"
-                        android:layout_weight="1"
-                        android:background="@drawable/bg_btn_nagad"
-                        android:text="নগদ টেস্ট (৳৫০)"
-                        android:textColor="#FFFFFF"
-                        android:textSize="13sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
-
-            </LinearLayout>
 
             <!-- 5. RECENT TRANSACTIONS LOG -->
             <LinearLayout

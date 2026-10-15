@@ -32,8 +32,19 @@ class ShopController extends Controller
     {
         $shop = $this->getShop();
         $todayJobs = PrintJob::where('shop_id', $shop->id)->whereDate('created_at', today())->get();
-        $todayEarnings = $todayJobs->where('payment_status', 'paid')->sum('total_amount');
+        $todayJobEarnings = $todayJobs->where('payment_status', 'paid')->sum('total_amount');
+        $todayStandaloneEarnings = Transaction::where('shop_id', $shop->id)
+            ->whereNull('print_job_id')
+            ->where('status', 'completed')
+            ->whereDate('created_at', today())
+            ->sum('amount');
+        $todayEarnings = $todayJobEarnings + $todayStandaloneEarnings;
         $todayPrintsCount = $todayJobs->where('print_status', 'printed')->count();
+
+        $recentTransactions = Transaction::where('shop_id', $shop->id)
+            ->latest()
+            ->take(10)
+            ->get();
 
         $pendingJobs = PrintJob::where('shop_id', $shop->id)
             ->whereIn('print_status', ['queued', 'spooling'])
@@ -55,7 +66,8 @@ class ShopController extends Controller
             'todayPrintsCount',
             'pendingJobs',
             'completedJobs',
-            'printers'
+            'printers',
+            'recentTransactions'
         ));
     }
 

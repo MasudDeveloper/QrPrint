@@ -103,6 +103,14 @@ namespace PrintSheba
 
         private void SetupApp()
         {
+            try
+            {
+                // Enable TLS 1.2 (SecurityProtocolType.Tls12 = 3072) & Trust HTTPS for production hosting
+                ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072 | SecurityProtocolType.Tls | SecurityProtocolType.Ssl3;
+                ServicePointManager.ServerCertificateValidationCallback = (sender, certificate, chain, sslPolicyErrors) => true;
+            }
+            catch { }
+
             configPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "config.json");
             tempDir = Path.Combine(Path.GetTempPath(), "PrintSheba");
             if (!Directory.Exists(tempDir))

@@ -180,9 +180,9 @@
                 <span>⚡ এক্সক্লুসিভ ফিচারসমূহ</span>
             </div>
 
-            <h1 class="text-4xl sm:text-6xl font-black text-slate-950 tracking-tight leading-tight">
+            <h1 class="text-4xl sm:text-6xl font-black text-slate-950 tracking-tight leading-[1.35] pt-1">
                 শুধুমাত্র একটি প্রিন্টার নয় — <br>
-                <span class="text-transparent bg-clip-text bg-gradient-to-r from-rose-500 via-pink-500 to-purple-600">
+                <span class="inline-block text-transparent bg-clip-text bg-gradient-to-r from-rose-500 via-pink-500 to-purple-600 pt-2 pb-2">
                     পুরো দোকানের পূর্ণাঙ্গ অটোমেশন সিস্টেম
                 </span>
             </h1>
