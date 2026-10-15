@@ -375,9 +375,14 @@ class ShopController extends Controller
         $shop = $this->getShop();
         $user = Auth::user();
 
-        // Allow if user is super admin OR job belongs to the active shop
-        if ($job->shop_id !== $shop->id && !($user && $user->isSuperAdmin())) {
-            abort(403, 'এই প্রিন্ট জবটি আপনার দোকানের নয়।');
+        // Check ownership: current active shop OR user's own shop OR super admin
+        $isOwner = ($job->shop_id === $shop->id) || 
+                   ($user && $user->shop && $user->shop->id === $job->shop_id) || 
+                   ($user && $user->isSuperAdmin()) ||
+                   (session('impersonator_id') !== null);
+
+        if (!$isOwner) {
+            return back()->with('error', 'এই প্রিন্ট জবটি আপনার দোকানের নয়।');
         }
 
         $job->update([
@@ -393,9 +398,14 @@ class ShopController extends Controller
         $shop = $this->getShop();
         $user = Auth::user();
 
-        // Allow if user is super admin OR job belongs to the active shop
-        if ($job->shop_id !== $shop->id && !($user && $user->isSuperAdmin())) {
-            abort(403, 'এই প্রিন্ট জবটি আপনার দোকানের নয়।');
+        // Check ownership: current active shop OR user's own shop OR super admin
+        $isOwner = ($job->shop_id === $shop->id) || 
+                   ($user && $user->shop && $user->shop->id === $job->shop_id) || 
+                   ($user && $user->isSuperAdmin()) ||
+                   (session('impersonator_id') !== null);
+
+        if (!$isOwner) {
+            return back()->with('error', 'এই প্রিন্ট জবটি আপনার দোকানের নয়।');
         }
 
         $job->update([
