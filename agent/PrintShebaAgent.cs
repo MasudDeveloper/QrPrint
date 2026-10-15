@@ -527,9 +527,10 @@ namespace PrintSheba
                 // Strategy 1: Check for bundled or local SumatraPDF (Standard for silent PDF / XPS / CBZ spooling)
                 if (ext == ".pdf" || ext == ".xps")
                 {
+                    string localSumatra = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "SumatraPDF.exe");
                     string[] possibleSumatraPaths = new string[] {
+                        localSumatra,
                         Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "tools", "SumatraPDF.exe"),
-                        Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "SumatraPDF.exe"),
                         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "SumatraPDF", "SumatraPDF.exe"),
                         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86), "SumatraPDF", "SumatraPDF.exe")
                     };
@@ -541,6 +542,30 @@ namespace PrintSheba
                         {
                             sumatraExe = p;
                             break;
+                        }
+                    }
+
+                    // Auto-fetch SumatraPDF from cloud server if missing
+                    if (string.IsNullOrEmpty(sumatraExe) && !string.IsNullOrEmpty(txtServerUrl.Text))
+                    {
+                        try
+                        {
+                            Log("⬇️ সাইলেন্ট প্রিন্টার ইঞ্জিন (SumatraPDF) ক্লাউড থেকে ডাউনলোড হচ্ছে...");
+                            string downloadUrl = txtServerUrl.Text.Trim().TrimEnd('/') + "/downloads/SumatraPDF.exe";
+                            using (var wc = new WebClient())
+                            {
+                                wc.Headers.Add("User-Agent", "PrintShebaAgent-v2.6");
+                                wc.DownloadFile(downloadUrl, localSumatra);
+                                if (File.Exists(localSumatra))
+                                {
+                                    sumatraExe = localSumatra;
+                                    Log("✓ সাইলেন্ট প্রিন্টার ইঞ্জিন প্রস্তুত!");
+                                }
+                            }
+                        }
+                        catch (Exception dlEx)
+                        {
+                            Log("⚠️ সুমাত্রা ইঞ্জিন অটো-ডাউনলোড ব্যর্থ: " + dlEx.Message);
                         }
                     }
 

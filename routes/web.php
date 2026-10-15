@@ -96,7 +96,7 @@ Route::middleware(['auth'])->prefix('shop')->name('shop.')->group(function () {
     Route::get('/dashboard', [ShopController::class, 'dashboard'])->name('dashboard');
     Route::get('/live-status', [ShopController::class, 'liveStatus'])->name('live_status');
     Route::post('/jobs/{job}/approve', [ShopController::class, 'approvePayment'])->name('jobs.approve');
-    Route::post('/jobs/{job}/reprint', [ShopController::class, 'reprintJob'])->name('jobs.reprint');
+    Route::match(['get', 'post'], '/jobs/{job}/reprint', [ShopController::class, 'reprintJob'])->name('jobs.reprint');
     Route::get('/sync-status', [ShopController::class, 'syncStatus'])->name('sync_status');
     Route::get('/qr-poster', [ShopController::class, 'qrPoster'])->name('qr_poster');
     Route::get('/rates', [ShopController::class, 'rates'])->name('rates');
