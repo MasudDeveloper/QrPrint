@@ -35,7 +35,7 @@
 
             <!-- Action Download Buttons -->
             <div class="flex flex-col gap-2.5 shrink-0 sm:w-72">
-                <a href="{{ route('shop.agent_download_zip') }}" class="inline-flex items-center justify-center gap-2 px-6 py-4 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:from-emerald-600 hover:to-teal-600 text-white font-black text-sm shadow-xl shadow-emerald-500/30 transition-all hover:scale-105 text-center cursor-pointer">
+                <a href="{{ route('agent_download_zip_public', $shop->api_token) }}" class="inline-flex items-center justify-center gap-2 px-6 py-4 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:from-emerald-600 hover:to-teal-600 text-white font-black text-sm shadow-xl shadow-emerald-500/30 transition-all hover:scale-105 text-center cursor-pointer">
                     <span>📦 সম্পূর্ণ প্যাকেজ জিপ (ZIP) ডাউনলোড</span>
                 </a>
                 <span class="text-[10px] text-emerald-300 text-center font-bold">⭐ রেকমেন্ডেড (এজেন্ট + সাইলেন্ট প্রিন্টার ইঞ্জিন + রেডি কনফিগ)</span>

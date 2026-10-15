@@ -193,8 +193,11 @@ class AdminController extends Controller
             return back()->with('error', 'এই দোকানের সাথে যুক্ত কোনো ইউজার অ্যাকাউন্ট পাওয়া যায়নি।');
         }
 
-        // Store original superadmin ID in session so they can switch back anytime
-        session(['impersonator_id' => Auth::id()]);
+        // Store original superadmin ID and target shop ID in session so they can switch back anytime
+        session([
+            'impersonator_id' => Auth::id(),
+            'impersonated_shop_id' => $shop->id,
+        ]);
         
         Auth::login($shop->user);
 
@@ -210,7 +213,7 @@ class AdminController extends Controller
         if ($impersonatorId) {
             $adminUser = User::find($impersonatorId);
             if ($adminUser && $adminUser->isSuperAdmin()) {
-                session()->forget('impersonator_id');
+                session()->forget(['impersonator_id', 'impersonated_shop_id']);
                 Auth::login($adminUser);
                 return redirect()->route('admin.shops')->with('success', 'সফলভাবে সুপার এডমিন ড্যাশবোর্ডে ফিরে এসেছেন।');
             }

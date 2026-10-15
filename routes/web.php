@@ -113,6 +113,9 @@ Route::middleware(['auth'])->prefix('shop')->name('shop.')->group(function () {
     Route::get('/agent-download/apk', [ShopController::class, 'downloadAndroidApk'])->name('agent_download_apk');
 });
 
+// Direct Public Download with Token (For external Download Managers like FDM/IDM)
+Route::get('/download/package/{token}', [ShopController::class, 'downloadAgentZipPublic'])->name('agent_download_zip_public');
+
 /*
 |--------------------------------------------------------------------------
 | Customer Public Mobile Print Portal

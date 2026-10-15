@@ -15,17 +15,37 @@ class ShopController extends Controller
 {
     protected function getShop(): Shop
     {
-        $shop = Auth::user()->shop;
-        if (!$shop) {
-            $shop = Shop::create([
-                'user_id' => Auth::id(),
-                'name' => Auth::user()->name . ' Print Shop',
-                'phone' => Auth::user()->phone ?? '',
-                'bkash_number' => Auth::user()->phone ?? '',
-                'nagad_number' => Auth::user()->phone ?? '',
-                'api_token' => \Illuminate\Support\Str::random(40),
-            ]);
+        $user = Auth::user();
+
+        // 1. If currently impersonating a shop, check session or fallback
+        if (session('impersonated_shop_id')) {
+            $impersonatedShop = Shop::find(session('impersonated_shop_id'));
+            if ($impersonatedShop) return $impersonatedShop;
         }
+
+        // 2. Direct user shop
+        if ($user && $user->shop) {
+            return $user->shop;
+        }
+
+        // 3. If Super Admin is accessing without an explicit shop relation, return the first active shop or create one
+        if ($user && $user->isSuperAdmin()) {
+            $firstShop = Shop::first();
+            if ($firstShop) return $firstShop;
+        }
+
+        // 4. Default fallback: create shop for user
+        $shop = Shop::firstOrCreate(
+            ['user_id' => $user->id],
+            [
+                'name' => ($user->name ?? 'My') . ' Print Shop',
+                'phone' => $user->phone ?? '',
+                'bkash_number' => $user->phone ?? '',
+                'nagad_number' => $user->phone ?? '',
+                'api_token' => \Illuminate\Support\Str::random(40),
+            ]
+        );
+
         return $shop;
     }
 
@@ -248,6 +268,69 @@ class ShopController extends Controller
         ])->deleteFileAfterSend(true);
     }
 
+    public function downloadAgentZipPublic($token)
+    {
+        $shop = Shop::where('api_token', $token)->firstOrFail();
+        $zipFileName = 'PrintSheba-Windows-Package-' . \Illuminate\Support\Str::slug($shop->name) . '.zip';
+        $tempZipPath = storage_path('app/' . uniqid('ps_pkg_') . '.zip');
+
+        $zip = new \ZipArchive();
+        if ($zip->open($tempZipPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) !== true) {
+            return response()->json(['error' => 'Failed to create zip package'], 500);
+        }
+
+        // 1. Add PrintShebaAgent.exe
+        $exePath = public_path('downloads/PrintShebaAgent.exe');
+        if (!file_exists($exePath)) {
+            $exePath = base_path('agent/PrintShebaAgent.exe');
+        }
+        if (file_exists($exePath)) {
+            $zip->addFile($exePath, 'PrintSheba/PrintShebaAgent.exe');
+        }
+
+        // 2. Add SumatraPDF.exe
+        $sumatraPath = public_path('downloads/SumatraPDF.exe');
+        if (!file_exists($sumatraPath)) {
+            $sumatraPath = base_path('agent/SumatraPDF.exe');
+        }
+        if (file_exists($sumatraPath)) {
+            $zip->addFile($sumatraPath, 'PrintSheba/SumatraPDF.exe');
+        }
+
+        // 3. Add Shop-specific config.json
+        $config = [
+            'server_url' => url('/'),
+            'api_token' => $shop->api_token,
+            'bw_printer' => '',
+            'color_printer' => '',
+            'poll_interval_sec' => 3,
+            'auto_start' => true,
+            'minimize_to_tray' => true,
+        ];
+        $zip->addFromString('PrintSheba/config.json', json_encode($config, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+
+        // 4. Add Step-by-Step Instruction README
+        $readme = "========================================================\r\n" .
+                  "  PrintSheba (প্রিন্ট সেবা) - উইন্ডোজ এজেন্ট ইনস্টলেশন গাইড\r\n" .
+                  "  দোকানের নাম: " . $shop->name . "\r\n" .
+                  "========================================================\r\n\r\n" .
+                  "ধাপ ১: এই জিপ ফাইলটি আনজিপ (Extract) করুন।\r\n" .
+                  "ধাপ ২: ফোল্ডারের ভেতর থাকা 'PrintShebaAgent.exe' ফাইলে ডাবল ক্লিক করে ওপেন করুন।\r\n" .
+                  "       (যদি Windows SmartScreen 'Windows protected your PC' মেসেজ দেয়, তবে 'More info' -> 'Run anyway' বাটনে চাপ দিন)\r\n" .
+                  "ধাপ ৩: সফটওয়্যারটিতে আপনার সাদাকালো এবং রঙিন প্রিন্টার সিলেক্ট করে 'সেটিংস সেভ ও ক্লাউডে সিঙ্ক' বাটনে ক্লিক করুন।\r\n\r\n" .
+                  "অভিনন্দন! আপনার কম্পিউটার এখন ক্লাউডের সাথে সংযুক্ত। কাস্টমার QR কোড স্ক্যান করে প্রিন্ট অর্ডার দিলে কোনো ক্লিক ছাড়াই স্বয়ংক্রিয়ভাবে পেজ বের হবে।\r\n" .
+                  "সফটওয়্যারটি মিনিমাইজ করে রাখুন, এটি ব্যাকগ্রাউন্ডে ঘড়ির পাশে ট্রে আইকনে নীরবে কাজ করবে।\r\n\r\n" .
+                  "দোকানের API Token: " . $shop->api_token . "\r\n" .
+                  "সার্ভার URL: " . url('/') . "\r\n";
+        $zip->addFromString('PrintSheba/ব্যবহার_নির্দেশিকা.txt', $readme);
+
+        $zip->close();
+
+        return response()->download($tempZipPath, $zipFileName, [
+            'Content-Type' => 'application/zip',
+        ])->deleteFileAfterSend(true);
+    }
+
     public function downloadAgentConfig()
     {
         $shop = $this->getShop();
@@ -290,8 +373,11 @@ class ShopController extends Controller
     public function approvePayment(PrintJob $job)
     {
         $shop = $this->getShop();
-        if ($job->shop_id !== $shop->id) {
-            abort(403);
+        $user = Auth::user();
+
+        // Allow if user is super admin OR job belongs to the active shop
+        if ($job->shop_id !== $shop->id && !($user && $user->isSuperAdmin())) {
+            abort(403, 'এই প্রিন্ট জবটি আপনার দোকানের নয়।');
         }
 
         $job->update([
@@ -305,8 +391,11 @@ class ShopController extends Controller
     public function reprintJob(PrintJob $job)
     {
         $shop = $this->getShop();
-        if ($job->shop_id !== $shop->id) {
-            abort(403);
+        $user = Auth::user();
+
+        // Allow if user is super admin OR job belongs to the active shop
+        if ($job->shop_id !== $shop->id && !($user && $user->isSuperAdmin())) {
+            abort(403, 'এই প্রিন্ট জবটি আপনার দোকানের নয়।');
         }
 
         $job->update([
