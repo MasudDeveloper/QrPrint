@@ -29,13 +29,34 @@ class SmsListenerController extends Controller
             return response()->json(['error' => 'Missing transaction data'], 400);
         }
 
-        // Check if there is a pending print job waiting with this trxId or matching amount
+        // Check if this TrxID is already recorded in transactions
+        $existingTx = Transaction::where('shop_id', $shop->id)
+            ->where('trx_id', $trxId)
+            ->first();
+
+        if ($existingTx && $existingTx->print_job_id) {
+            return response()->json([
+                'status' => 'already_used',
+                'message' => 'Transaction ID already recorded and linked to a job.',
+            ]);
+        }
+
+        // Check if there is a pending print job waiting for this exact TrxID, 
+        // OR submitted by the same sender phone where amount >= total_amount
         $job = PrintJob::where('shop_id', $shop->id)
             ->where('payment_status', 'pending')
-            ->where(function ($query) use ($trxId, $amount) {
-                $query->where('payment_trx_id', $trxId)
-                      ->orWhere('total_amount', $amount);
+            ->where(function ($query) use ($trxId, $sender, $amount) {
+                $query->where('payment_trx_id', $trxId);
+                if (!empty($sender)) {
+                    $cleanSender = preg_replace('/[^0-9]/', '', $sender);
+                    $last8 = substr($cleanSender, -8);
+                    $query->orWhere(function ($subQ) use ($last8, $amount) {
+                        $subQ->where('customer_phone', 'like', "%{$last8}%")
+                             ->where('total_amount', '<=', $amount);
+                    });
+                }
             })
+            ->where('total_amount', '<=', $amount) // Amount must be sufficient!
             ->latest()
             ->first();
 
@@ -43,18 +64,27 @@ class SmsListenerController extends Controller
             $job->update([
                 'payment_status' => 'paid',
                 'payment_trx_id' => $trxId,
-                'payment_sender_number' => $sender,
+                'payment_sender_number' => $sender ?: $job->payment_sender_number,
             ]);
 
-            Transaction::create([
-                'shop_id' => $shop->id,
-                'print_job_id' => $job->id,
-                'amount' => $amount,
-                'payment_method' => $method,
-                'trx_id' => $trxId,
-                'sender_number' => $sender,
-                'status' => 'completed',
-            ]);
+            if ($existingTx) {
+                $existingTx->update([
+                    'print_job_id' => $job->id,
+                    'amount' => $amount,
+                    'sender_number' => $sender ?: $existingTx->sender_number,
+                    'status' => 'completed',
+                ]);
+            } else {
+                Transaction::create([
+                    'shop_id' => $shop->id,
+                    'print_job_id' => $job->id,
+                    'amount' => $amount,
+                    'payment_method' => $method,
+                    'trx_id' => $trxId,
+                    'sender_number' => $sender,
+                    'status' => 'completed',
+                ]);
+            }
 
             return response()->json([
                 'status' => 'matched',
@@ -63,15 +93,17 @@ class SmsListenerController extends Controller
             ]);
         }
 
-        // Record standalone transaction if no immediate job matched
-        Transaction::create([
-            'shop_id' => $shop->id,
-            'amount' => $amount,
-            'payment_method' => $method,
-            'trx_id' => $trxId,
-            'sender_number' => $sender,
-            'status' => 'completed',
-        ]);
+        if (!$existingTx) {
+            // Record standalone transaction if no immediate job matched
+            Transaction::create([
+                'shop_id' => $shop->id,
+                'amount' => $amount,
+                'payment_method' => $method,
+                'trx_id' => $trxId,
+                'sender_number' => $sender,
+                'status' => 'completed',
+            ]);
+        }
 
         return response()->json([
             'status' => 'recorded',

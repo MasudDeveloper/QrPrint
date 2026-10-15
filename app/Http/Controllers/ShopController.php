@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Shop;
 use App\Models\Printer;
 use App\Models\PrintJob;
+use App\Models\Transaction;
 use App\Models\Setting;
 use App\Models\ShopSubscription;
 use Illuminate\Http\Request;

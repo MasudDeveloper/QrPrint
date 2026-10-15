@@ -79,6 +79,55 @@ class CustomerPrintController extends Controller
             $totalAmount = round($totalPages * $unitRate * $copies, 2);
         }
 
+        // Strict TrxID and Payment Validation
+        $paymentMethod = $request->payment_method;
+        $trxId = strtoupper(trim($request->input('payment_trx_id', '')));
+        $paymentStatus = 'pending';
+        $matchedTx = null;
+
+        if (in_array($paymentMethod, ['bkash', 'nagad'])) {
+            if (!empty($trxId)) {
+                // 1. Check if this TrxID has already been claimed by a completed or paid print job
+                $alreadyUsedJob = PrintJob::where('shop_id', $shop->id)
+                    ->where('payment_trx_id', $trxId)
+                    ->where('payment_status', 'paid')
+                    ->first();
+
+                if ($alreadyUsedJob) {
+                    return back()->withInput()->with('error_alert', "এই TrxID ({$trxId}) ইতিমধ্যে ব্যবহার করা হয়েছে! অনুগ্রহ করে সঠিক বা নতুন ট্রানজেকশন আইডি দিন।");
+                }
+
+                // 2. Check if transaction exists in database (received via Android SMS app)
+                $matchedTx = \App\Models\Transaction::where('shop_id', $shop->id)
+                    ->where('trx_id', $trxId)
+                    ->where('status', 'completed')
+                    ->first();
+
+                if ($matchedTx) {
+                    // Check if transaction was already linked to an existing paid job
+                    if ($matchedTx->print_job_id) {
+                        return back()->withInput()->with('error_alert', "এই পেমেন্ট ট্রানজেকশনটি ({$trxId}) ইতিমধ্যে অন্য একটি অর্ডারে সম্পন্ন হয়ে গেছে!");
+                    }
+
+                    // Check if paid amount is sufficient for the job total amount
+                    if ((float)$matchedTx->amount < (float)$totalAmount) {
+                        return back()->withInput()->with('error_alert', "প্রদত্ত TrxID-এর পেমেন্ট পরিমাণ (৳{$matchedTx->amount}) আপনার মোট বিলের (৳{$totalAmount}) চেয়ে কম! অনুগ্রহ করে সঠিক পরিমাণের পেমেন্ট করুন অথবা কাউন্টারে ক্যাশ দিন।");
+                    }
+
+                    // Payment verified!
+                    $paymentStatus = 'paid';
+                } else {
+                    // If SMS has not synced yet from phone, leave payment_status as 'pending'
+                    // Once Android SMS App detects the SMS, it will verify and mark as paid.
+                    $paymentStatus = 'pending';
+                }
+            } else {
+                $paymentStatus = 'pending';
+            }
+        } elseif ($paymentMethod === 'cash') {
+            $paymentStatus = 'pending';
+        }
+
         // Store file
         $fileName = 'job_' . time() . '_' . Str::random(8) . '.' . $extension;
         $path = $file->storeAs('print_uploads', $fileName, 'public');
@@ -101,11 +150,19 @@ class CustomerPrintController extends Controller
             'paper_size' => $paperSize,
             'page_range' => $request->input('page_range'),
             'total_amount' => $totalAmount,
-            'payment_method' => $request->payment_method,
-            'payment_trx_id' => $request->payment_trx_id,
-            'payment_status' => $request->payment_method === 'cash' ? 'pending' : ($request->filled('payment_trx_id') ? 'paid' : 'pending'),
+            'payment_method' => $paymentMethod,
+            'payment_trx_id' => $trxId ?: null,
+            'payment_status' => $paymentStatus,
             'print_status' => 'queued',
         ]);
+
+        // Link matched transaction if found
+        if ($matchedTx && $paymentStatus === 'paid') {
+            $matchedTx->update([
+                'print_job_id' => $job->id,
+                'sender_number' => $request->customer_phone ?: $matchedTx->sender_number,
+            ]);
+        }
 
         return redirect()->route('customer.status', $jobToken);
     }

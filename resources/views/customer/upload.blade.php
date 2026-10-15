@@ -9,6 +9,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- PDF.js for Instant Client-Side Page Count Detection -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
     </script>
@@ -55,6 +56,32 @@
     </header>
 
     <div class="max-w-md mx-auto px-4 pt-5 space-y-5">
+
+        @if(session('error_alert'))
+            <!-- Flash Error Alert Dialog -->
+            <div class="p-4 rounded-2xl bg-rose-50 border border-rose-300 text-rose-900 text-xs flex items-start gap-3 shadow-sm animate-bounce">
+                <span class="text-xl leading-none">⚠️</span>
+                <div class="space-y-1">
+                    <strong class="font-bold text-sm text-rose-800 block">পেমেন্ট ভেরিফিকেশন সতর্কতা</strong>
+                    <span class="text-xs text-rose-700 leading-relaxed">{{ session('error_alert') }}</span>
+                </div>
+            </div>
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'পেমেন্ট ত্রুটি!',
+                        text: '{{ session('error_alert') }}',
+                        confirmButtonText: 'ঠিক আছে',
+                        confirmButtonColor: '#e11d48',
+                        background: '#ffffff',
+                        customClass: {
+                            popup: 'rounded-3xl shadow-2xl border border-slate-200'
+                        }
+                    });
+                });
+            </script>
+        @endif
 
         @if(!$isAgentOnline)
             <!-- Offline Warning Alert -->
