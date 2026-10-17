@@ -18,6 +18,7 @@ class Printer extends Model
     ];
 
     protected $casts = [
+        'shop_id' => 'integer',
         'is_default' => 'boolean',
         'last_heartbeat_at' => 'datetime',
     ];

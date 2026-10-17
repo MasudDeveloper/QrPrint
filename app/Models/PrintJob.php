@@ -34,6 +34,7 @@ class PrintJob extends Model
     ];
 
     protected $casts = [
+        'shop_id' => 'integer',
         'is_duplex' => 'boolean',
         'is_deleted_from_disk' => 'boolean',
         'total_amount' => 'decimal:2',

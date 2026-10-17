@@ -24,8 +24,18 @@ class ShopController extends Controller
         }
 
         // 2. Direct user shop
-        if ($user && $user->shop) {
-            return $user->shop;
+        if ($user) {
+            if (session('active_shop_id')) {
+                $activeShop = Shop::where('id', session('active_shop_id'))->where('user_id', $user->id)->first();
+                if ($activeShop) return $activeShop;
+            }
+            if ($user->shop) {
+                return $user->shop;
+            }
+            $userShop = Shop::where('user_id', $user->id)->first();
+            if ($userShop) {
+                return $userShop;
+            }
         }
 
         // 3. If Super Admin is accessing without an explicit shop relation, return the first active shop or create one
@@ -174,10 +184,18 @@ class ShopController extends Controller
     public function deletePrinter(Printer $printer)
     {
         $shop = $this->getShop();
-        if ($printer->shop_id === $shop->id) {
+        $user = Auth::user();
+
+        $canDelete = ((int) $printer->shop_id === (int) $shop->id) ||
+                     ($user && Shop::where('id', $printer->shop_id)->where('user_id', $user->id)->exists()) ||
+                     ($user && $user->isSuperAdmin());
+
+        if ($canDelete) {
             $printer->delete();
+            return back()->with('success', 'প্রিন্টার মুছে ফেলা হয়েছে!');
         }
-        return back()->with('success', 'প্রিন্টার মুছে ফেলা হয়েছে!');
+
+        return back()->with('error', 'এই প্রিন্টারটি মুছে ফেলার অনুমতি নেই।');
     }
 
     public function agentSetup()
@@ -376,8 +394,9 @@ class ShopController extends Controller
         $user = Auth::user();
 
         // Check ownership: current active shop OR user's own shop OR super admin
-        $isOwner = ($job->shop_id === $shop->id) || 
-                   ($user && $user->shop && $user->shop->id === $job->shop_id) || 
+        $isOwner = ((int) $job->shop_id === (int) $shop->id) || 
+                   ($user && Shop::where('id', $job->shop_id)->where('user_id', $user->id)->exists()) ||
+                   ($user && $user->shop && (int) $user->shop->id === (int) $job->shop_id) || 
                    ($user && $user->isSuperAdmin()) ||
                    (session('impersonator_id') !== null);
 
@@ -399,8 +418,9 @@ class ShopController extends Controller
         $user = Auth::user();
 
         // Check ownership: current active shop OR user's own shop OR super admin
-        $isOwner = ($job->shop_id === $shop->id) || 
-                   ($user && $user->shop && $user->shop->id === $job->shop_id) || 
+        $isOwner = ((int) $job->shop_id === (int) $shop->id) || 
+                   ($user && Shop::where('id', $job->shop_id)->where('user_id', $user->id)->exists()) ||
+                   ($user && $user->shop && (int) $user->shop->id === (int) $job->shop_id) || 
                    ($user && $user->isSuperAdmin()) ||
                    (session('impersonator_id') !== null);
 
