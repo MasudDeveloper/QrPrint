@@ -6,6 +6,16 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'শপ ড্যাশবোর্ড') – PrintSheba</title>
     <link rel="icon" type="image/svg+xml" href="{{ asset('logo.svg') }}">
+    <link rel="apple-touch-icon" href="{{ asset('icon-192.png') }}">
+
+    <!-- PWA Web App Manifest & Mobile Integration -->
+    <link rel="manifest" href="{{ asset('manifest.json') }}">
+    <meta name="theme-color" content="#0b0f19">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="PrintSheba">
+
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -122,6 +132,15 @@
                     <span>লাইভ কিউ ও আয়</span>
                 </a>
 
+                <a href="{{ route('shop.quick_print') }}" 
+                   class="flex items-center justify-between px-3.5 py-3 rounded-xl text-sm font-semibold transition-all duration-200 {{ request()->routeIs('shop.quick_print') ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/25' : 'text-slate-300 hover:bg-slate-800/70 hover:text-white' }}">
+                    <span class="flex items-center gap-3">
+                        <span class="text-lg">⚡</span>
+                        <span>ইনস্ট্যান্ট / শেয়ার প্রিন্ট</span>
+                    </span>
+                    <span class="text-[9px] font-black px-1.5 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">NEW</span>
+                </a>
+
                 <a href="{{ route('shop.qr_poster') }}" 
                    class="flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-semibold transition-all duration-200 {{ request()->routeIs('shop.qr_poster') ? 'bg-gradient-to-r from-rose-500 to-rose-600 text-white shadow-lg shadow-rose-500/25' : 'text-slate-300 hover:bg-slate-800/70 hover:text-white' }}">
                     <span class="text-lg">🖼️</span>
@@ -228,6 +247,7 @@
                         </div>
                         <nav class="mt-4 space-y-1.5">
                             <a href="{{ route('shop.dashboard') }}" class="block px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('shop.dashboard') ? 'bg-rose-500 text-white' : 'text-slate-300 hover:bg-slate-800' }}">📊 লাইভ কিউ ও আয়</a>
+                            <a href="{{ route('shop.quick_print') }}" class="block px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('shop.quick_print') ? 'bg-emerald-500 text-white' : 'text-slate-300 hover:bg-slate-800' }}">⚡ ইনস্ট্যান্ট / শেয়ার প্রিন্ট</a>
                             <a href="{{ route('shop.qr_poster') }}" class="block px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('shop.qr_poster') ? 'bg-rose-500 text-white' : 'text-slate-300 hover:bg-slate-800' }}">🖼️ কিউআর পোস্টার</a>
                             <a href="{{ route('shop.rates') }}" class="block px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('shop.rates') ? 'bg-rose-500 text-white' : 'text-slate-300 hover:bg-slate-800' }}">💰 রেট ও পেমেন্ট নম্বর</a>
                             <a href="{{ route('shop.printers') }}" class="block px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('shop.printers') ? 'bg-rose-500 text-white' : 'text-slate-300 hover:bg-slate-800' }}">🖨️ প্রিন্টার সেটিংস</a>
@@ -330,6 +350,42 @@
         }
 
         setInterval(pollSyncStatus, 5000);
+
+        // Register PWA Service Worker for Instant Web Share Target
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then((reg) => console.log('PrintSheba PWA SW active:', reg.scope))
+                    .catch((err) => console.warn('PWA SW registration failed:', err));
+            });
+        }
+
+        // PWA Install Prompt Capture
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            const pwaBanner = document.getElementById('pwaInstallBanner');
+            if (pwaBanner) {
+                pwaBanner.classList.remove('hidden');
+            }
+        });
+
+        window.installPrintShebaPwa = function() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choice) => {
+                    if (choice.outcome === 'accepted') {
+                        console.log('User installed PrintSheba PWA');
+                    }
+                    deferredPrompt = null;
+                    const pwaBanner = document.getElementById('pwaInstallBanner');
+                    if (pwaBanner) pwaBanner.classList.add('hidden');
+                });
+            } else {
+                alert('আপনার ব্রাউজারের মেনু (তিন ডট ⋮) থেকে "Add to Home screen" বা "অ্যাপ ইনস্টল করুন" সিলেক্ট করুন।');
+            }
+        };
     </script>
 </body>
 </html>

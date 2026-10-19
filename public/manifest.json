@@ -1,0 +1,104 @@
+{
+  "id": "/?source=pwa",
+  "name": "PrintSheba - দোকানদার প্রিন্ট",
+  "short_name": "PrintSheba",
+  "description": "দোকানদারদের জন্য ইনস্ট্যান্ট হোয়াটসঅ্যাপ শেয়ার ও দ্রুত প্রিন্ট সলিউশন",
+  "lang": "bn",
+  "dir": "ltr",
+  "start_url": "/shop/dashboard",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0b0f19",
+  "theme_color": "#0f172a",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/logo.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "share_target": {
+    "action": "/shop/share-target",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url",
+      "files": [
+        {
+          "name": "shared_files",
+          "accept": [
+            "image/*",
+            "application/pdf",
+            ".pdf",
+            ".doc",
+            ".docx",
+            "application/msword",
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "text/plain"
+          ]
+        }
+      ]
+    }
+  },
+  "shortcuts": [
+    {
+      "name": "ইনস্ট্যান্ট প্রিন্ট",
+      "short_name": "প্রিন্ট",
+      "description": "সরাসরি ফাইল সিলেক্ট বা শেয়ার করে দোকানে প্রিন্ট করুন",
+      "url": "/shop/quick-print",
+      "icons": [
+        {
+          "src": "/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "শপ ড্যাশবোর্ড",
+      "short_name": "ড্যাশবোর্ড",
+      "description": "লাইভ প্রিন্ট কিউ ও আয় বিবরণী",
+      "url": "/shop/dashboard",
+      "icons": [
+        {
+          "src": "/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    }
+  ],
+  "categories": [
+    "business",
+    "productivity",
+    "utilities"
+  ]
+}

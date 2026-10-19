@@ -28,6 +28,10 @@
             <p class="text-xs sm:text-sm text-slate-400 max-w-xl">কাস্টমার সেলফ-সার্ভিস প্রিন্ট কিউ, ডিজিটাল পেমেন্ট ও লাইভ আয় বিবরণী ড্যাশবোর্ড</p>
             
             <div class="flex flex-wrap items-center gap-3 pt-2">
+                <a href="{{ route('shop.quick_print') }}" class="px-4 py-2.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold text-xs shadow-lg shadow-emerald-500/25 transition-all flex items-center gap-2">
+                    <span>⚡ সরাসরি ফাইল প্রিন্ট</span>
+                    <span class="text-[9px] font-black px-1.5 py-0.5 rounded-md bg-black/20">১-ট্যাপ</span>
+                </a>
                 <a href="{{ route('shop.qr_poster') }}" class="px-4 py-2.5 rounded-2xl bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white font-bold text-xs shadow-lg shadow-rose-500/25 transition-all flex items-center gap-2">
                     <span>🖨️ কাউন্টার QR পোস্টার</span>
                 </a>
@@ -63,6 +67,32 @@
             </div>
         </div>
 
+    </div>
+
+    <!-- PWA Mobile Share-to-Print App Banner -->
+    <div id="pwaInstallBanner" class="p-4 sm:p-5 rounded-3xl bg-gradient-to-r from-emerald-950/70 via-slate-900 to-teal-950/70 border border-emerald-500/30 flex flex-col md:flex-row items-center justify-between gap-4 shadow-xl relative overflow-hidden">
+        <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center text-2xl shrink-0 shadow-lg shadow-emerald-500/10">
+                📲
+            </div>
+            <div>
+                <h3 class="text-sm sm:text-base font-black text-white flex items-center gap-2">
+                    <span>WhatsApp ও গ্যালারি থেকে সরাসরি প্রিন্ট করুন</span>
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">PWA Share Target</span>
+                </h3>
+                <p class="text-xs text-slate-400">
+                    মোবাইলে অ্যাপটি ইনস্টল করলে যেকোনো ছবি বা PDF শেয়ার করার সময় সরাসরি "PrintSheba" পেয়ে যাবেন — কোনো ডাউনলোড বা আপলোডের ঝামেলা ছাড়া!
+                </p>
+            </div>
+        </div>
+        <div class="flex items-center gap-2 shrink-0 w-full md:w-auto">
+            <button type="button" onclick="installPrintShebaPwa()" class="w-full md:w-auto px-5 py-2.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold text-xs shadow-lg shadow-emerald-500/25 transition-all flex items-center justify-center gap-2">
+                <span>📥 ফোনে ইনস্টল করুন</span>
+            </button>
+            <a href="{{ route('shop.quick_print') }}" class="px-4 py-2.5 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs border border-slate-700 transition-all flex items-center gap-1.5 shrink-0">
+                <span>⚡ ইনস্ট্যান্ট প্রিন্ট</span>
+            </a>
+        </div>
     </div>
 
     <!-- 3 Metrics Cards -->

@@ -16,7 +16,9 @@ return new class extends Migration
             $table->timestamp('cancelled_at')->nullable()->after('cancel_reason');
         });
 
-        \Illuminate\Support\Facades\DB::statement("ALTER TABLE print_jobs MODIFY COLUMN print_status ENUM('queued', 'spooling', 'printed', 'failed', 'deleted', 'cancelled') NOT NULL DEFAULT 'queued'");
+        if (\Illuminate\Support\Facades\DB::getDriverName() === 'mysql') {
+            \Illuminate\Support\Facades\DB::statement("ALTER TABLE print_jobs MODIFY COLUMN print_status ENUM('queued', 'spooling', 'printed', 'failed', 'deleted', 'cancelled') NOT NULL DEFAULT 'queued'");
+        }
     }
 
     /**

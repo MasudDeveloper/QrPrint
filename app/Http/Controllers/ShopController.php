@@ -10,6 +10,8 @@ use App\Models\Setting;
 use App\Models\ShopSubscription;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class ShopController extends Controller
 {
@@ -646,5 +648,268 @@ class ShopController extends Controller
         }
 
         return view('shop.job_slip', compact('shop', 'job'));
+    }
+
+    /**
+     * PWA Web Share Target Receiver
+     * Accepts shared file from WhatsApp, Gallery, File Manager etc.
+     * Exempt from CSRF. Saves temporary file and redirects (HTTP 303) to Quick Print preview.
+     */
+    public function handleShareTarget(Request $request)
+    {
+        if ($request->isMethod('GET')) {
+            return redirect()->route('shop.quick_print');
+        }
+
+        // Locate uploaded file from any standard parameter name
+        $file = null;
+        if ($request->hasFile('shared_files')) {
+            $f = $request->file('shared_files');
+            $file = is_array($f) ? $f[0] : $f;
+        } elseif ($request->hasFile('document')) {
+            $file = $request->file('document');
+        } elseif ($request->hasFile('file')) {
+            $file = $request->file('file');
+        } else {
+            $all = $request->allFiles();
+            if (!empty($all)) {
+                $f = reset($all);
+                $file = is_array($f) ? $f[0] : $f;
+            }
+        }
+
+        if (!$file || !$file->isValid()) {
+            return redirect()->route('shop.quick_print')
+                ->with('warning_alert', 'কোনো ফাইল শেয়ার করা হয়নি বা ফাইলটি লোড হতে সমস্যা হয়েছে। অনুগ্রহ করে সরাসরি ফাইল নির্বাচন করুন।');
+        }
+
+        $allowedExtensions = ['pdf', 'jpg', 'jpeg', 'png', 'webp', 'doc', 'docx', 'txt'];
+        $ext = strtolower($file->getClientOriginalExtension());
+        if (!in_array($ext, $allowedExtensions)) {
+            return redirect()->route('shop.quick_print')
+                ->with('error_alert', 'অসমর্থিত ফাইল ফরম্যাট (.' . $ext . ')! শুধুমাত্র PDF, ছবি (JPG, PNG, WEBP) ও Word ফাইল প্রিন্ট করা যায়।');
+        }
+
+        $tempDir = storage_path('app/public/share_temp');
+        if (!file_exists($tempDir)) {
+            @mkdir($tempDir, 0777, true);
+        }
+
+        $tempFileName = 'share_' . time() . '_' . Str::random(10) . '.' . $ext;
+        $file->storeAs('share_temp', $tempFileName, 'public');
+
+        $originalName = $file->getClientOriginalName();
+        session([
+            'quick_print_temp_file' => $tempFileName,
+            'quick_print_original_name' => $originalName,
+        ]);
+
+        return redirect()->route('shop.quick_print', [
+            'file' => $tempFileName,
+            'name' => $originalName,
+        ])->setStatusCode(303);
+    }
+
+    /**
+     * Show Quick Print page with live preview & shop settings
+     */
+    public function quickPrint(Request $request)
+    {
+        $shop = $this->getShop();
+        $printers = Printer::where('shop_id', $shop->id)->get();
+
+        // Check if a direct file was dropped/uploaded to this page
+        if ($request->isMethod('POST') && $request->hasFile('document')) {
+            $file = $request->file('document');
+            $ext = strtolower($file->getClientOriginalExtension());
+            $tempDir = storage_path('app/public/share_temp');
+            if (!file_exists($tempDir)) {
+                @mkdir($tempDir, 0777, true);
+            }
+            $tempFileName = 'share_' . time() . '_' . Str::random(10) . '.' . $ext;
+            $file->storeAs('share_temp', $tempFileName, 'public');
+            $originalName = $file->getClientOriginalName();
+
+            return redirect()->route('shop.quick_print', [
+                'file' => $tempFileName,
+                'name' => $originalName,
+            ]);
+        }
+
+        $tempFileName = $request->query('file', session('quick_print_temp_file'));
+        $originalName = $request->query('name', session('quick_print_original_name', 'শেয়ারকৃত_ডকুমেন্ট'));
+
+        $fileData = null;
+        if ($tempFileName) {
+            $disk = Storage::disk('public');
+            $relativeTempPath = 'share_temp/' . $tempFileName;
+            if ($disk->exists($relativeTempPath)) {
+                $filePath = $disk->path($relativeTempPath);
+                $ext = strtolower(pathinfo($tempFileName, PATHINFO_EXTENSION));
+                $sizeBytes = $disk->size($relativeTempPath);
+                $sizeFormatted = $sizeBytes >= 1048576 
+                    ? round($sizeBytes / 1048576, 2) . ' MB' 
+                    : round($sizeBytes / 1024, 1) . ' KB';
+
+                $totalPages = 1;
+                if ($ext === 'pdf') {
+                    try {
+                        $content = $disk->get($relativeTempPath);
+                        if (preg_match_all("/\/Type\s*\/Page\b/", $content, $matches)) {
+                            $detected = count($matches[0]);
+                            if ($detected > 0) $totalPages = $detected;
+                        }
+                    } catch (\Exception $e) {}
+                }
+
+                $fileData = [
+                    'temp_file' => $tempFileName,
+                    'original_name' => $originalName ?: $tempFileName,
+                    'extension' => $ext,
+                    'size_formatted' => $sizeFormatted,
+                    'is_pdf' => ($ext === 'pdf'),
+                    'is_image' => in_array($ext, ['jpg', 'jpeg', 'png', 'webp']),
+                    'total_pages' => $totalPages,
+                    'url' => asset('storage/' . $relativeTempPath),
+                ];
+            }
+        }
+
+        return view('shop.quick_print', compact('shop', 'printers', 'fileData'));
+    }
+
+    /**
+     * Submit Quick Print directly to shop's active printer agent
+     */
+    public function submitQuickPrint(Request $request)
+    {
+        $shop = $this->getShop();
+
+        if (!$shop->isSubscriptionActive() && !$shop->is_lifetime) {
+            return back()->with('error_alert', 'আপনার সাবস্ক্রিপশন মেয়াদোত্তীর্ণ। সরাসরি প্রিন্ট করতে প্যাকেজ রিনিউ করুন।');
+        }
+
+        $request->validate([
+            'temp_file' => 'nullable|string',
+            'document' => 'nullable|file|max:51200|mimes:pdf,doc,docx,jpg,jpeg,png,webp',
+            'color_mode' => 'required|in:bw,color',
+            'copies' => 'required|integer|min:1|max:100',
+            'paper_size' => 'nullable|string',
+            'is_duplex' => 'nullable',
+            'page_range' => 'nullable|string|max:50',
+            'printer_id' => 'nullable|exists:printers,id',
+            'customer_label' => 'nullable|string|max:100',
+        ]);
+
+        $finalFileName = null;
+        $originalName = null;
+        $extension = null;
+        $totalPages = 1;
+
+        if ($request->hasFile('document')) {
+            $file = $request->file('document');
+            $extension = strtolower($file->getClientOriginalExtension());
+            $originalName = $file->getClientOriginalName();
+            $finalFileName = 'shop_quick_' . time() . '_' . Str::random(8) . '.' . $extension;
+            $file->storeAs('print_uploads', $finalFileName, 'public');
+
+            if ($extension === 'pdf') {
+                try {
+                    $content = file_get_contents($file->getRealPath());
+                    if (preg_match_all("/\/Type\s*\/Page\b/", $content, $matches)) {
+                        $detected = count($matches[0]);
+                        if ($detected > 0) $totalPages = $detected;
+                    }
+                } catch (\Exception $e) {}
+            }
+        } elseif ($request->filled('temp_file')) {
+            $tempFile = basename($request->temp_file);
+            $disk = Storage::disk('public');
+            $relativeSource = 'share_temp/' . $tempFile;
+
+            if (!$disk->exists($relativeSource)) {
+                return back()->with('error_alert', 'শেয়ারকৃত ফাইলটির মেয়াদ শেষ হয়ে গেছে বা পাওয়া যায়নি। অনুগ্রহ করে ফাইলটি পুনরায় নির্বাচন করুন।');
+            }
+
+            $extension = strtolower(pathinfo($tempFile, PATHINFO_EXTENSION));
+            $originalName = $request->input('original_name', 'Quick_Print_' . date('Ymd_His') . '.' . $extension);
+            $finalFileName = 'shop_quick_' . time() . '_' . Str::random(8) . '.' . $extension;
+            $relativeDest = 'print_uploads/' . $finalFileName;
+
+            $disk->move($relativeSource, $relativeDest);
+
+            $totalPages = (int) $request->input('detected_pages', 1);
+            if ($totalPages < 1) {
+                if ($extension === 'pdf' && $disk->exists($relativeDest)) {
+                    try {
+                        $content = $disk->get($relativeDest);
+                        if (preg_match_all("/\/Type\s*\/Page\b/", $content, $matches)) {
+                            $detected = count($matches[0]);
+                            if ($detected > 0) $totalPages = $detected;
+                        }
+                    } catch (\Exception $e) {}
+                }
+            }
+            if ($totalPages < 1) $totalPages = 1;
+
+            session()->forget(['quick_print_temp_file', 'quick_print_original_name']);
+        } else {
+            return back()->with('error_alert', 'অনুগ্রহ করে প্রিন্ট করার জন্য একটি ফাইল দিন।');
+        }
+
+        $copies = (int) $request->copies;
+        $isDuplex = $request->boolean('is_duplex');
+        $colorMode = $request->color_mode;
+        $paperSize = $request->input('paper_size', 'A4');
+        $customerLabel = $request->input('customer_label') ?: 'হোয়াটসঅ্যাপ / সরাসরি প্রিন্ট';
+
+        // Select printer (or fallback to primary/first)
+        $printerId = $request->printer_id;
+        if (!$printerId) {
+            $defaultPrinter = Printer::where('shop_id', $shop->id)->first();
+            $printerId = $defaultPrinter ? $defaultPrinter->id : null;
+        }
+
+        $jobToken = 'PS-SP-' . strtoupper(Str::random(6));
+
+        $job = PrintJob::create([
+            'shop_id' => $shop->id,
+            'printer_id' => $printerId,
+            'job_token' => $jobToken,
+            'customer_name' => $customerLabel,
+            'customer_phone' => null,
+            'pickup_reference' => 'দোকানদার সরাসরি প্রিন্ট',
+            'file_name' => $finalFileName,
+            'original_name' => $originalName,
+            'file_path' => 'print_uploads/' . $finalFileName,
+            'file_type' => $extension,
+            'total_pages' => $totalPages,
+            'copies' => $copies,
+            'color_mode' => $colorMode,
+            'is_duplex' => $isDuplex,
+            'paper_size' => $paperSize,
+            'page_range' => $request->input('page_range'),
+            'total_amount' => 0.00,
+            'payment_method' => 'cash',
+            'payment_status' => 'paid',
+            'print_status' => 'queued',
+        ]);
+
+        return redirect()->route('shop.dashboard')->with('success', "✅ প্রিন্ট অর্ডার (#{$jobToken}) সফলভাবে পাঠানো হয়েছে! উইন্ডোজ এজেন্ট সরাসরি প্রিন্ট শুরু করছে...");
+    }
+
+    /**
+     * Cancel / Delete temporary share file
+     */
+    public function deleteTempShareFile(Request $request)
+    {
+        $tempFile = $request->input('temp_file');
+        if ($tempFile) {
+            $cleanName = basename($tempFile);
+            Storage::disk('public')->delete('share_temp/' . $cleanName);
+        }
+        session()->forget(['quick_print_temp_file', 'quick_print_original_name']);
+
+        return redirect()->route('shop.quick_print')->with('info', 'ফাইলটি মুছে ফেলা হয়েছে। নতুন ফাইল বেছে নিন।');
     }
 }

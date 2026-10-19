@@ -114,7 +114,15 @@ Route::middleware(['auth'])->prefix('shop')->name('shop.')->group(function () {
     Route::get('/agent-download/exe', [ShopController::class, 'downloadAgentExe'])->name('agent_download_exe');
     Route::get('/agent-download/config', [ShopController::class, 'downloadAgentConfig'])->name('agent_download_config');
     Route::get('/agent-download/apk', [ShopController::class, 'downloadAndroidApk'])->name('agent_download_apk');
+
+    // Instant / Share-to-Print Routes for Shop Owners
+    Route::match(['get', 'post'], '/quick-print', [ShopController::class, 'quickPrint'])->name('quick_print');
+    Route::post('/quick-print/submit', [ShopController::class, 'submitQuickPrint'])->name('quick_print.submit');
+    Route::post('/quick-print/delete-temp', [ShopController::class, 'deleteTempShareFile'])->name('quick_print.delete_temp');
 });
+
+// PWA Web Share Target Public Handler (exempt from CSRF, redirects to authenticated quick-print)
+Route::match(['get', 'post'], '/shop/share-target', [ShopController::class, 'handleShareTarget'])->name('shop.share_target');
 
 // Direct Public Download with Token (For external Download Managers like FDM/IDM)
 Route::get('/download/package/{token}', [ShopController::class, 'downloadAgentZipPublic'])->name('agent_download_zip_public');

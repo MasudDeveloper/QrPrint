@@ -14,6 +14,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->validateCsrfTokens(except: [
             'api/*',
             '/api/*',
+            'shop/share-target',
+            '/shop/share-target',
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
