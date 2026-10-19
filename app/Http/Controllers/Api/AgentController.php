@@ -49,6 +49,9 @@ class AgentController extends Controller
                 'is_duplex' => $job->is_duplex,
                 'copies' => $job->copies,
                 'paper_size' => $job->paper_size,
+                'customer_name' => $job->customer_name,
+                'pickup_reference' => $job->pickup_reference,
+                'is_office_job' => (bool) $job->is_office_job,
             ];
         });
 

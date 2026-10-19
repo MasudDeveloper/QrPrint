@@ -141,6 +141,20 @@
                                 @if($job->customer_phone)
                                     <span class="text-[10px] text-slate-500 font-mono">{{ $job->customer_phone }}</span>
                                 @endif
+                                @if($job->pickup_reference)
+                                    <div class="mt-1">
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 font-bold text-[10px] border border-amber-500/30">
+                                            🏷️ খাম: {{ $job->pickup_reference }}
+                                        </span>
+                                    </div>
+                                @endif
+                                @if($job->is_office_job)
+                                    <div class="mt-1">
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.2 rounded-md bg-indigo-500/20 text-indigo-300 font-bold text-[9px] border border-indigo-500/30">
+                                            🏢 অফিস
+                                        </span>
+                                    </div>
+                                @endif
                             </td>
                             <td class="px-6 py-4 text-slate-400 max-w-xs truncate">{{ $job->original_name }}</td>
                             <td class="px-6 py-4">
@@ -148,7 +162,13 @@
                                     {{ $job->color_mode === 'color' ? 'কালার' : 'সাদাকালো' }}
                                 </span>
                             </td>
-                            <td class="px-6 py-4 font-mono font-bold text-emerald-400">৳{{ $job->total_amount }}</td>
+                            <td class="px-6 py-4 font-mono font-bold text-emerald-400">
+                                @if($job->is_office_job)
+                                    <span class="text-indigo-400 text-xs">ফ্রি (অফিস)</span>
+                                @else
+                                    ৳{{ $job->total_amount }}
+                                @endif
+                            </td>
                             <td class="px-6 py-4">
                                 <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold {{ $job->payment_status === 'paid' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20' }}">
                                     {{ $job->payment_status === 'paid' ? 'পরিশোধিত' : 'ক্যাশ/পেন্ডিং' }}
@@ -163,22 +183,28 @@
                                 </span>
                             </td>
                             <td class="px-6 py-4 text-right">
-                                @if($job->payment_status !== 'paid')
-                                    <form action="{{ route('shop.jobs.approve', $job) }}" method="POST" class="inline">
-                                        @csrf
-                                        <button type="submit" class="px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold text-xs shadow-md shadow-emerald-500/20 transition-all cursor-pointer flex items-center gap-1">
-                                            <span>✓</span>
-                                            <span>ক্যাশ পেলাম / প্রিন্ট দিন</span>
-                                        </button>
-                                    </form>
-                                @else
-                                    <form action="{{ route('shop.jobs.reprint', $job) }}" method="POST" class="inline">
-                                        @csrf
-                                        <button type="submit" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold text-xs transition-colors cursor-pointer">
-                                            🔄 ফোর্স প্রিন্ট
-                                        </button>
-                                    </form>
-                                @endif
+                                <div class="flex items-center justify-end gap-1.5">
+                                    <a href="{{ route('shop.jobs.slip', $job) }}" target="_blank" class="px-2.5 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold text-xs transition-colors flex items-center gap-1" title="খামের স্লিপ প্রিন্ট করুন">
+                                        <span>🏷️ স্লিপ</span>
+                                    </a>
+
+                                    @if($job->payment_status !== 'paid')
+                                        <form action="{{ route('shop.jobs.approve', $job) }}" method="POST" class="inline">
+                                            @csrf
+                                            <button type="submit" class="px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold text-xs shadow-md shadow-emerald-500/20 transition-all cursor-pointer flex items-center gap-1">
+                                                <span>✓</span>
+                                                <span>ক্যাশ পেলাম / প্রিন্ট</span>
+                                            </button>
+                                        </form>
+                                    @else
+                                        <form action="{{ route('shop.jobs.reprint', $job) }}" method="POST" class="inline">
+                                            @csrf
+                                            <button type="submit" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold text-xs transition-colors cursor-pointer">
+                                                🔄 ফোর্স প্রিন্ট
+                                            </button>
+                                        </form>
+                                    @endif
+                                </div>
                             </td>
                         </tr>
                     @empty
@@ -216,10 +242,28 @@
                 <tbody id="completedJobsTbody" class="divide-y divide-slate-800/80">
                     @forelse($completedJobs as $job)
                         <tr class="hover:bg-slate-800/40 transition-colors">
-                            <td class="px-6 py-4 font-mono font-bold text-white">{{ $job->job_token }}</td>
+                            <td class="px-6 py-4 font-mono font-bold text-white">
+                                <div>{{ $job->job_token }}</div>
+                                @if($job->pickup_reference)
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 font-bold text-[10px] border border-amber-500/30 mt-1">
+                                        🏷️ খাম: {{ $job->pickup_reference }}
+                                    </span>
+                                @endif
+                                @if($job->is_office_job)
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.2 rounded-md bg-indigo-500/20 text-indigo-300 font-bold text-[9px] border border-indigo-500/30 mt-1">
+                                        🏢 অফিস
+                                    </span>
+                                @endif
+                            </td>
                             <td class="px-6 py-4 text-slate-400 max-w-xs truncate">{{ $job->original_name }}</td>
                             <td class="px-6 py-4 font-bold text-slate-200">{{ $job->total_pages }} পেজ ({{ $job->paper_size }})</td>
-                            <td class="px-6 py-4 font-mono font-bold text-emerald-400">৳{{ $job->total_amount }}</td>
+                            <td class="px-6 py-4 font-mono font-bold text-emerald-400">
+                                @if($job->is_office_job)
+                                    <span class="text-indigo-400 text-xs">ফ্রি (অফিস)</span>
+                                @else
+                                    ৳{{ $job->total_amount }}
+                                @endif
+                            </td>
                             <td class="px-6 py-4">
                                 <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase {{ $job->payment_method === 'bkash' ? 'bg-pink-500/10 text-pink-400 border border-pink-500/20' : ($job->payment_method === 'nagad' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 'bg-slate-800 text-slate-300') }}">
                                     {{ $job->payment_method }}
@@ -229,13 +273,18 @@
                                 {{ $job->printed_at ? $job->printed_at->format('h:i A') : $job->created_at->format('h:i A') }}
                             </td>
                             <td class="px-6 py-4 text-right">
-                                <form action="{{ route('shop.jobs.reprint', $job) }}" method="POST" class="inline" onsubmit="return confirm('আপনি কি এই ডকুমেন্টটি পুনরায় প্রিন্ট করতে চান?')">
-                                    @csrf
-                                    <button type="submit" class="px-3 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 font-bold text-xs transition-colors cursor-pointer flex items-center gap-1 ml-auto">
-                                        <span>🖨️</span>
-                                        <span>রি-প্রিন্ট করুন</span>
-                                    </button>
-                                </form>
+                                <div class="flex items-center justify-end gap-1.5">
+                                    <a href="{{ route('shop.jobs.slip', $job) }}" target="_blank" class="px-2.5 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold text-xs transition-colors flex items-center gap-1" title="খামের স্লিপ প্রিন্ট করুন">
+                                        <span>🏷️ স্লিপ</span>
+                                    </a>
+                                    <form action="{{ route('shop.jobs.reprint', $job) }}" method="POST" class="inline" onsubmit="return confirm('আপনি কি এই ডকুমেন্টটি পুনরায় প্রিন্ট করতে চান?')">
+                                        @csrf
+                                        <button type="submit" class="px-3 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 font-bold text-xs transition-colors cursor-pointer flex items-center gap-1">
+                                            <span>🖨️</span>
+                                            <span>রি-প্রিন্ট</span>
+                                        </button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                     @empty

@@ -55,7 +55,34 @@
         </div>
     </header>
 
-    <div class="max-w-md mx-auto px-4 pt-5 space-y-5">
+    <div class="max-w-md mx-auto px-4 pt-4 space-y-4">
+
+        @if($shop->has_nid_print)
+            <!-- Service Mode Switcher Tabs -->
+            <div class="grid grid-cols-2 p-1 bg-slate-200/80 rounded-2xl gap-1 text-xs font-bold text-center">
+                <div class="py-2.5 rounded-xl bg-white text-slate-900 shadow-sm flex items-center justify-center gap-1.5 font-black border border-slate-200">
+                    <span>📄 সাধারণ ডকুমেন্ট</span>
+                </div>
+                <a href="{{ route('customer.nid_upload', $shop->slug) }}" class="py-2.5 rounded-xl text-emerald-700 hover:text-emerald-800 hover:bg-emerald-50 transition-all flex items-center justify-center gap-1.5">
+                    <span>🪪 এনআইডি প্রিন্ট</span>
+                    <span class="px-1.5 py-0.2 rounded-md bg-emerald-100 text-[9px] text-emerald-800">স্মার্ট</span>
+                </a>
+            </div>
+
+            <!-- Smart NID Promotion Pill -->
+            <a href="{{ route('customer.nid_upload', $shop->slug) }}" class="p-3 rounded-2xl bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-emerald-500/10 border border-emerald-500/30 flex items-center justify-between text-xs hover:border-emerald-500 transition-all">
+                <div class="flex items-center gap-2">
+                    <span class="text-base">🪪</span>
+                    <div>
+                        <span class="font-bold text-emerald-950 block">ভোটার আইডি / এনআইডি কার্ড প্রিন্ট করবেন?</span>
+                        <span class="text-[10px] text-emerald-700">ছবি তুললে এআই সোজা করে নিখুঁত মাপে বসিয়ে দেবে</span>
+                    </div>
+                </div>
+                <span class="px-2.5 py-1 rounded-xl bg-emerald-600 text-white font-bold text-[10px] shadow-xs shrink-0">
+                    ক্লিক করুন →
+                </span>
+            </a>
+        @endif
 
         @if(session('error_alert'))
             <!-- Flash Error Alert Dialog -->
@@ -284,6 +311,22 @@
                     <input type="text" name="payment_trx_id" 
                         class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-mono uppercase focus:outline-none focus:border-rose-500"
                         placeholder="যেমন: BKH92810X">
+                </div>
+
+                <!-- Remote Pickup / Envelope Reference -->
+                <div class="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-300 space-y-1.5">
+                    <div class="flex items-center justify-between">
+                        <label class="block text-xs font-black text-amber-950 flex items-center gap-1.5">
+                            <span>🏷️ খামের রেফারেন্স / গ্রাহক কোড (ঐচ্ছিক):</span>
+                        </label>
+                        <span class="text-[10px] text-amber-700 font-bold">দূর/বাসা থেকে অর্ডারের জন্য</span>
+                    </div>
+                    <input type="text" name="pickup_reference" 
+                        class="w-full px-3 py-2 rounded-xl bg-white border border-amber-300 text-xs font-bold text-slate-900 focus:outline-none focus:border-amber-500"
+                        placeholder="যেমন: খাম নং ৫ / সুমন (বাসা থেকে অর্ডার)">
+                    <span class="text-[10px] text-amber-800 block leading-tight">
+                        বাসা বা দূর থেকে অর্ডার দিলে এখানে নাম বা রেফারেন্স লিখে দিন। দোকানদার পেজ প্রিন্ট করে এই নাম/কোড লিখে খামে রাখবেন।
+                    </span>
                 </div>
             </div>
 

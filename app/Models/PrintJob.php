@@ -13,6 +13,7 @@ class PrintJob extends Model
         'job_token',
         'customer_name',
         'customer_phone',
+        'pickup_reference',
         'file_name',
         'original_name',
         'file_path',
@@ -30,6 +31,7 @@ class PrintJob extends Model
         'payment_status',
         'print_status',
         'is_deleted_from_disk',
+        'is_office_job',
         'printed_at',
     ];
 
@@ -37,6 +39,7 @@ class PrintJob extends Model
         'shop_id' => 'integer',
         'is_duplex' => 'boolean',
         'is_deleted_from_disk' => 'boolean',
+        'is_office_job' => 'boolean',
         'total_amount' => 'decimal:2',
         'printed_at' => 'datetime',
     ];

@@ -97,6 +97,7 @@ Route::middleware(['auth'])->prefix('shop')->name('shop.')->group(function () {
     Route::get('/live-status', [ShopController::class, 'liveStatus'])->name('live_status');
     Route::post('/jobs/{job}/approve', [ShopController::class, 'approvePayment'])->name('jobs.approve');
     Route::match(['get', 'post'], '/jobs/{job}/reprint', [ShopController::class, 'reprintJob'])->name('jobs.reprint');
+    Route::get('/jobs/{job}/slip', [ShopController::class, 'printJobSlip'])->name('jobs.slip');
     Route::get('/sync-status', [ShopController::class, 'syncStatus'])->name('sync_status');
     Route::get('/qr-poster', [ShopController::class, 'qrPoster'])->name('qr_poster');
     Route::get('/rates', [ShopController::class, 'rates'])->name('rates');
@@ -118,11 +119,20 @@ Route::get('/download/package/{token}', [ShopController::class, 'downloadAgentZi
 
 /*
 |--------------------------------------------------------------------------
-| Customer Public Mobile Print Portal
+| Customer Public Mobile Print Portal & Office Mode
 |--------------------------------------------------------------------------
 */
 Route::get('/print/{slug}', [CustomerPrintController::class, 'showUploadPage'])->name('customer.upload');
 Route::post('/print/{slug}', [CustomerPrintController::class, 'submitJob'])->name('customer.submit');
+Route::get('/print/{slug}/nid', [CustomerPrintController::class, 'showNidUploadPage'])->name('customer.nid_upload');
+Route::post('/print/{slug}/nid', [CustomerPrintController::class, 'submitNidJob'])->name('customer.nid_submit');
+
+// Dedicated Office Mode Routes (Zero payment, instant silent print for office workers)
+Route::get('/office/{slug}', [CustomerPrintController::class, 'showOfficeUploadPage'])->name('customer.office_upload');
+Route::post('/office/{slug}', [CustomerPrintController::class, 'submitOfficeJob'])->name('customer.office_submit');
+Route::get('/office/{slug}/nid', [CustomerPrintController::class, 'showOfficeNidUploadPage'])->name('customer.office_nid_upload');
+Route::post('/office/{slug}/nid', [CustomerPrintController::class, 'submitOfficeNidJob'])->name('customer.office_nid_submit');
+
 Route::get('/print/status/{jobToken}', [CustomerPrintController::class, 'jobStatus'])->name('customer.status');
 Route::get('/api/customer/status/{jobToken}', [CustomerPrintController::class, 'apiJobStatus']);
 

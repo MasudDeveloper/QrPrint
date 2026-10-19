@@ -89,6 +89,27 @@
                         {{ $job->color_mode === 'color' ? 'কালার' : 'সাদাকালো' }} ({{ $job->is_duplex ? 'উভয় পাশ' : 'একপাশ' }})
                     </span>
                 </div>
+                @if($job->pickup_reference)
+                    <div class="p-3.5 rounded-2xl bg-amber-500/10 border-2 border-amber-400 text-amber-950 text-left space-y-1 shadow-xs">
+                        <div class="flex items-center justify-between text-xs font-black text-amber-900">
+                            <span class="flex items-center gap-1.5">
+                                <span>🏷️ খাম / প্যাকেট রেফারেন্স:</span>
+                                <span class="px-2.5 py-0.5 rounded-lg bg-amber-200 text-amber-900 font-bold font-mono text-xs">{{ $job->pickup_reference }}</span>
+                            </span>
+                        </div>
+                        <div class="text-[11px] text-amber-800 leading-tight">
+                            দোকানদার এই রেফারেন্স লিখে আপনার প্রিন্ট কপি খামে সংরক্ষণ করবেন। দোকানে এটি দেখালেই আপনার খাম পেয়ে যাবেন।
+                        </div>
+                    </div>
+                @endif
+
+                @if($job->is_office_job)
+                    <div class="p-2.5 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-900 text-xs flex items-center justify-between font-bold">
+                        <span>🏢 অফিস ডিরেক্ট প্রিন্ট</span>
+                        <span class="text-[10px] text-indigo-700 font-normal">কোনো পেমেন্ট ছাড়াই সরাসরি প্রিন্ট</span>
+                    </div>
+                @endif
+
                 <div class="flex justify-between pt-2 border-t border-slate-200 text-sm">
                     <span class="font-bold text-slate-700">মোট প্রদেয় বিল:</span>
                     <span class="font-black text-emerald-600 font-en">৳ {{ number_format($job->total_amount, 2) }}</span>
@@ -103,7 +124,7 @@
 
             <!-- Back or New Print button -->
             <div class="pt-2">
-                <a href="{{ route('customer.upload', $job->shop->slug) }}" class="inline-block w-full py-3.5 rounded-2xl bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white font-bold text-xs shadow-lg shadow-rose-500/20 transition-all">
+                <a href="{{ $job->is_office_job ? route('customer.office_upload', $job->shop->slug) : route('customer.upload', $job->shop->slug) }}" class="inline-block w-full py-3.5 rounded-2xl bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white font-bold text-xs shadow-lg shadow-rose-500/20 transition-all">
                     + নতুন ডকুমেন্ট প্রিন্ট করুন
                 </a>
             </div>

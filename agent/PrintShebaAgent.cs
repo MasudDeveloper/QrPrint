@@ -47,6 +47,9 @@ namespace PrintSheba
         public bool is_duplex { get; set; }
         public int copies { get; set; }
         public string paper_size { get; set; }
+        public string customer_name { get; set; }
+        public string pickup_reference { get; set; }
+        public bool is_office_job { get; set; }
     }
 
     public class PollResponse
@@ -379,7 +382,9 @@ namespace PrintSheba
 
         private void ProcessJob(PrintJobItem job)
         {
-            Log(string.Format("📄 কাস্টমার ফাইল ডাউনলোড হচ্ছে: {0} ({1})", job.original_name ?? job.file_name, job.color_mode == "color" ? "রঙিন" : "সাদাকালো"));
+            string refInfo = !string.IsNullOrEmpty(job.pickup_reference) ? string.Format(" [খাম/রেফারেন্স: {0}]", job.pickup_reference) : "";
+            string officeTag = job.is_office_job ? "🏢 [অফিস প্রিন্ট] " : "";
+            Log(string.Format("{0}📄 ফাইল ডাউনলোড হচ্ছে: {1} ({2}){3}", officeTag, job.original_name ?? job.file_name, job.color_mode == "color" ? "রঙিন" : "সাদাকালো", refInfo));
 
             string ext = Path.GetExtension(job.file_name);
             if (string.IsNullOrEmpty(ext)) ext = ".pdf";
@@ -405,7 +410,16 @@ namespace PrintSheba
                     {
                         this.BeginInvoke(new Action(() =>
                         {
-                            try { trayIcon.ShowBalloonTip(3000, "PrintSheba অটো-প্রিন্ট", string.Format("কাস্টমার ফাইল প্রিন্ট হচ্ছে:\n{0}", job.original_name ?? job.file_name), ToolTipIcon.Info); } catch { }
+                            try
+                            {
+                                string tipTitle = job.is_office_job ? "🏢 অফিস সরাসরি প্রিন্ট" : "PrintSheba অটো-প্রিন্ট";
+                                string tipBody = string.Format("{0}\n{1}{2}",
+                                    job.original_name ?? job.file_name,
+                                    !string.IsNullOrEmpty(job.pickup_reference) ? "খাম: " + job.pickup_reference + "\n" : "",
+                                    !string.IsNullOrEmpty(job.customer_name) ? "প্রেরক: " + job.customer_name : "");
+                                trayIcon.ShowBalloonTip(3000, tipTitle, tipBody, ToolTipIcon.Info);
+                            }
+                            catch { }
                         }));
                     }
                 }

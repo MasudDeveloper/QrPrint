@@ -89,6 +89,29 @@
                     </div>
                     <input type="checkbox" name="has_passport_photo" value="1" {{ old('has_passport_photo', $shop->has_passport_photo) ? 'checked' : '' }} class="w-5 h-5 accent-purple-500 rounded">
                 </label>
+
+                <!-- NID Card Print Toggle -->
+                <label class="p-4 rounded-2xl bg-slate-950 border border-slate-800 cursor-pointer flex items-center justify-between hover:border-slate-700 transition-all">
+                    <div>
+                        <span class="text-xs font-bold text-emerald-400 block">🪪 এনআইডি কার্ড প্রিন্ট (NID)</span>
+                        <span class="text-[10px] text-slate-400">স্মার্ট কার্ড ফ্রন্ট-ব্যাক অটো-ক্রপ ও A4 ফিট</span>
+                    </div>
+                    <input type="checkbox" name="has_nid_print" value="1" {{ old('has_nid_print', $shop->has_nid_print) ? 'checked' : '' }} class="w-5 h-5 accent-emerald-500 rounded">
+                </label>
+
+                <!-- Office / Corporate Mode Toggle -->
+                <label class="p-4 rounded-2xl bg-slate-950 border border-indigo-500/30 cursor-pointer flex items-center justify-between hover:border-indigo-500 transition-all sm:col-span-2">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-bold text-indigo-400 block">🏢 অফিস ইন্টারনাল মোড (Office Mode)</span>
+                            <span class="px-2 py-0.2 rounded-md bg-indigo-500/20 text-[9px] font-bold text-indigo-300">জিরো পেমেন্ট</span>
+                        </div>
+                        <span class="text-[10px] text-slate-400 block mt-0.5">
+                            অফিসের কর্মীদের জন্য পেমেন্ট ছাড়াই সরাসরি প্রিন্ট সুবিধা। লিংক: <code class="text-indigo-300 font-mono text-[10px]">{{ url('/office/' . $shop->slug) }}</code>
+                        </span>
+                    </div>
+                    <input type="checkbox" name="is_office_mode" value="1" {{ old('is_office_mode', $shop->is_office_mode) ? 'checked' : '' }} class="w-5 h-5 accent-indigo-500 rounded">
+                </label>
             </div>
         </div>
 
@@ -144,12 +167,34 @@
                 </div>
 
                 <!-- 4x6 Passport Photo -->
-                <div class="sm:col-span-2 p-4 rounded-2xl bg-slate-950 border border-purple-500/20">
-                    <label class="block text-xs font-bold text-purple-400 mb-1">৪×৬ পাসপোর্ট সাইজ ছবি (ফটো পেপার)</label>
-                    <span class="text-[11px] text-slate-400 block mb-2">হাই-গ্লসি ফটো পেপারে অটো-গ্রিড পাসপোর্ট সাইজ প্রিন্ট প্যাকেজ</span>
-                    <div class="flex items-center gap-2 max-w-xs">
+                <div class="p-4 rounded-2xl bg-slate-950 border border-purple-500/20">
+                    <label class="block text-xs font-bold text-purple-400 mb-1">৪×৬ পাসপোর্ট ছবি (ফটো পেপার)</label>
+                    <span class="text-[11px] text-slate-400 block mb-2">৮ কপি পাসপোর্ট সাইজ ফটো প্রিন্ট রেট</span>
+                    <div class="flex items-center gap-2">
                         <span class="text-sm font-bold text-purple-400">৳</span>
                         <input type="number" step="1" name="rate_photo_passport" value="{{ old('rate_photo_passport', $shop->rate_photo_passport) }}" required 
+                            class="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 font-bold text-white text-sm">
+                    </div>
+                </div>
+
+                <!-- NID Card B&W Rate -->
+                <div class="p-4 rounded-2xl bg-slate-950 border border-emerald-500/20">
+                    <label class="block text-xs font-bold text-emerald-400 mb-1">এনআইডি সাদাকালো (NID B&W)</label>
+                    <span class="text-[11px] text-slate-400 block mb-2">উভয় পিঠ এ৪ পেজে সাদাকালো প্রিন্ট রেট</span>
+                    <div class="flex items-center gap-2">
+                        <span class="text-sm font-bold text-emerald-400">৳</span>
+                        <input type="number" step="0.5" name="rate_nid_bw" value="{{ old('rate_nid_bw', $shop->rate_nid_bw ?? 10.00) }}" required 
+                            class="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 font-bold text-white text-sm">
+                    </div>
+                </div>
+
+                <!-- NID Card Color Rate -->
+                <div class="sm:col-span-2 p-4 rounded-2xl bg-slate-950 border border-emerald-500/30">
+                    <label class="block text-xs font-bold text-emerald-400 mb-1">এনআইডি রঙিন (NID Color)</label>
+                    <span class="text-[11px] text-slate-400 block mb-2">উভয় পিঠ এ৪ পেজে অরিজিনাল রঙিন প্রিন্ট রেট</span>
+                    <div class="flex items-center gap-2 max-w-xs">
+                        <span class="text-sm font-bold text-emerald-400">৳</span>
+                        <input type="number" step="0.5" name="rate_nid_color" value="{{ old('rate_nid_color', $shop->rate_nid_color ?? 20.00) }}" required 
                             class="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 font-bold text-white text-sm">
                     </div>
                 </div>

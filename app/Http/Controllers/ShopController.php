@@ -129,6 +129,8 @@ class ShopController extends Controller
             'rate_color_single' => 'required|numeric|min:1',
             'rate_color_double' => 'required|numeric|min:1',
             'rate_photo_passport' => 'required|numeric|min:5',
+            'rate_nid_bw' => 'nullable|numeric|min:1',
+            'rate_nid_color' => 'nullable|numeric|min:1',
         ]);
 
         $data = $request->only([
@@ -141,10 +143,14 @@ class ShopController extends Controller
             'rate_color_single',
             'rate_color_double',
             'rate_photo_passport',
+            'rate_nid_bw',
+            'rate_nid_color',
         ]);
         $data['has_color_print'] = $request->boolean('has_color_print');
         $data['has_duplex_print'] = $request->boolean('has_duplex_print');
         $data['has_passport_photo'] = $request->boolean('has_passport_photo');
+        $data['has_nid_print'] = $request->boolean('has_nid_print');
+        $data['is_office_mode'] = $request->boolean('is_office_mode');
 
         $shop->update($data);
 
@@ -565,5 +571,26 @@ class ShopController extends Controller
         ]);
 
         return back()->with('success', 'আপনার সাবস্ক্রিপশন ও পেমেন্টের আবেদনটি সফলভাবে জমা হয়েছে! সুপার এডমিন পেমেন্ট ভেরিফাই করার সাথে সাথেই আপনার প্যাকেজটি সক্রিয় হয়ে যাবে।');
+    }
+
+    /**
+     * Render printable envelope / pickup tag slip for shopkeeper
+     */
+    public function printJobSlip(PrintJob $job)
+    {
+        $shop = $this->getShop();
+        $user = Auth::user();
+
+        $isOwner = ((int) $job->shop_id === (int) $shop->id) || 
+                   ($user && Shop::where('id', $job->shop_id)->where('user_id', $user->id)->exists()) ||
+                   ($user && $user->shop && (int) $user->shop->id === (int) $job->shop_id) || 
+                   ($user && $user->isSuperAdmin()) ||
+                   (session('impersonator_id') !== null);
+
+        if (!$isOwner) {
+            abort(403, 'অননুমোদিত অ্যাক্সেস');
+        }
+
+        return view('shop.job_slip', compact('shop', 'job'));
     }
 }
