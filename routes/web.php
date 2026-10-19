@@ -82,6 +82,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::get('/print-jobs', [AdminController::class, 'printJobs'])->name('jobs');
     Route::post('/jobs/{job}/approve', [AdminController::class, 'approvePayment'])->name('jobs.approve');
     Route::post('/jobs/{job}/reprint', [AdminController::class, 'reprintJob'])->name('jobs.reprint');
+    Route::post('/jobs/{job}/cancel', [AdminController::class, 'cancelJob'])->name('jobs.cancel');
 });
 
 // Impersonation Revert Route
@@ -96,6 +97,7 @@ Route::middleware(['auth'])->prefix('shop')->name('shop.')->group(function () {
     Route::get('/dashboard', [ShopController::class, 'dashboard'])->name('dashboard');
     Route::get('/live-status', [ShopController::class, 'liveStatus'])->name('live_status');
     Route::post('/jobs/{job}/approve', [ShopController::class, 'approvePayment'])->name('jobs.approve');
+    Route::post('/jobs/{job}/cancel', [ShopController::class, 'cancelJob'])->name('jobs.cancel');
     Route::match(['get', 'post'], '/jobs/{job}/reprint', [ShopController::class, 'reprintJob'])->name('jobs.reprint');
     Route::get('/jobs/{job}/slip', [ShopController::class, 'printJobSlip'])->name('jobs.slip');
     Route::get('/sync-status', [ShopController::class, 'syncStatus'])->name('sync_status');

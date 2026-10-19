@@ -196,6 +196,11 @@
                                                 <span>ক্যাশ পেলাম / প্রিন্ট</span>
                                             </button>
                                         </form>
+
+                                        <button type="button" onclick="openCancelModal({{ $job->id }}, '{{ $job->job_token }}', '{{ addslashes($job->original_name) }}', '{{ route('shop.jobs.cancel', $job) }}')" class="px-2.5 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs font-bold transition-all flex items-center gap-1 cursor-pointer" title="অর্ডার বাতিল করুন">
+                                            <span>✕</span>
+                                            <span>বাতিল</span>
+                                        </button>
                                     @else
                                         <form action="{{ route('shop.jobs.reprint', $job) }}" method="POST" class="inline">
                                             @csrf
@@ -294,7 +299,69 @@
                     @endforelse
                 </tbody>
             </table>
+        </div>
     </div>
+
+    <!-- Recent Cancelled Prints -->
+    @if(isset($cancelledJobs) && $cancelledJobs->count() > 0)
+    <div class="bg-slate-900/80 rounded-3xl border border-rose-500/20 shadow-sm overflow-hidden">
+        <div class="p-6 border-b border-slate-800 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
+                <h3 class="text-base font-bold text-white">বাতিলকৃত অর্ডারসমূহ (Cancelled Orders)</h3>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/10 text-rose-400 border border-rose-500/20">
+                    {{ $cancelledJobs->count() }} টি
+                </span>
+            </div>
+            <span class="text-xs text-slate-400">কাস্টমার না এলে বা ভুল অর্ডারে বাতিল হওয়া লিস্ট</span>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+                <thead class="bg-slate-950/70 text-slate-400 font-bold border-b border-slate-800 uppercase text-[10px] tracking-wider">
+                    <tr>
+                        <th class="px-6 py-4">টোকেন</th>
+                        <th class="px-6 py-4">গ্রাহক</th>
+                        <th class="px-6 py-4">ফাইল</th>
+                        <th class="px-6 py-4">টাকা</th>
+                        <th class="px-6 py-4">বাতিলের কারণ</th>
+                        <th class="px-6 py-4 text-right">বাতিলের সময়</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-800/80">
+                    @foreach($cancelledJobs as $cJob)
+                        <tr class="hover:bg-slate-800/40 transition-colors opacity-75 hover:opacity-100">
+                            <td class="px-6 py-4 font-mono font-bold text-white">
+                                <div>{{ $cJob->job_token }}</div>
+                                @if($cJob->pickup_reference)
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 font-bold text-[10px] border border-amber-500/30 mt-1">
+                                        🏷️ খাম: {{ $cJob->pickup_reference }}
+                                    </span>
+                                @endif
+                            </td>
+                            <td class="px-6 py-4 font-medium text-slate-300">
+                                <div>{{ $cJob->customer_name }}</div>
+                                @if($cJob->customer_phone)
+                                    <span class="text-[10px] text-slate-500 font-mono">{{ $cJob->customer_phone }}</span>
+                                @endif
+                            </td>
+                            <td class="px-6 py-4 text-slate-400 max-w-xs truncate">{{ $cJob->original_name }}</td>
+                            <td class="px-6 py-4 font-mono font-bold text-slate-400">৳{{ $cJob->total_amount }}</td>
+                            <td class="px-6 py-4">
+                                <span class="px-2.5 py-1 rounded-lg text-xs font-bold bg-rose-500/10 text-rose-300 border border-rose-500/20 inline-block">
+                                    {{ $cJob->cancel_reason ?: 'কাস্টমার দোকানে আসেননি / ক্যাশ দেননি' }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 text-right text-slate-500 font-mono text-[11px]">
+                                {{ $cJob->cancelled_at ? $cJob->cancelled_at->format('h:i A, d M') : $cJob->updated_at->format('h:i A, d M') }}
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    </div>
+    @endif
 
     <!-- Live bKash/Nagad Payments & SMS Listener Log -->
     <div class="bg-slate-900/80 rounded-3xl border border-slate-800 shadow-sm overflow-hidden">
@@ -348,6 +415,88 @@
         </div>
     </div>
 
+    <!-- Cancel Job Modal -->
+    <div id="cancelJobModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 w-full max-w-md shadow-2xl space-y-4">
+            <div class="flex items-start justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-400 flex items-center justify-center text-xl font-bold">
+                        ✕
+                    </div>
+                    <div>
+                        <h3 class="text-base font-black text-white">প্রিন্ট অর্ডার বাতিল করুন</h3>
+                        <span class="text-xs text-slate-400 font-mono" id="cancelModalToken">#PS-XXXXXXXX</span>
+                    </div>
+                </div>
+                <button type="button" onclick="closeCancelModal()" class="text-slate-400 hover:text-white p-1 rounded-lg">✕</button>
+            </div>
+
+            <div class="p-3 rounded-2xl bg-slate-950/60 border border-slate-800/80 text-xs text-slate-300">
+                <span class="text-slate-500 block text-[10px] uppercase font-bold">ফাইল নাম:</span>
+                <span class="font-medium text-white truncate block" id="cancelModalFileName">Document.pdf</span>
+            </div>
+
+            <form id="cancelJobForm" method="POST" onsubmit="submitCancelJob(event)" class="space-y-3">
+                @csrf
+                <label class="block text-xs font-bold text-slate-300">বাতিলের কারণ নির্বাচন করুন (শর্টকাট):</label>
+                
+                <div class="space-y-2">
+                    <label class="flex items-center gap-2.5 p-3 rounded-xl border border-slate-800 bg-slate-950/40 hover:bg-slate-800/50 cursor-pointer has-[:checked]:border-rose-500/50 has-[:checked]:bg-rose-500/10 transition-all">
+                        <input type="radio" name="cancel_reason" value="কাস্টমার দোকানে আসেননি / ক্যাশ দেননি" checked class="accent-rose-500" onchange="toggleCustomReason(false)">
+                        <div class="text-xs">
+                            <span class="font-bold text-white block">🏃‍♂️ কাস্টমার দোকানে আসেননি / ক্যাশ দেননি</span>
+                            <span class="text-[10px] text-slate-400">ক্যাশ সিলেক্ট করে কাউন্টারে আসেনি বা কনফার্ম করেনি</span>
+                        </div>
+                    </label>
+
+                    <label class="flex items-center gap-2.5 p-3 rounded-xl border border-slate-800 bg-slate-950/40 hover:bg-slate-800/50 cursor-pointer has-[:checked]:border-rose-500/50 has-[:checked]:bg-rose-500/10 transition-all">
+                        <input type="radio" name="cancel_reason" value="কাস্টমারের অনুরোধে বাতিল" class="accent-rose-500" onchange="toggleCustomReason(false)">
+                        <div class="text-xs">
+                            <span class="font-bold text-white block">👤 কাস্টমারের অনুরোধে বাতিল</span>
+                            <span class="text-[10px] text-slate-400">গ্রাহক নিজে অর্ডার বাতিল করতে অনুরোধ করেছেন</span>
+                        </div>
+                    </label>
+
+                    <label class="flex items-center gap-2.5 p-3 rounded-xl border border-slate-800 bg-slate-950/40 hover:bg-slate-800/50 cursor-pointer has-[:checked]:border-rose-500/50 has-[:checked]:bg-rose-500/10 transition-all">
+                        <input type="radio" name="cancel_reason" value="ভুল বা ডুপ্লিকেট অর্ডার" class="accent-rose-500" onchange="toggleCustomReason(false)">
+                        <div class="text-xs">
+                            <span class="font-bold text-white block">📄 ভুল বা ডুপ্লিকেট অর্ডার</span>
+                            <span class="text-[10px] text-slate-400">একই ফাইল ভুলবশত একাধিকবার পাঠানো হয়েছে</span>
+                        </div>
+                    </label>
+
+                    <label class="flex items-center gap-2.5 p-3 rounded-xl border border-slate-800 bg-slate-950/40 hover:bg-slate-800/50 cursor-pointer has-[:checked]:border-rose-500/50 has-[:checked]:bg-rose-500/10 transition-all">
+                        <input type="radio" name="cancel_reason" value="অস্পষ্ট বা ত্রুটিপূর্ণ ফাইল" class="accent-rose-500" onchange="toggleCustomReason(false)">
+                        <div class="text-xs">
+                            <span class="font-bold text-white block">⚠️ অস্পষ্ট বা ত্রুটিপূর্ণ ফাইল</span>
+                            <span class="text-[10px] text-slate-400">ছবি বোঝা যাচ্ছে না বা ফাইল পড়া সম্ভব হচ্ছে না</span>
+                        </div>
+                    </label>
+
+                    <label class="flex items-center gap-2.5 p-3 rounded-xl border border-slate-800 bg-slate-950/40 hover:bg-slate-800/50 cursor-pointer has-[:checked]:border-rose-500/50 has-[:checked]:bg-rose-500/10 transition-all">
+                        <input type="radio" name="cancel_reason" value="other" class="accent-rose-500" onchange="toggleCustomReason(true)">
+                        <div class="text-xs">
+                            <span class="font-bold text-white block">✏️ অন্যান্য কারণ</span>
+                            <span class="text-[10px] text-slate-400">নিজে নির্দিষ্ট কারণ লিখে দিতে পারেন</span>
+                        </div>
+                    </label>
+                </div>
+
+                <div id="customReasonContainer" class="hidden pt-1">
+                    <input type="text" name="custom_reason" id="customReasonInput" placeholder="বাতিলের কারণ লিখুন..." class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-rose-500">
+                </div>
+
+                <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-800">
+                    <button type="button" onclick="closeCancelModal()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition-all cursor-pointer">
+                        না, ফিরে যান
+                    </button>
+                    <button type="submit" id="cancelConfirmBtn" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-rose-600 to-rose-700 hover:from-rose-500 hover:to-rose-600 text-white text-xs font-bold shadow-lg shadow-rose-600/30 transition-all cursor-pointer flex items-center gap-1.5">
+                        <span>🗑️ হ্যাঁ, নিশ্চিত বাতিল করুন</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -384,19 +533,32 @@
             const phoneHtml = job.customer_phone ? `<span class="text-[10px] text-slate-500 font-mono">${escapeHtml(job.customer_phone)}</span>` : '';
             const trxHtml = job.payment_trx_id ? `<span class="text-[9px] text-slate-500 font-mono block mt-0.5">${escapeHtml(job.payment_trx_id)}</span>` : '';
 
-            let actionHtml = '';
+            let actionHtml = `
+                <div class="flex items-center justify-end gap-1.5">
+            `;
+            if (job.slip_url) {
+                actionHtml += `
+                    <a href="${job.slip_url}" target="_blank" class="px-2.5 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold text-xs transition-colors flex items-center gap-1" title="খামের স্লিপ প্রিন্ট করুন">
+                        <span>🏷️ স্লিপ</span>
+                    </a>
+                `;
+            }
             if (!isPaid) {
-                actionHtml = `
+                actionHtml += `
                     <form action="${job.approve_url}" method="POST" class="inline">
                         <input type="hidden" name="_token" value="${csrfToken}">
                         <button type="submit" class="px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold text-xs shadow-md shadow-emerald-500/20 transition-all cursor-pointer flex items-center gap-1">
                             <span>✓</span>
-                            <span>ক্যাশ পেলাম / প্রিন্ট দিন</span>
+                            <span>ক্যাশ পেলাম / প্রিন্ট</span>
                         </button>
                     </form>
+                    <button type="button" onclick="openCancelModal(${job.id}, '${escapeHtml(job.job_token)}', '${escapeHtml(job.original_name)}', '${job.cancel_url}')" class="px-2.5 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs font-bold transition-all flex items-center gap-1 cursor-pointer" title="অর্ডার বাতিল করুন">
+                        <span>✕</span>
+                        <span>বাতিল</span>
+                    </button>
                 `;
             } else {
-                actionHtml = `
+                actionHtml += `
                     <form action="${job.reprint_url}" method="POST" class="inline">
                         <input type="hidden" name="_token" value="${csrfToken}">
                         <button type="submit" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold text-xs transition-colors cursor-pointer">
@@ -405,6 +567,7 @@
                     </form>
                 `;
             }
+            actionHtml += `</div>`;
 
             html += `
                 <tr class="hover:bg-slate-800/40 transition-colors">
@@ -515,5 +678,82 @@
 
     // Live Auto-Refresh every 3 seconds (Zero manual browser refresh needed)
     setInterval(refreshShopDashboardLive, 3000);
+
+    // Cancel Job Modal Functions
+    let currentCancelActionUrl = '';
+
+    function openCancelModal(jobId, jobToken, fileName, cancelUrl) {
+        currentCancelActionUrl = cancelUrl;
+        document.getElementById('cancelJobForm').action = cancelUrl;
+        document.getElementById('cancelModalToken').innerText = '#' + jobToken;
+        document.getElementById('cancelModalFileName').innerText = fileName;
+        
+        // Reset radio to default
+        const defaultRadio = document.querySelector('input[name="cancel_reason"][value="কাস্টমার দোকানে আসেননি / ক্যাশ দেননি"]');
+        if (defaultRadio) defaultRadio.checked = true;
+        toggleCustomReason(false);
+        document.getElementById('customReasonInput').value = '';
+
+        document.getElementById('cancelJobModal').classList.remove('hidden');
+    }
+
+    function closeCancelModal() {
+        document.getElementById('cancelJobModal').classList.add('hidden');
+    }
+
+    function toggleCustomReason(isOther) {
+        const container = document.getElementById('customReasonContainer');
+        if (isOther) {
+            container.classList.remove('hidden');
+            document.getElementById('customReasonInput').focus();
+        } else {
+            container.classList.add('hidden');
+        }
+    }
+
+    async function submitCancelJob(event) {
+        event.preventDefault();
+        const form = document.getElementById('cancelJobForm');
+        const formData = new FormData(form);
+        const confirmBtn = document.getElementById('cancelConfirmBtn');
+
+        confirmBtn.disabled = true;
+        confirmBtn.innerHTML = '<span>বাতিল করা হচ্ছে...</span>';
+
+        try {
+            const response = await fetch(currentCancelActionUrl, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                }
+            });
+
+            const result = await response.json();
+            if (response.ok && result.success) {
+                closeCancelModal();
+                if (window.Swal) {
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'success',
+                        title: result.message,
+                        showConfirmButton: false,
+                        timer: 2500
+                    });
+                }
+                refreshShopDashboardLive();
+            } else {
+                alert(result.message || 'অর্ডার বাতিল করতে সমস্যা হয়েছে।');
+            }
+        } catch (err) {
+            console.error(err);
+            form.submit(); // fallback to normal POST
+        } finally {
+            confirmBtn.disabled = false;
+            confirmBtn.innerHTML = '<span>🗑️ হ্যাঁ, নিশ্চিত বাতিল করুন</span>';
+        }
+    }
 </script>
 @endsection

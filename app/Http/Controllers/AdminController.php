@@ -317,4 +317,21 @@ class AdminController extends Controller
 
         return back()->with('success', "টোকেন #{$job->job_token} পুনরায় প্রিন্ট করার জন্য কিউতে পাঠানো হয়েছে!");
     }
+
+    public function cancelJob(Request $request, PrintJob $job)
+    {
+        $reason = trim($request->input('cancel_reason', ''));
+        if (empty($reason) || $reason === 'other') {
+            $reason = trim($request->input('custom_reason', '')) ?: 'অ্যাডমিন কর্তৃক বাতিল';
+        }
+
+        $job->update([
+            'payment_status' => 'cancelled',
+            'print_status'   => 'cancelled',
+            'cancel_reason'  => $reason,
+            'cancelled_at'   => now(),
+        ]);
+
+        return back()->with('success', "টোকেন #{$job->job_token} এর অর্ডারটি অ্যাডমিন কর্তৃক বাতিল করা হয়েছে।");
+    }
 }

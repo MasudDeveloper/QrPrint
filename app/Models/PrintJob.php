@@ -32,6 +32,8 @@ class PrintJob extends Model
         'print_status',
         'is_deleted_from_disk',
         'is_office_job',
+        'cancel_reason',
+        'cancelled_at',
         'printed_at',
     ];
 
@@ -42,6 +44,7 @@ class PrintJob extends Model
         'is_office_job' => 'boolean',
         'total_amount' => 'decimal:2',
         'printed_at' => 'datetime',
+        'cancelled_at' => 'datetime',
     ];
 
     protected static function booted()

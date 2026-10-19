@@ -38,9 +38,11 @@
             </div>
 
             <!-- Animated Status Icon -->
-            <div id="statusIconBox" class="w-24 h-24 rounded-full mx-auto flex items-center justify-center text-4xl shadow-inner transition-all duration-300 {{ $job->print_status === 'printed' ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-50 text-rose-500 animate-pulse' }}">
+            <div id="statusIconBox" class="w-24 h-24 rounded-full mx-auto flex items-center justify-center text-4xl shadow-inner transition-all duration-300 {{ $job->print_status === 'printed' ? 'bg-emerald-100 text-emerald-600' : ($job->print_status === 'cancelled' ? 'bg-rose-100 text-rose-600' : 'bg-rose-50 text-rose-500 animate-pulse') }}">
                 @if($job->print_status === 'printed')
                     ✓
+                @elseif($job->print_status === 'cancelled')
+                    ✕
                 @elseif($job->print_status === 'spooling')
                     🖨️
                 @else
@@ -52,6 +54,8 @@
                 <h2 id="statusHeadline" class="text-2xl font-black text-slate-900">
                     @if($job->print_status === 'printed')
                         প্রিন্ট সম্পন্ন হয়েছে!
+                    @elseif($job->print_status === 'cancelled')
+                        অর্ডারটি বাতিল করা হয়েছে
                     @elseif($job->print_status === 'spooling')
                         প্রিন্টারে পেজ বের হচ্ছে...
                     @else
@@ -61,6 +65,8 @@
                 <p id="statusSubtext" class="text-xs text-slate-500">
                     @if($job->print_status === 'printed')
                         কাউন্টার থেকে আপনার প্রিন্ট করা পেজ সংগ্রহ করুন
+                    @elseif($job->print_status === 'cancelled')
+                        {{ $job->cancel_reason ? 'বাতিলের কারণ: ' . $job->cancel_reason : 'দোকানদার কর্তৃক এই প্রিন্ট অর্ডারটি বাতিল করা হয়েছে।' }}
                     @elseif($job->payment_status === 'paid')
                         পেমেন্ট নিশ্চিত হয়েছে, প্রিন্টার কাজ শুরু করেছে
                     @else
@@ -116,8 +122,8 @@
                 </div>
                 <div class="flex justify-between">
                     <span class="text-slate-500">পেমেন্ট স্ট্যাটাস:</span>
-                    <span id="paymentStatusBadge" class="font-bold uppercase text-[10px] px-2 py-0.5 rounded {{ $job->payment_status === 'paid' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800' }}">
-                        {{ $job->payment_status === 'paid' ? 'পরিশোধিত (PAID)' : 'অপেক্ষমান (PENDING)' }}
+                    <span id="paymentStatusBadge" class="font-bold uppercase text-[10px] px-2 py-0.5 rounded {{ $job->print_status === 'cancelled' ? 'bg-rose-100 text-rose-800' : ($job->payment_status === 'paid' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800') }}">
+                        {{ $job->print_status === 'cancelled' ? 'বাতিল (CANCELLED)' : ($job->payment_status === 'paid' ? 'পরিশোধিত (PAID)' : 'অপেক্ষমান (PENDING)') }}
                     </span>
                 </div>
             </div>
@@ -139,6 +145,7 @@
     <script>
         const jobToken = '{{ $job->job_token }}';
         let isAlreadyCelebrated = {{ $job->print_status === 'printed' ? 'true' : 'false' }};
+        let pollTimer = null;
 
         function checkStatus() {
             fetch('/api/customer/status/' + jobToken)
@@ -148,6 +155,17 @@
                     const subText = document.getElementById('statusSubtext');
                     const iconBox = document.getElementById('statusIconBox');
                     const payBadge = document.getElementById('paymentStatusBadge');
+
+                    if (data.print_status === 'cancelled' || data.payment_status === 'cancelled') {
+                        statusText.innerText = 'অর্ডারটি বাতিল করা হয়েছে';
+                        subText.innerText = data.cancel_reason ? ('বাতিলের কারণ: ' + data.cancel_reason) : 'কাউন্টার থেকে এই প্রিন্ট অর্ডারটি বাতিল করা হয়েছে';
+                        iconBox.className = 'w-24 h-24 rounded-full mx-auto flex items-center justify-center text-4xl shadow-inner bg-rose-100 text-rose-600';
+                        iconBox.innerText = '✕';
+                        payBadge.className = 'font-bold uppercase text-[10px] px-2 py-0.5 rounded bg-rose-100 text-rose-800';
+                        payBadge.innerText = 'বাতিল (CANCELLED)';
+                        if (pollTimer) clearInterval(pollTimer);
+                        return;
+                    }
 
                     if (data.payment_status === 'paid') {
                         payBadge.className = 'font-bold uppercase text-[10px] px-2 py-0.5 rounded bg-emerald-100 text-emerald-800';
@@ -164,6 +182,7 @@
                             confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
                             isAlreadyCelebrated = true;
                         }
+                        if (pollTimer) clearInterval(pollTimer);
                     } else if (data.print_status === 'spooling') {
                         statusText.innerText = 'প্রিন্টারে পেজ বের হচ্ছে...';
                         subText.innerText = 'অনুগ্রহ করে অপেক্ষা করুন, প্রিন্ট কমান্ড পাঠানো হয়েছে';
@@ -174,8 +193,10 @@
                 .catch(err => console.error(err));
         }
 
-        // Poll every 2.5 seconds if not printed
-        setInterval(checkStatus, 2500);
+        // Poll every 2.5 seconds if not printed or cancelled
+        if ('{{ $job->print_status }}' !== 'printed' && '{{ $job->print_status }}' !== 'cancelled') {
+            pollTimer = setInterval(checkStatus, 2500);
+        }
     </script>
 </body>
 </html>

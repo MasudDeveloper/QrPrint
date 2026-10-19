@@ -68,12 +68,6 @@ class NidPdfService
         $pdf->Rect($centerX - 0.4, $yBack - 0.4, self::CARD_WIDTH_MM + 0.8, self::CARD_HEIGHT_MM + 0.8);
         $pdf->Image($processedBack, $centerX, $yBack, self::CARD_WIDTH_MM, self::CARD_HEIGHT_MM);
 
-        // Optional tiny bottom footer note
-        $pdf->SetFont('Arial', '', 7);
-        $pdf->SetTextColor(180, 180, 180);
-        $pdf->SetXY(0, 285);
-        $pdf->Cell(self::A4_WIDTH_MM, 5, 'PrintSheba Smart NID Print Service - Exact 1:1 Scale (85.6mm x 54mm)', 0, 0, 'C');
-
         $pdf->Output('F', $outputPdfPath);
 
         // Clean up temporary preprocessed files if created

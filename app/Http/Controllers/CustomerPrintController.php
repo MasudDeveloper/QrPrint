@@ -560,6 +560,7 @@ class CustomerPrintController extends Controller
             'job_token' => $job->job_token,
             'payment_status' => $job->payment_status,
             'print_status' => $job->print_status,
+            'cancel_reason' => $job->cancel_reason,
             'total_amount' => $job->total_amount,
             'printed_at' => $job->printed_at ? $job->printed_at->format('h:i A') : null,
         ]);

@@ -89,6 +89,12 @@ class ShopController extends Controller
             ->take(15)
             ->get();
 
+        $cancelledJobs = PrintJob::where('shop_id', $shop->id)
+            ->where('print_status', 'cancelled')
+            ->latest()
+            ->take(15)
+            ->get();
+
         $printers = Printer::where('shop_id', $shop->id)->get();
 
         return view('shop.dashboard', compact(
@@ -97,6 +103,7 @@ class ShopController extends Controller
             'todayPrintsCount',
             'pendingJobs',
             'completedJobs',
+            'cancelledJobs',
             'printers',
             'recentTransactions'
         ));
@@ -442,6 +449,48 @@ class ShopController extends Controller
         return back()->with('success', "টোকেন #{$job->job_token} পুনরায় প্রিন্ট করার জন্য কিউতে পাঠানো হয়েছে!");
     }
 
+    public function cancelJob(Request $request, PrintJob $job)
+    {
+        $shop = $this->getShop();
+        $user = Auth::user();
+
+        // Check ownership: current active shop OR user's own shop OR super admin
+        $isOwner = ((int) $job->shop_id === (int) $shop->id) || 
+                   ($user && Shop::where('id', $job->shop_id)->where('user_id', $user->id)->exists()) ||
+                   ($user && $user->shop && (int) $user->shop->id === (int) $job->shop_id) || 
+                   ($user && $user->isSuperAdmin()) ||
+                   (session('impersonator_id') !== null);
+
+        if (!$isOwner) {
+            if ($request->expectsJson()) {
+                return response()->json(['success' => false, 'message' => 'এই প্রিন্ট জবটি আপনার দোকানের নয়।'], 403);
+            }
+            return back()->with('error', 'এই প্রিন্ট জবটি আপনার দোকানের নয়।');
+        }
+
+        $reason = trim($request->input('cancel_reason', ''));
+        if (empty($reason) || $reason === 'other') {
+            $reason = trim($request->input('custom_reason', '')) ?: 'কাস্টমার দোকানে আসেননি / ক্যাশ দেননি';
+        }
+
+        $job->update([
+            'payment_status' => 'cancelled',
+            'print_status'   => 'cancelled',
+            'cancel_reason'  => $reason,
+            'cancelled_at'   => now(),
+        ]);
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => "টোকেন #{$job->job_token} এর অর্ডারটি বাতিল করা হয়েছে।",
+                'job_token' => $job->job_token,
+            ]);
+        }
+
+        return back()->with('success', "টোকেন #{$job->job_token} এর অর্ডারটি সফলভাবে বাতিল করা হয়েছে।");
+    }
+
     public function syncStatus()
     {
         $shop = $this->getShop();
@@ -478,10 +527,15 @@ class ShopController extends Controller
                     'color_mode' => $job->color_mode,
                     'total_amount' => $job->total_amount,
                     'payment_status' => $job->payment_status,
+                    'payment_method' => $job->payment_method,
                     'payment_trx_id' => $job->payment_trx_id,
                     'print_status' => $job->print_status,
+                    'pickup_reference' => $job->pickup_reference,
+                    'is_office_job' => (bool) $job->is_office_job,
                     'approve_url' => route('shop.jobs.approve', $job),
                     'reprint_url' => route('shop.jobs.reprint', $job),
+                    'cancel_url' => route('shop.jobs.cancel', $job),
+                    'slip_url' => route('shop.jobs.slip', $job),
                 ];
             });
 

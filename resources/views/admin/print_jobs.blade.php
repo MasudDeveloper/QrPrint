@@ -60,13 +60,21 @@
                                 {{ $job->created_at->format('d M, h:i A') }}
                             </td>
                             <td class="px-6 py-4 text-right whitespace-nowrap">
-                                @if($job->payment_status !== 'paid')
+                                @if($job->payment_status !== 'paid' && $job->print_status !== 'cancelled')
                                     <form action="{{ route('admin.jobs.approve', $job) }}" method="POST" class="inline">
                                         @csrf
                                         <button type="submit" class="px-2.5 py-1 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold text-[11px] transition-colors cursor-pointer">
                                             ✓ এপ্রুভ করুন
                                         </button>
                                     </form>
+                                    <form action="{{ route('admin.jobs.cancel', $job) }}" method="POST" class="inline" onsubmit="return confirm('আপনি কি নিশ্চিত এই প্রিন্ট অর্ডারটি বাতিল করতে চান?')">
+                                        @csrf
+                                        <button type="submit" class="px-2.5 py-1 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 font-bold text-[11px] transition-colors cursor-pointer">
+                                            ✕ বাতিল
+                                        </button>
+                                    </form>
+                                @elseif($job->print_status === 'cancelled')
+                                    <span class="text-rose-400 font-bold text-[11px]">বাতিলকৃত</span>
                                 @else
                                     <form action="{{ route('admin.jobs.reprint', $job) }}" method="POST" class="inline">
                                         @csrf
