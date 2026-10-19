@@ -199,9 +199,16 @@ class CustomerPrintController extends Controller
             return response()->view('customer.shop_closed', compact('shop'), 403);
         }
 
-        if (!$shop->has_nid_print) {
+        if ($shop->has_nid_print === false || $shop->has_nid_print === 0 || $shop->has_nid_print === '0') {
             return redirect()->route('customer.upload', $slug)->with('error_alert', 'এই দোকানে এনআইডি প্রিন্ট সেবাটি বন্ধ রয়েছে।');
         }
+
+        // Auto-fill fallback defaults to avoid unexpected validation blocks
+        $request->merge([
+            'payment_method' => $request->input('payment_method', 'cash') ?: 'cash',
+            'color_mode'     => $request->input('color_mode', 'bw') ?: 'bw',
+            'copies'         => max(1, min(100, (int) $request->input('copies', 1))),
+        ]);
 
         $request->validate([
             'color_mode' => 'required|in:bw,color',
@@ -213,11 +220,11 @@ class CustomerPrintController extends Controller
         ]);
 
         // Ensure both front and back images are provided (either as file or base64 data URI)
-        $hasFront = $request->hasFile('front_file') || !empty($request->input('front_cropped_data'));
-        $hasBack  = $request->hasFile('back_file') || !empty($request->input('back_cropped_data'));
+        $hasFront = $request->hasFile('front_file') || (!empty($request->input('front_cropped_data')) && strlen($request->input('front_cropped_data')) > 50);
+        $hasBack  = $request->hasFile('back_file')  || (!empty($request->input('back_cropped_data'))  && strlen($request->input('back_cropped_data')) > 50);
 
         if (!$hasFront || !$hasBack) {
-            return back()->withInput()->with('error_alert', 'এনআইডি কার্ডের সামনের অংশ (Front) এবং পেছনের অংশ (Back) উভয় পাশের ছবি প্রদান করতে হবে।');
+            return back()->withInput()->with('error_alert', 'এনআইডি কার্ডের সামনের অংশ (Front) এবং পেছনের অংশ (Back) উভয় পাশের ছবি সঠিকভাবে প্রদান করতে হবে।');
         }
 
         $copies = (int) $request->copies;
@@ -342,19 +349,25 @@ class CustomerPrintController extends Controller
         $base64Key = "{$side}_cropped_data";
         $fileKey = "{$side}_file";
 
-        if (!empty($request->input($base64Key))) {
-            $data = $request->input($base64Key);
-            if (preg_match('/^data:image\/(\w+);base64,/', $data, $matches)) {
+        $data = $request->input($base64Key);
+        if (!empty($data) && is_string($data)) {
+            if (str_contains($data, ',')) {
                 $data = substr($data, strpos($data, ',') + 1);
             }
             $binary = base64_decode($data);
-            file_put_contents($destPath, $binary);
-        } elseif ($request->hasFile($fileKey)) {
+            if ($binary !== false && strlen($binary) > 50) {
+                file_put_contents($destPath, $binary);
+                return;
+            }
+        }
+
+        if ($request->hasFile($fileKey)) {
             $file = $request->file($fileKey);
             copy($file->getRealPath(), $destPath);
-        } else {
-            throw new \Exception("Missing image for {$side} side");
+            return;
         }
+
+        throw new \Exception("এনআইডি কার্ডের {$side} অংশের ছবি পাওয়া যায়নি। অনুগ্রহ করে আবার আপলোড করুন।");
     }
 
     /*
@@ -470,11 +483,11 @@ class CustomerPrintController extends Controller
             'pickup_reference' => 'nullable|string|max:100',
         ]);
 
-        $hasFront = $request->hasFile('front_file') || !empty($request->input('front_cropped_data'));
-        $hasBack  = $request->hasFile('back_file') || !empty($request->input('back_cropped_data'));
+        $hasFront = $request->hasFile('front_file') || (!empty($request->input('front_cropped_data')) && strlen($request->input('front_cropped_data')) > 50);
+        $hasBack  = $request->hasFile('back_file')  || (!empty($request->input('back_cropped_data'))  && strlen($request->input('back_cropped_data')) > 50);
 
         if (!$hasFront || !$hasBack) {
-            return back()->withInput()->with('error_alert', 'এনআইডি কার্ডের সামনের ও পেছনের উভয় অংশের ছবি প্রদান করতে হবে।');
+            return back()->withInput()->with('error_alert', 'এনআইডি কার্ডের সামনের ও পেছনের উভয় অংশের ছবি সঠিকভাবে প্রদান করতে হবে।');
         }
 
         $copies = (int) $request->copies;

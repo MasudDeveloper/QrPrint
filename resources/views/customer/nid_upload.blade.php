@@ -90,6 +90,20 @@
             </div>
         @endif
 
+        @if($errors->any())
+            <div class="p-4 rounded-2xl bg-rose-50 border border-rose-300 text-rose-900 text-xs flex items-start gap-3 shadow-sm">
+                <span class="text-xl leading-none">⚠️</span>
+                <div class="space-y-1">
+                    <strong class="font-bold text-sm text-rose-800 block">ফর্ম পূরণে ত্রুটি হয়েছে:</strong>
+                    <ul class="list-disc list-inside space-y-0.5 text-xs text-rose-700">
+                        @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            </div>
+        @endif
+
         <!-- Banner -->
         <div class="p-4 rounded-3xl bg-gradient-to-r from-emerald-950 via-slate-900 to-teal-950 text-white shadow-lg space-y-1.5 border border-emerald-800/40 relative overflow-hidden">
             <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-emerald-500/10 rounded-full blur-xl pointer-events-none"></div>
@@ -103,7 +117,7 @@
             </p>
         </div>
 
-        <form action="{{ route('customer.nid_submit', $shop->slug) }}" method="POST" id="nidForm" class="space-y-4">
+        <form action="{{ route('customer.nid_submit', $shop->slug) }}" method="POST" enctype="multipart/form-data" id="nidForm" class="space-y-4">
             @csrf
 
             <!-- Hidden Inputs for Cropped High-Res Canvas Data -->
@@ -124,7 +138,7 @@
 
                 <!-- Front Upload Dropzone -->
                 <div id="frontUploadBox" class="border-2 border-dashed border-slate-300 hover:border-emerald-500 rounded-2xl p-5 text-center transition-all bg-slate-50/50 relative overflow-hidden">
-                    <input type="file" id="frontFileInput" accept="image/*" class="hidden">
+                    <input type="file" name="front_file" id="frontFileInput" accept="image/*" class="hidden">
                     <div class="space-y-3">
                         <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto text-xl shadow-xs">
                             🪪
@@ -191,7 +205,7 @@
 
                 <!-- Back Upload Dropzone -->
                 <div id="backUploadBox" class="border-2 border-dashed border-slate-300 hover:border-teal-500 rounded-2xl p-5 text-center transition-all bg-slate-50/50 relative overflow-hidden">
-                    <input type="file" id="backFileInput" accept="image/*" class="hidden">
+                    <input type="file" name="back_file" id="backFileInput" accept="image/*" class="hidden">
                     <div class="space-y-3">
                         <div class="w-12 h-12 rounded-2xl bg-teal-50 text-teal-600 flex items-center justify-center mx-auto text-xl shadow-xs">
                             🪪
@@ -359,6 +373,9 @@
                 <div>
                     <label class="block text-xs font-bold text-slate-700 mb-2">পেমেন্ট মেথড নির্বাচন করুন:</label>
                     <div class="space-y-2">
+                        @php
+                            $defaultMethod = old('payment_method') ?: ($shop->bkash_number ? 'bkash' : ($shop->nagad_number ? 'nagad' : 'cash'));
+                        @endphp
                         @if($shop->bkash_number)
                             <label class="border-2 border-slate-200 rounded-2xl p-3 flex items-center justify-between cursor-pointer has-[:checked]:border-pink-500 has-[:checked]:bg-pink-50/20">
                                 <div class="flex items-center gap-2.5">
@@ -368,7 +385,7 @@
                                         <span class="text-[11px] font-mono text-pink-600 font-bold">{{ $shop->bkash_number }}</span>
                                     </div>
                                 </div>
-                                <input type="radio" name="payment_method" value="bkash" checked class="accent-pink-500">
+                                <input type="radio" name="payment_method" value="bkash" {{ $defaultMethod === 'bkash' ? 'checked' : '' }} class="accent-pink-500">
                             </label>
                         @endif
 
@@ -381,7 +398,7 @@
                                         <span class="text-[11px] font-mono text-amber-600 font-bold">{{ $shop->nagad_number }}</span>
                                     </div>
                                 </div>
-                                <input type="radio" name="payment_method" value="nagad" class="accent-amber-500">
+                                <input type="radio" name="payment_method" value="nagad" {{ $defaultMethod === 'nagad' ? 'checked' : '' }} class="accent-amber-500">
                             </label>
                         @endif
 
@@ -393,7 +410,7 @@
                                     <span class="text-[10px] text-slate-500">দোকানদার ভেরিফাই করলে প্রিন্ট শুরু হবে</span>
                                 </div>
                             </div>
-                            <input type="radio" name="payment_method" value="cash" class="accent-slate-800">
+                            <input type="radio" name="payment_method" value="cash" {{ $defaultMethod === 'cash' ? 'checked' : '' }} class="accent-slate-800">
                         </label>
                     </div>
                 </div>
@@ -1210,6 +1227,141 @@
                 mctx.fillStyle = '#ffffff';
                 mctx.fill();
             });
+
+            // Draw Floating Circular Magnifying Glass (Loupe) when dragging a corner handle
+            if (activeHandleIndex !== -1 && activeHandleIndex >= 0 && activeHandleIndex < modalCorners.length) {
+                const curPt = modalCorners[activeHandleIndex];
+                const cx = curPt.x * scale;
+                const cy = curPt.y * scale;
+
+                const loupeRadius = 48; // Circular magnifier radius (diameter 96px)
+                const zoom = 2.4;       // 2.4x zoom for crisp edge alignment
+
+                // Position loupe vertically above the finger so finger does not obstruct the view.
+                // If corner is near top of screen (cy - 85 - loupeRadius < 8), position it below the finger.
+                const offsetAbove = 85;
+                const loupeY = (cy - offsetAbove - loupeRadius >= 8) 
+                    ? (cy - offsetAbove) 
+                    : (cy + offsetAbove);
+
+                // Clamp loupeX horizontally inside canvas bounds with padding
+                const loupeX = Math.max(loupeRadius + 10, Math.min(modalCanvas.width - loupeRadius - 10, cx));
+
+                // Save canvas state for clipped loupe
+                mctx.save();
+
+                // Drop shadow around the lens
+                mctx.shadowColor = 'rgba(0, 0, 0, 0.45)';
+                mctx.shadowBlur = 16;
+                mctx.shadowOffsetX = 0;
+                mctx.shadowOffsetY = 4;
+
+                // Begin circular clip path
+                mctx.beginPath();
+                mctx.arc(loupeX, loupeY, loupeRadius, 0, 2 * Math.PI);
+                mctx.fillStyle = '#1e293b';
+                mctx.fill();
+                mctx.clip();
+
+                // Reset shadow inside clip
+                mctx.shadowColor = 'transparent';
+
+                // Source dimensions from unscaled modalRotCanvas
+                const srcDiameter = (loupeRadius * 2) / (scale * zoom);
+                const srcX = curPt.x - srcDiameter / 2;
+                const srcY = curPt.y - srcDiameter / 2;
+
+                // Draw zoomed image portion
+                mctx.drawImage(
+                    modalRotCanvas,
+                    srcX, srcY, srcDiameter, srcDiameter,
+                    loupeX - loupeRadius, loupeY - loupeRadius, loupeRadius * 2, loupeRadius * 2
+                );
+
+                // Draw precision Crosshair Target in center of loupe
+                // White outer halo ring for crosshair
+                mctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
+                mctx.lineWidth = 2.5;
+                mctx.beginPath();
+                mctx.arc(loupeX, loupeY, 6, 0, 2 * Math.PI);
+                mctx.stroke();
+
+                // Precision Red Reticle / Crosshair lines (with center gap)
+                mctx.strokeStyle = '#ef4444';
+                mctx.lineWidth = 1.8;
+                mctx.beginPath();
+                // Horizontal
+                mctx.moveTo(loupeX - 18, loupeY);
+                mctx.lineTo(loupeX - 4, loupeY);
+                mctx.moveTo(loupeX + 4, loupeY);
+                mctx.lineTo(loupeX + 18, loupeY);
+                // Vertical
+                mctx.moveTo(loupeX, loupeY - 18);
+                mctx.lineTo(loupeX, loupeY - 4);
+                mctx.moveTo(loupeX, loupeY + 4);
+                mctx.lineTo(loupeX, loupeY + 18);
+                mctx.stroke();
+
+                // Center red dot
+                mctx.beginPath();
+                mctx.arc(loupeX, loupeY, 2.5, 0, 2 * Math.PI);
+                mctx.fillStyle = '#ef4444';
+                mctx.fill();
+
+                mctx.restore();
+
+                // Outer border lens casing (Emerald theme)
+                mctx.save();
+                mctx.beginPath();
+                mctx.arc(loupeX, loupeY, loupeRadius, 0, 2 * Math.PI);
+                mctx.strokeStyle = '#10b981';
+                mctx.lineWidth = 3.5;
+                mctx.stroke();
+
+                // Thin white inner rim highlight
+                mctx.beginPath();
+                mctx.arc(loupeX, loupeY, loupeRadius - 2.5, 0, 2 * Math.PI);
+                mctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+                mctx.lineWidth = 1.2;
+                mctx.stroke();
+
+                // Small pill label indicating corner name & zoom factor
+                const badgeY = (loupeY < cy) 
+                    ? (loupeY - loupeRadius - 10) 
+                    : (loupeY + loupeRadius + 12);
+                const cornerNames = ['১. বাম-উপর', '২. ডান-উপর', '৩. ডান-নিচ', '৪. বাম-নিচ'];
+                const cornerLabel = (cornerNames[activeHandleIndex] || 'কোণা') + ' (২.৪x জুম)';
+                
+                mctx.font = 'bold 11px "Hind Siliguri", sans-serif';
+                mctx.textAlign = 'center';
+                mctx.textBaseline = 'middle';
+                const textWidth = mctx.measureText(cornerLabel).width;
+                const badgeWidth = textWidth + 14;
+                const badgeHeight = 18;
+
+                mctx.fillStyle = 'rgba(15, 23, 42, 0.9)';
+                mctx.beginPath();
+                if (typeof mctx.roundRect === 'function') {
+                    mctx.roundRect(loupeX - badgeWidth / 2, badgeY - badgeHeight / 2, badgeWidth, badgeHeight, 9);
+                } else {
+                    mctx.rect(loupeX - badgeWidth / 2, badgeY - badgeHeight / 2, badgeWidth, badgeHeight);
+                }
+                mctx.fill();
+                mctx.fillStyle = '#34d399';
+                mctx.fillText(cornerLabel, loupeX, badgeY);
+
+                // Dotted connector line from corner handle to loupe for visual connection
+                mctx.strokeStyle = 'rgba(16, 185, 129, 0.6)';
+                mctx.lineWidth = 1.5;
+                mctx.setLineDash([3, 3]);
+                mctx.beginPath();
+                mctx.moveTo(cx, cy);
+                mctx.lineTo(loupeX, (loupeY < cy) ? (loupeY + loupeRadius) : (loupeY - loupeRadius));
+                mctx.stroke();
+                mctx.setLineDash([]); // Reset line dash
+
+                mctx.restore();
+            }
         }
 
         // Pointer / Touch Handling on Cropper Canvas
@@ -1298,15 +1450,37 @@
                 return;
             }
 
-            // Show Loading State
-            document.getElementById('submitBtn').disabled = true;
-            document.getElementById('submitBtn').innerHTML = `
+            // Ensure cropped base64 is populated
+            const frontDataInput = document.getElementById('frontCroppedData');
+            if (!frontDataInput.value || frontDataInput.value.length < 50) {
+                frontDataInput.value = cardState.front.croppedCanvas.toDataURL('image/jpeg', 0.92);
+            }
+            const backDataInput = document.getElementById('backCroppedData');
+            if (!backDataInput.value || backDataInput.value.length < 50) {
+                backDataInput.value = cardState.back.croppedCanvas.toDataURL('image/jpeg', 0.92);
+            }
+
+            // Ensure payment method has a checked radio
+            let checkedPayment = document.querySelector('input[name="payment_method"]:checked');
+            if (!checkedPayment) {
+                const cashRadio = document.querySelector('input[name="payment_method"][value="cash"]');
+                if (cashRadio) cashRadio.checked = true;
+            }
+
+            // Show Loading State (WITHOUT synchronous disabling so the browser doesn't cancel submission)
+            const btn = document.getElementById('submitBtn');
+            btn.classList.add('pointer-events-none', 'opacity-75');
+            btn.innerHTML = `
                 <svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
                 </svg>
                 <span>এ৪ পেজ জেনারেট হচ্ছে, অপেক্ষা করুন...</span>
             `;
+
+            setTimeout(() => {
+                btn.disabled = true;
+            }, 400);
         });
 
         // Initial Calculation

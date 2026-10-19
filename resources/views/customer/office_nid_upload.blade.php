@@ -84,6 +84,20 @@
             </div>
         @endif
 
+        @if($errors->any())
+            <div class="p-4 rounded-2xl bg-rose-50 border border-rose-300 text-rose-900 text-xs flex items-start gap-3 shadow-sm">
+                <span class="text-xl leading-none">⚠️</span>
+                <div class="space-y-1">
+                    <strong class="font-bold text-sm text-rose-800 block">ফর্ম পূরণে ত্রুটি হয়েছে:</strong>
+                    <ul class="list-disc list-inside space-y-0.5 text-xs text-rose-700">
+                        @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            </div>
+        @endif
+
         <!-- Banner -->
         <div class="p-4 rounded-3xl bg-gradient-to-r from-indigo-950 via-slate-900 to-indigo-900 text-white shadow-lg space-y-1.5 border border-indigo-800/40 relative overflow-hidden">
             <div class="flex items-center gap-2">
@@ -96,7 +110,7 @@
             </p>
         </div>
 
-        <form action="{{ route('customer.office_nid_submit', $shop->slug) }}" method="POST" id="officeNidForm" class="space-y-4">
+        <form action="{{ route('customer.office_nid_submit', $shop->slug) }}" method="POST" enctype="multipart/form-data" id="officeNidForm" class="space-y-4">
             @csrf
 
             <input type="hidden" name="front_cropped_data" id="frontCroppedData">
@@ -115,7 +129,7 @@
                 </div>
 
                 <div id="frontUploadBox" class="border-2 border-dashed border-slate-300 hover:border-indigo-500 rounded-2xl p-5 text-center transition-all bg-slate-50/50 relative overflow-hidden">
-                    <input type="file" id="frontFileInput" accept="image/*" class="hidden">
+                    <input type="file" name="front_file" id="frontFileInput" accept="image/*" class="hidden">
                     <div class="space-y-3">
                         <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center mx-auto text-xl shadow-xs">
                             🪪
@@ -180,7 +194,7 @@
                 </div>
 
                 <div id="backUploadBox" class="border-2 border-dashed border-slate-300 hover:border-blue-500 rounded-2xl p-5 text-center transition-all bg-slate-50/50 relative overflow-hidden">
-                    <input type="file" id="backFileInput" accept="image/*" class="hidden">
+                    <input type="file" name="back_file" id="backFileInput" accept="image/*" class="hidden">
                     <div class="space-y-3">
                         <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mx-auto text-xl shadow-xs">
                             🪪
@@ -894,6 +908,137 @@
                 mctx.lineWidth = 3;
                 mctx.stroke();
             });
+
+            // Draw Floating Circular Magnifying Glass (Loupe) when dragging a corner handle
+            if (activeHandleIndex !== -1 && activeHandleIndex >= 0 && activeHandleIndex < modalCorners.length) {
+                const curPt = modalCorners[activeHandleIndex];
+                const cx = curPt.x * scale;
+                const cy = curPt.y * scale;
+
+                const loupeRadius = 48; // Circular magnifier radius (diameter 96px)
+                const zoom = 2.4;       // 2.4x zoom for crisp edge alignment
+
+                // Position loupe vertically above the finger so finger does not obstruct the view
+                const offsetAbove = 85;
+                const loupeY = (cy - offsetAbove - loupeRadius >= 8) 
+                    ? (cy - offsetAbove) 
+                    : (cy + offsetAbove);
+
+                // Clamp loupeX horizontally inside canvas bounds with padding
+                const loupeX = Math.max(loupeRadius + 10, Math.min(modalCanvas.width - loupeRadius - 10, cx));
+
+                // Save canvas state for clipped loupe
+                mctx.save();
+
+                // Drop shadow around the lens
+                mctx.shadowColor = 'rgba(0, 0, 0, 0.45)';
+                mctx.shadowBlur = 16;
+                mctx.shadowOffsetX = 0;
+                mctx.shadowOffsetY = 4;
+
+                // Begin circular clip path
+                mctx.beginPath();
+                mctx.arc(loupeX, loupeY, loupeRadius, 0, 2 * Math.PI);
+                mctx.fillStyle = '#1e1b4b';
+                mctx.fill();
+                mctx.clip();
+
+                // Reset shadow inside clip
+                mctx.shadowColor = 'transparent';
+
+                // Source dimensions from unscaled modalRotCanvas
+                const srcDiameter = (loupeRadius * 2) / (scale * zoom);
+                const srcX = curPt.x - srcDiameter / 2;
+                const srcY = curPt.y - srcDiameter / 2;
+
+                // Draw zoomed image portion
+                mctx.drawImage(
+                    modalRotCanvas,
+                    srcX, srcY, srcDiameter, srcDiameter,
+                    loupeX - loupeRadius, loupeY - loupeRadius, loupeRadius * 2, loupeRadius * 2
+                );
+
+                // Draw precision Crosshair Target in center of loupe
+                mctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
+                mctx.lineWidth = 2.5;
+                mctx.beginPath();
+                mctx.arc(loupeX, loupeY, 6, 0, 2 * Math.PI);
+                mctx.stroke();
+
+                // Precision Red Reticle / Crosshair lines (with center gap)
+                mctx.strokeStyle = '#ef4444';
+                mctx.lineWidth = 1.8;
+                mctx.beginPath();
+                mctx.moveTo(loupeX - 18, loupeY);
+                mctx.lineTo(loupeX - 4, loupeY);
+                mctx.moveTo(loupeX + 4, loupeY);
+                mctx.lineTo(loupeX + 18, loupeY);
+                mctx.moveTo(loupeX, loupeY - 18);
+                mctx.lineTo(loupeX, loupeY - 4);
+                mctx.moveTo(loupeX, loupeY + 4);
+                mctx.lineTo(loupeX, loupeY + 18);
+                mctx.stroke();
+
+                // Center red dot
+                mctx.beginPath();
+                mctx.arc(loupeX, loupeY, 2.5, 0, 2 * Math.PI);
+                mctx.fillStyle = '#ef4444';
+                mctx.fill();
+
+                mctx.restore();
+
+                // Outer border lens casing (Indigo theme)
+                mctx.save();
+                mctx.beginPath();
+                mctx.arc(loupeX, loupeY, loupeRadius, 0, 2 * Math.PI);
+                mctx.strokeStyle = '#6366f1';
+                mctx.lineWidth = 3.5;
+                mctx.stroke();
+
+                // Thin white inner rim highlight
+                mctx.beginPath();
+                mctx.arc(loupeX, loupeY, loupeRadius - 2.5, 0, 2 * Math.PI);
+                mctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+                mctx.lineWidth = 1.2;
+                mctx.stroke();
+
+                // Small pill label indicating corner name & zoom factor
+                const badgeY = (loupeY < cy) 
+                    ? (loupeY - loupeRadius - 10) 
+                    : (loupeY + loupeRadius + 12);
+                const cornerNames = ['১. বাম-উপর', '২. ডান-উপর', '৩. ডান-নিচ', '৪. বাম-নিচ'];
+                const cornerLabel = (cornerNames[activeHandleIndex] || 'কোণা') + ' (২.৪x জুম)';
+                
+                mctx.font = 'bold 11px "Hind Siliguri", sans-serif';
+                mctx.textAlign = 'center';
+                mctx.textBaseline = 'middle';
+                const textWidth = mctx.measureText(cornerLabel).width;
+                const badgeWidth = textWidth + 14;
+                const badgeHeight = 18;
+
+                mctx.fillStyle = 'rgba(15, 23, 42, 0.9)';
+                mctx.beginPath();
+                if (typeof mctx.roundRect === 'function') {
+                    mctx.roundRect(loupeX - badgeWidth / 2, badgeY - badgeHeight / 2, badgeWidth, badgeHeight, 9);
+                } else {
+                    mctx.rect(loupeX - badgeWidth / 2, badgeY - badgeHeight / 2, badgeWidth, badgeHeight);
+                }
+                mctx.fill();
+                mctx.fillStyle = '#818cf8';
+                mctx.fillText(cornerLabel, loupeX, badgeY);
+
+                // Dotted connector line from corner handle to loupe for visual connection
+                mctx.strokeStyle = 'rgba(99, 102, 241, 0.6)';
+                mctx.lineWidth = 1.5;
+                mctx.setLineDash([3, 3]);
+                mctx.beginPath();
+                mctx.moveTo(cx, cy);
+                mctx.lineTo(loupeX, (loupeY < cy) ? (loupeY + loupeRadius) : (loupeY - loupeRadius));
+                mctx.stroke();
+                mctx.setLineDash([]); // Reset line dash
+
+                mctx.restore();
+            }
         }
 
         function getCanvasPoint(evt) {
@@ -950,9 +1095,24 @@
                 });
                 return;
             }
+
+            // Ensure cropped base64 is populated
+            const frontDataInput = document.getElementById('frontCroppedData');
+            if (!frontDataInput.value || frontDataInput.value.length < 50) {
+                frontDataInput.value = cardState.front.croppedCanvas.toDataURL('image/jpeg', 0.92);
+            }
+            const backDataInput = document.getElementById('backCroppedData');
+            if (!backDataInput.value || backDataInput.value.length < 50) {
+                backDataInput.value = cardState.back.croppedCanvas.toDataURL('image/jpeg', 0.92);
+            }
+
             const btn = document.getElementById('submitBtn');
-            btn.disabled = true;
+            btn.classList.add('pointer-events-none', 'opacity-75');
             btn.innerHTML = '<span>প্রিন্টারে পাঠানো হচ্ছে...</span>';
+
+            setTimeout(() => {
+                btn.disabled = true;
+            }, 400);
         });
     </script>
 </body>
