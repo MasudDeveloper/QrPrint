@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'python_ai' => [
+        'url' => env('PYTHON_AI_API_URL', 'http://127.0.0.1:8000'),
+        'key' => env('PYTHON_AI_API_KEY', 'penghor_secret_key_121'),
+    ],
+
 ];

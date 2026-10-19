@@ -2,7 +2,19 @@
 
 namespace App\Services;
 
-use FPDF;
+if (!class_exists('FPDF') && !class_exists('\FPDF')) {
+    $fpdfPaths = [
+        base_path('vendor/setasign/fpdf/fpdf.php'),
+        __DIR__ . '/FPDF/fpdf.php',
+    ];
+    foreach ($fpdfPaths as $path) {
+        if (file_exists($path)) {
+            require_once $path;
+            break;
+        }
+    }
+}
+
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -31,7 +43,7 @@ class NidPdfService
         $processedFront = $this->prepareCardImage($frontImagePath, $colorMode, 'front');
         $processedBack  = $this->prepareCardImage($backImagePath, $colorMode, 'back');
 
-        $pdf = new FPDF('P', 'mm', 'A4');
+        $pdf = new \FPDF('P', 'mm', 'A4');
         $pdf->SetAutoPageBreak(false);
         $pdf->SetMargins(0, 0, 0);
         $pdf->AddPage();

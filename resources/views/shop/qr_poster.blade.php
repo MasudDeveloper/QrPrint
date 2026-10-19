@@ -64,16 +64,18 @@
         </div>
 
         <!-- QR Code Box -->
-        <div class="max-w-xs mx-auto p-6 bg-slate-50 rounded-3xl border-2 border-dashed border-slate-300 flex flex-col items-center">
+        <div class="w-full max-w-sm mx-auto p-6 bg-slate-50 rounded-3xl border-2 border-dashed border-slate-300 flex flex-col items-center">
             <!-- QR Code using reliable API -->
             <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data={{ urlencode($printUrl) }}&color=0f172a" 
                  alt="Shop QR Code" 
                  class="w-56 h-56 rounded-2xl shadow-md border-4 border-white">
             
-            <span class="text-xs font-mono font-bold text-slate-600 mt-4 truncate max-w-full">
-                {{ $printUrl }}
-            </span>
-            <span class="text-[11px] font-bold text-emerald-600 mt-1 uppercase tracking-wider flex items-center gap-1">
+            <div class="mt-4 px-3.5 py-2 rounded-xl bg-white border border-slate-200/90 shadow-xs w-full text-center">
+                <span class="text-xs font-mono font-bold text-slate-700 break-all select-all block leading-relaxed">
+                    {{ $printUrl }}
+                </span>
+            </div>
+            <span class="text-[11px] font-bold text-emerald-600 mt-2 uppercase tracking-wider flex items-center gap-1">
                 <span>●</span> মোবাইল ক্যামেরা দিয়ে স্ক্যান করুন
             </span>
         </div>

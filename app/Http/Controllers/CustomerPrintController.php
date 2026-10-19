@@ -6,6 +6,7 @@ use App\Models\Shop;
 use App\Models\PrintJob;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 
 class CustomerPrintController extends Controller
@@ -549,5 +550,146 @@ class CustomerPrintController extends Controller
             'total_amount' => $job->total_amount,
             'printed_at' => $job->printed_at ? $job->printed_at->format('h:i A') : null,
         ]);
+    }
+
+    /**
+     * AI-powered document / NID auto-crop API gateway.
+     */
+    public function autoCropDocument(Request $request)
+    {
+        $file = $request->file('file') ?? $request->file('image');
+        $fileContent = null;
+        $fileName = 'document.jpg';
+
+        if ($file && $file->isValid()) {
+            $fileContent = file_get_contents($file->getRealPath());
+            $fileName = $file->getClientOriginalName() ?: 'document.jpg';
+        } elseif ($request->filled('image_data')) {
+            $dataUri = $request->input('image_data');
+            if (preg_match('/^data:image\/(\w+);base64,/', $dataUri)) {
+                $fileContent = base64_decode(substr($dataUri, strpos($dataUri, ',') + 1));
+            } else {
+                $fileContent = base64_decode($dataUri);
+            }
+        }
+
+        if (!$fileContent) {
+            return response()->json([
+                'success' => false,
+                'message' => 'কোনো ছবি পাওয়া যায়নি। অনুগ্রহ করে ফাইল আপলোড বা পেস্ট করুন।'
+            ], 400);
+        }
+
+        $endpointUrl = $this->getAiEndpointUrl('auto-crop-document');
+        $aiKey = config('services.python_ai.key', 'penghor_secret_key_121');
+
+        try {
+            $response = Http::withHeaders([
+                'x-api-key' => $aiKey,
+            ])->timeout(30)->attach(
+                'file',
+                $fileContent,
+                $fileName
+            )->post($endpointUrl);
+
+            if ($response->successful()) {
+                $croppedBinary = $response->body();
+                return response()->json([
+                    'success' => true,
+                    'image_data' => 'data:image/jpeg;base64,' . base64_encode($croppedBinary),
+                    'source' => 'python_ai',
+                ]);
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Python AI ক্রপিং প্রসেস করতে ব্যর্থ হয়েছে (স্ট্যাটাস: ' . $response->status() . ')',
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Python AI সার্ভারে সংযোগ করা যায়নি: ' . $e->getMessage(),
+            ], 200);
+        }
+    }
+
+    /**
+     * AI-powered document / NID 4-corner detection API gateway.
+     */
+    public function detectDocumentCorners(Request $request)
+    {
+        $file = $request->file('file') ?? $request->file('image');
+        $fileContent = null;
+        $fileName = 'document.jpg';
+
+        if ($file && $file->isValid()) {
+            $fileContent = file_get_contents($file->getRealPath());
+            $fileName = $file->getClientOriginalName() ?: 'document.jpg';
+        } elseif ($request->filled('image_data')) {
+            $dataUri = $request->input('image_data');
+            if (preg_match('/^data:image\/(\w+);base64,/', $dataUri)) {
+                $fileContent = base64_decode(substr($dataUri, strpos($dataUri, ',') + 1));
+            } else {
+                $fileContent = base64_decode($dataUri);
+            }
+        }
+
+        if (!$fileContent) {
+            return response()->json([
+                'success' => false,
+                'message' => 'কোনো ছবি পাওয়া যায়নি।'
+            ], 400);
+        }
+
+        $endpointUrl = $this->getAiEndpointUrl('detect-document-corners');
+        $aiKey = config('services.python_ai.key', 'penghor_secret_key_121');
+
+        try {
+            $response = Http::withHeaders([
+                'x-api-key' => $aiKey,
+            ])->timeout(30)->attach(
+                'file',
+                $fileContent,
+                $fileName
+            )->post($endpointUrl);
+
+            if ($response->successful()) {
+                return response()->json($response->json());
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => 'AI কর্নার ডিটেকশন ব্যর্থ হয়েছে (স্ট্যাটাস: ' . $response->status() . ')',
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Python AI সার্ভারে সংযোগ পাওয়া যায়নি: ' . $e->getMessage(),
+            ], 200);
+        }
+    }
+
+    /**
+     * Resolve the target URL for a given AI endpoint.
+     * Supports both direct FastAPI URLs (e.g. http://127.0.0.1:8000/endpoint)
+     * and VPS PHP proxy URLs (e.g. http://importentapi.rootvabd.com/python_api/proxy.php?endpoint=...)
+     */
+    protected function getAiEndpointUrl(string $endpoint): string
+    {
+        $rawUrl = config('services.python_ai.url', 'http://importentapi.rootvabd.com/python_api/proxy.php');
+        $rawUrl = trim($rawUrl);
+
+        // If the URL already contains proxy.php or has query parameters:
+        if (str_contains($rawUrl, 'proxy.php') || str_contains($rawUrl, '?endpoint=')) {
+            // Strip any existing ?endpoint=... or &endpoint=...
+            $baseUrl = preg_replace('/(\?|&)endpoint=[^&]*/', '', $rawUrl);
+            $separator = str_contains($baseUrl, '?') ? '&' : '?';
+            return $baseUrl . $separator . 'endpoint=' . urlencode($endpoint);
+        }
+
+        // Standard direct FastAPI endpoint
+        return rtrim($rawUrl, '/') . '/' . ltrim($endpoint, '/');
     }
 }

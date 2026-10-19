@@ -114,7 +114,7 @@
                     </span>
                 </div>
 
-                <div id="frontUploadBox" class="border-2 border-dashed border-slate-300 hover:border-indigo-500 rounded-2xl p-5 text-center transition-all bg-slate-50/50 relative">
+                <div id="frontUploadBox" class="border-2 border-dashed border-slate-300 hover:border-indigo-500 rounded-2xl p-5 text-center transition-all bg-slate-50/50 relative overflow-hidden">
                     <input type="file" id="frontFileInput" accept="image/*" class="hidden">
                     <div class="space-y-3">
                         <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center mx-auto text-xl shadow-xs">
@@ -122,16 +122,25 @@
                         </div>
                         <div>
                             <div class="text-xs font-bold text-slate-800">এনআইডি কার্ডের সামনের অংশের ছবি</div>
-                            <div class="text-[10px] text-slate-400 mt-0.5">টেবিল বা মেঝের ওপর রেখে ছবি তুলুন</div>
+                            <div class="text-[10px] text-slate-400 mt-0.5">টেবিল বা মেঝের ওপর রেখে ছবি তুলুন অথবা সরাসরি <kbd class="px-1 py-0.5 rounded bg-slate-200 text-slate-700 font-mono text-[9px]">Ctrl+V</kbd> দিয়ে পেস্ট করুন</div>
                         </div>
-                        <div class="flex items-center justify-center gap-2 pt-1">
+                        <div class="flex items-center justify-center gap-2 pt-1 flex-wrap">
                             <button type="button" onclick="triggerFileInput('front', true)" class="px-3 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-sm transition-all flex items-center gap-1.5 cursor-pointer">
                                 <span>📸 ক্যামেরা</span>
                             </button>
                             <button type="button" onclick="triggerFileInput('front', false)" class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold border border-slate-200 transition-all flex items-center gap-1.5 cursor-pointer">
-                                <span>📁 ফাইল/গ্যালারি</span>
+                                <span>📁 ফাইল</span>
+                            </button>
+                            <button type="button" onclick="pasteFromClipboard('front')" class="px-3 py-2 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-700 text-xs font-bold border border-purple-200 transition-all flex items-center gap-1.5 cursor-pointer" title="কপি করা ছবি পেস্ট করুন">
+                                <span>📋 পেস্ট (Ctrl+V)</span>
                             </button>
                         </div>
+                    </div>
+                    <!-- Front AI Scanning Overlay -->
+                    <div id="frontAiLoading" class="hidden absolute inset-0 bg-white/95 rounded-2xl flex flex-col items-center justify-center p-4 z-20 backdrop-blur-xs">
+                        <div class="w-10 h-10 border-3 border-indigo-600 border-t-transparent rounded-full animate-spin mb-2.5"></div>
+                        <span class="text-xs font-bold text-indigo-900">🤖 AI কার্ড ডিটেক্ট ও সোজা করছে...</span>
+                        <span class="text-[10px] text-slate-500 mt-1">দয়া করে কয়েক সেকেন্ড অপেক্ষা করুন</span>
                     </div>
                 </div>
 
@@ -170,7 +179,7 @@
                     </span>
                 </div>
 
-                <div id="backUploadBox" class="border-2 border-dashed border-slate-300 hover:border-blue-500 rounded-2xl p-5 text-center transition-all bg-slate-50/50 relative">
+                <div id="backUploadBox" class="border-2 border-dashed border-slate-300 hover:border-blue-500 rounded-2xl p-5 text-center transition-all bg-slate-50/50 relative overflow-hidden">
                     <input type="file" id="backFileInput" accept="image/*" class="hidden">
                     <div class="space-y-3">
                         <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mx-auto text-xl shadow-xs">
@@ -178,16 +187,25 @@
                         </div>
                         <div>
                             <div class="text-xs font-bold text-slate-800">এনআইডি কার্ডের পেছনের অংশের ছবি</div>
-                            <div class="text-[10px] text-slate-400 mt-0.5">ঠিকানা ও বারকোড অংশ পরিষ্কারভাবে তুলুন</div>
+                            <div class="text-[10px] text-slate-400 mt-0.5">ঠিকানা ও বারকোড পরিষ্কার রাখুন বা সরাসরি <kbd class="px-1 py-0.5 rounded bg-slate-200 text-slate-700 font-mono text-[9px]">Ctrl+V</kbd> দিয়ে পেস্ট করুন</div>
                         </div>
-                        <div class="flex items-center justify-center gap-2 pt-1">
+                        <div class="flex items-center justify-center gap-2 pt-1 flex-wrap">
                             <button type="button" onclick="triggerFileInput('back', true)" class="px-3 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-sm transition-all flex items-center gap-1.5 cursor-pointer">
                                 <span>📸 ক্যামেরা</span>
                             </button>
                             <button type="button" onclick="triggerFileInput('back', false)" class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold border border-slate-200 transition-all flex items-center gap-1.5 cursor-pointer">
-                                <span>📁 ফাইল/গ্যালারি</span>
+                                <span>📁 ফাইল</span>
+                            </button>
+                            <button type="button" onclick="pasteFromClipboard('back')" class="px-3 py-2 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-700 text-xs font-bold border border-purple-200 transition-all flex items-center gap-1.5 cursor-pointer" title="কপি করা ছবি পেস্ট করুন">
+                                <span>📋 পেস্ট (Ctrl+V)</span>
                             </button>
                         </div>
+                    </div>
+                    <!-- Back AI Scanning Overlay -->
+                    <div id="backAiLoading" class="hidden absolute inset-0 bg-white/95 rounded-2xl flex flex-col items-center justify-center p-4 z-20 backdrop-blur-xs">
+                        <div class="w-10 h-10 border-3 border-blue-600 border-t-transparent rounded-full animate-spin mb-2.5"></div>
+                        <span class="text-xs font-bold text-blue-900">🤖 AI কার্ড ডিটেক্ট ও সোজা করছে...</span>
+                        <span class="text-[10px] text-slate-500 mt-1">দয়া করে কয়েক সেকেন্ড অপেক্ষা করুন</span>
                     </div>
                 </div>
 
@@ -355,24 +373,230 @@
             input.click();
         }
 
+        // File Selection Handlers
         ['front', 'back'].forEach(side => {
             const input = document.getElementById(`${side}FileInput`);
             input.addEventListener('change', function(e) {
                 const file = e.target.files[0];
                 if (!file) return;
+                processUploadedFile(side, file);
+            });
+        });
 
+        function readFileAsDataUrl(file) {
+            return new Promise((resolve, reject) => {
                 const reader = new FileReader();
-                reader.onload = function(evt) {
-                    const img = new Image();
-                    img.onload = function() {
-                        cardState[side].originalImage = img;
-                        cardState[side].rotation = 0;
-                        detectCardAndCrop(side);
-                    };
-                    img.src = evt.target.result;
-                };
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = reject;
                 reader.readAsDataURL(file);
             });
+        }
+
+        function loadImageFromSrc(src) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = () => resolve(img);
+                img.onerror = reject;
+                img.src = src;
+            });
+        }
+
+        // Main File / Paste Processing Pipeline
+        async function processUploadedFile(side, file, optionalDataUrl = null) {
+            const loadingEl = document.getElementById(`${side}AiLoading`);
+            const statusBadge = document.getElementById(`${side}StatusBadge`);
+
+            if (loadingEl) loadingEl.classList.remove('hidden');
+            if (statusBadge) {
+                statusBadge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 animate-pulse';
+                statusBadge.innerText = '🤖 AI প্রসেসিং...';
+            }
+
+            try {
+                const dataUrl = optionalDataUrl || await readFileAsDataUrl(file);
+                const originalImg = await loadImageFromSrc(dataUrl);
+
+                cardState[side].originalImage = originalImg;
+                cardState[side].rotation = 0;
+
+                let aiSuccess = false;
+                try {
+                    const formData = new FormData();
+                    if (file) {
+                        formData.append('file', file);
+                    } else {
+                        formData.append('image_data', dataUrl);
+                    }
+
+                    const response = await fetch('{{ route("api.ai.auto_crop") }}', {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        }
+                    });
+
+                    if (response.ok) {
+                        const result = await response.json();
+                        if (result.success && result.image_data) {
+                            const croppedImg = await loadImageFromSrc(result.image_data);
+
+                            const outCanvas = document.createElement('canvas');
+                            outCanvas.width = TARGET_WIDTH;
+                            outCanvas.height = TARGET_HEIGHT;
+                            const outCtx = outCanvas.getContext('2d');
+                            outCtx.drawImage(croppedImg, 0, 0, TARGET_WIDTH, TARGET_HEIGHT);
+
+                            cardState[side].croppedCanvas = outCanvas;
+
+                            const previewCanvas = document.getElementById(`${side}Canvas`);
+                            previewCanvas.width = TARGET_WIDTH;
+                            previewCanvas.height = TARGET_HEIGHT;
+                            const pCtx = previewCanvas.getContext('2d');
+                            pCtx.drawImage(outCanvas, 0, 0);
+
+                            document.getElementById(`${side}CroppedData`).value = result.image_data;
+
+                            document.getElementById(`${side}UploadBox`).classList.add('hidden');
+                            document.getElementById(`${side}PreviewBox`).classList.remove('hidden');
+
+                            if (statusBadge) {
+                                statusBadge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800';
+                                statusBadge.innerText = '✨ AI পারফেক্ট ক্রপ';
+                            }
+
+                            updateA4Mockup();
+                            aiSuccess = true;
+
+                            fetchAiCorners(side, file, dataUrl, originalImg.width, originalImg.height);
+                        }
+                    }
+                } catch (apiErr) {
+                    console.warn('Python AI API not reachable, falling back to local detection:', apiErr);
+                }
+
+                if (!aiSuccess) {
+                    detectCardAndCrop(side);
+                    if (statusBadge) {
+                        statusBadge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800';
+                        statusBadge.innerText = '✓ ক্রপ রেডি';
+                    }
+                }
+            } catch (err) {
+                console.error('File process error:', err);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'ত্রুটি',
+                    text: 'ছবি প্রসেস করা সম্ভব হয়নি। অনুগ্রহ করে অন্য কোনো ছবি চেষ্টা করুন।',
+                    confirmButtonColor: '#4f46e5'
+                });
+            } finally {
+                if (loadingEl) loadingEl.classList.add('hidden');
+            }
+        }
+
+        async function fetchAiCorners(side, file, dataUrl, origW, origH) {
+            try {
+                const formData = new FormData();
+                if (file) {
+                    formData.append('file', file);
+                } else {
+                    formData.append('image_data', dataUrl);
+                }
+
+                const res = await fetch('{{ route("api.ai.detect_corners") }}', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    }
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.success && Array.isArray(data.corners) && data.corners.length === 4) {
+                        cardState[side].corners = data.corners.map(pt => ({
+                            x: pt.x * origW,
+                            y: pt.y * origH
+                        }));
+                    }
+                }
+            } catch (e) {
+                console.warn('AI corner detection warning:', e);
+            }
+        }
+
+        async function pasteFromClipboard(side) {
+            try {
+                if (navigator.clipboard && navigator.clipboard.read) {
+                    const items = await navigator.clipboard.read();
+                    for (const item of items) {
+                        const imageType = item.types.find(t => t.startsWith('image/'));
+                        if (imageType) {
+                            const blob = await item.getType(imageType);
+                            const file = new File([blob], `pasted_${side}_${Date.now()}.png`, { type: imageType });
+                            Swal.fire({
+                                toast: true,
+                                position: 'top-end',
+                                icon: 'success',
+                                title: `📋 ${side === 'front' ? 'সামনের' : 'পেছনের'} কার্ডের ছবি পেস্ট হয়েছে!`,
+                                showConfirmButton: false,
+                                timer: 2000
+                            });
+                            processUploadedFile(side, file);
+                            return;
+                        }
+                    }
+                }
+                Swal.fire({
+                    icon: 'info',
+                    title: 'ছবি পেস্ট করুন (Ctrl + V)',
+                    text: 'কীবোর্ডে Ctrl + V চাপুন। কপি করা ছবিটি স্বয়ংক্রিয়ভাবে বসে যাবে!',
+                    confirmButtonColor: '#4f46e5',
+                    confirmButtonText: 'বুঝেছি'
+                });
+            } catch (e) {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'ছবি পেস্ট করুন (Ctrl + V)',
+                    text: 'কীবোর্ডে Ctrl + V চাপুন। কপি করা ছবিটি সরাসরি পেস্ট হয়ে যাবে!',
+                    confirmButtonColor: '#4f46e5',
+                    confirmButtonText: 'ঠিক আছে'
+                });
+            }
+        }
+
+        window.addEventListener('paste', function(e) {
+            const items = (e.clipboardData || e.originalEvent?.clipboardData)?.items;
+            if (!items) return;
+
+            for (let i = 0; i < items.length; i++) {
+                if (items[i].type && items[i].type.startsWith('image/')) {
+                    const file = items[i].getAsFile();
+                    if (!file) continue;
+
+                    let targetSide = 'front';
+                    if (activeModalSide) {
+                        targetSide = activeModalSide;
+                    } else if (cardState.front.originalImage && !cardState.back.originalImage) {
+                        targetSide = 'back';
+                    }
+
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'success',
+                        title: `📋 ${targetSide === 'front' ? 'সামনের' : 'পেছনের'} কার্ডের ছবি পেস্ট হয়েছে!`,
+                        showConfirmButton: false,
+                        timer: 2000
+                    });
+
+                    processUploadedFile(targetSide, file);
+                    break;
+                }
+            }
         });
 
         function detectCardAndCrop(side) {

@@ -136,6 +136,10 @@ Route::post('/office/{slug}/nid', [CustomerPrintController::class, 'submitOffice
 Route::get('/print/status/{jobToken}', [CustomerPrintController::class, 'jobStatus'])->name('customer.status');
 Route::get('/api/customer/status/{jobToken}', [CustomerPrintController::class, 'apiJobStatus']);
 
+// AI Document Auto-Crop & Perspective Detection Routes
+Route::post('/api/ai/auto-crop-document', [CustomerPrintController::class, 'autoCropDocument'])->name('api.ai.auto_crop');
+Route::post('/api/ai/detect-corners', [CustomerPrintController::class, 'detectDocumentCorners'])->name('api.ai.detect_corners');
+
 /*
 |--------------------------------------------------------------------------
 | Windows Agent & Android SMS Listener APIs
