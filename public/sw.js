@@ -1,10 +1,15 @@
 // PrintSheba High-Performance Service Worker for PWA & Web Share Target
-const CACHE_NAME = 'printsheba-v1';
+const CACHE_NAME = 'printsheba-v2';
 const PRECACHE_ASSETS = [
     '/',
     '/logo.svg',
     '/icon-192.png',
+    '/icon-maskable-192.png',
     '/icon-512.png',
+    '/icon-maskable-512.png',
+    '/apple-touch-icon.png',
+    '/favicon-32x32.png',
+    '/favicon.ico',
     '/manifest.json'
 ];
 

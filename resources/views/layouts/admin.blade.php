@@ -101,6 +101,22 @@
                     <span>ভিডিও ও সাইট সেটিংস</span>
                 </a>
 
+                <a href="{{ route('admin.logs') }}" 
+                   class="flex items-center justify-between px-3.5 py-3 rounded-xl text-sm font-semibold transition-all duration-200 {{ request()->routeIs('admin.logs*') ? 'bg-gradient-to-r from-rose-600 to-rose-700 text-white shadow-lg shadow-rose-600/30' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
+                    <span class="flex items-center gap-3">
+                        <span class="text-lg">⚠️</span>
+                        <span>এরর ও ক্র্যাশ লগ</span>
+                    </span>
+                    @php
+                        $unresolvedLogsCount = \App\Models\SystemErrorLog::where('status', 'unresolved')->count();
+                    @endphp
+                    @if($unresolvedLogsCount > 0)
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-amber-500 text-slate-950 animate-pulse">
+                            {{ $unresolvedLogsCount }}
+                        </span>
+                    @endif
+                </a>
+
                 <div class="pt-4 text-[10px] font-bold tracking-wider text-slate-500 uppercase px-3 py-1">ওয়েবসাইট লিংক</div>
 
                 <a href="/" target="_blank" 
@@ -166,6 +182,14 @@
                             <a href="{{ route('admin.subscriptions') }}" class="block px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('admin.subscriptions') ? 'bg-rose-600 text-white' : 'text-slate-300 hover:bg-slate-800' }}">💎 সাবস্ক্রিপশন কিউ</a>
                             <a href="{{ route('admin.jobs') }}" class="block px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('admin.jobs') ? 'bg-rose-600 text-white' : 'text-slate-300 hover:bg-slate-800' }}">📄 সকল প্রিন্ট টাস্ক</a>
                             <a href="{{ route('admin.settings') }}" class="block px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('admin.settings') ? 'bg-rose-600 text-white' : 'text-slate-300 hover:bg-slate-800' }}">🎬 ভিডিও ও সাইট সেটিংস</a>
+                            <a href="{{ route('admin.logs') }}" class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('admin.logs*') ? 'bg-rose-600 text-white' : 'text-slate-300 hover:bg-slate-800' }}">
+                                <span>⚠️ এরর ও ক্র্যাশ লগ</span>
+                                @if(isset($unresolvedLogsCount) && $unresolvedLogsCount > 0)
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-amber-500 text-slate-950">
+                                        {{ $unresolvedLogsCount }}
+                                    </span>
+                                @endif
+                            </a>
                         </nav>
                     </div>
                     <form action="{{ route('logout') }}" method="POST" class="pt-4 border-t border-slate-800">

@@ -7,6 +7,8 @@ use App\Models\User;
 use App\Models\PrintJob;
 use App\Models\Setting;
 use App\Models\ShopSubscription;
+use App\Models\SystemErrorLog;
+use App\Services\SystemCrashLogger;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -333,5 +335,136 @@ class AdminController extends Controller
         ]);
 
         return back()->with('success', "টোকেন #{$job->job_token} এর অর্ডারটি অ্যাডমিন কর্তৃক বাতিল করা হয়েছে।");
+    }
+
+    public function systemLogs(Request $request)
+    {
+        $status = $request->query('status', 'unresolved');
+        $level = $request->query('level', 'all');
+        $search = $request->query('search', '');
+        $type = $request->query('type', 'all');
+        $tab = $request->query('tab', 'database');
+
+        $query = SystemErrorLog::with(['shop', 'user', 'resolver']);
+
+        if ($status !== 'all' && in_array($status, ['unresolved', 'resolved'])) {
+            $query->where('status', $status);
+        }
+
+        if ($level !== 'all' && !empty($level)) {
+            $query->where('level', $level);
+        }
+
+        if ($type === 'spooler') {
+            $query->where(function ($q) {
+                $q->where('error_type', 'like', '%Spooler%')
+                  ->orWhere('error_type', 'like', '%Agent%')
+                  ->orWhere('error_type', 'like', '%Print%');
+            });
+        } elseif ($type !== 'all' && !empty($type)) {
+            $query->where('error_type', $type);
+        }
+
+        if (!empty($search)) {
+            $query->where(function ($q) use ($search) {
+                $q->where('message', 'like', "%{$search}%")
+                  ->orWhere('error_type', 'like', "%{$search}%")
+                  ->orWhere('file', 'like', "%{$search}%")
+                  ->orWhere('url', 'like', "%{$search}%")
+                  ->orWhere('ip_address', 'like', "%{$search}%");
+            });
+        }
+
+        $logs = $query->orderByDesc('last_seen_at')->paginate(25)->withQueryString();
+
+        // Metrics
+        $totalUnresolved = SystemErrorLog::where('status', 'unresolved')->count();
+        $criticalCount = SystemErrorLog::where('status', 'unresolved')->whereIn('level', ['critical', 'emergency'])->count();
+        $spoolerErrorsCount = SystemErrorLog::where('status', 'unresolved')
+            ->where(function ($q) {
+                $q->where('error_type', 'like', '%Spooler%')
+                  ->orWhere('error_type', 'like', '%Agent%')
+                  ->orWhere('error_type', 'like', '%Print%');
+            })->count();
+        $todayErrorsCount = SystemErrorLog::whereDate('created_at', today())->count();
+
+        $rawLogs = $tab === 'raw' ? SystemCrashLogger::getRawLogs(300) : [];
+
+        return view('admin.system_logs', compact(
+            'logs',
+            'totalUnresolved',
+            'criticalCount',
+            'spoolerErrorsCount',
+            'todayErrorsCount',
+            'status',
+            'level',
+            'search',
+            'type',
+            'tab',
+            'rawLogs'
+        ));
+    }
+
+    public function systemLogDetails(SystemErrorLog $log)
+    {
+        $log->load(['shop', 'user', 'resolver']);
+        return response()->json($log);
+    }
+
+    public function resolveSystemLog(SystemErrorLog $log)
+    {
+        $log->update([
+            'status' => 'resolved',
+            'resolved_at' => now(),
+            'resolved_by' => auth()->id(),
+        ]);
+
+        return back()->with('success', "লগ #{$log->id} সমাধান চিহ্নিত করা হয়েছে!");
+    }
+
+    public function unresolveSystemLog(SystemErrorLog $log)
+    {
+        $log->update([
+            'status' => 'unresolved',
+            'resolved_at' => null,
+            'resolved_by' => null,
+        ]);
+
+        return back()->with('success', "লগ #{$log->id} পুনরায় অমীমাংসিত হিসেবে চিহ্নিত করা হয়েছে।");
+    }
+
+    public function deleteSystemLog(SystemErrorLog $log)
+    {
+        $log->delete();
+        return back()->with('success', "লগ #{$log->id} সফলভাবে মুছে ফেলা হয়েছে।");
+    }
+
+    public function clearSystemLogs(Request $request)
+    {
+        $scope = $request->input('scope', 'resolved');
+        if ($scope === 'all') {
+            SystemErrorLog::truncate();
+            return back()->with('success', "সকল সিস্টেম এরর লগ সম্পূর্ণ মুছে ফেলা হয়েছে!");
+        }
+
+        SystemErrorLog::where('status', 'resolved')->delete();
+        return back()->with('success', "সকল সমাধানকৃত এরর লগ সফলভাবে মুছে ফেলা হয়েছে!");
+    }
+
+    public function clearRawLog()
+    {
+        SystemCrashLogger::clearRawLogs();
+        return back()->with('success', "Laravel র (Raw) ফাইল লগ সফলভাবে খালি করা হয়েছে!");
+    }
+
+    public function testCrash()
+    {
+        try {
+            throw new \Exception("টেস্ট ক্র্যাশ রিপোর্ট — সুপার এডমিন টেস্ট " . now()->format('Y-m-d H:i:s'));
+        } catch (\Throwable $e) {
+            SystemCrashLogger::logException($e, 'critical');
+        }
+
+        return redirect()->route('admin.logs')->with('success', "টেস্ট ক্র্যাশ সফলভাবে সিস্টেমে রেকর্ড করা হয়েছে! নিচে দেখুন।");
     }
 }

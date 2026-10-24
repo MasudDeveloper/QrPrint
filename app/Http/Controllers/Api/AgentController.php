@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Shop;
 use App\Models\Printer;
 use App\Models\PrintJob;
+use App\Services\SystemCrashLogger;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -29,16 +30,52 @@ class AgentController extends Controller
 
         $shop->update(['last_agent_heartbeat_at' => now()]);
 
-        $jobs = PrintJob::where('shop_id', $shop->id)
+        // Auto-heal orphaned or stuck spooling jobs older than 5 minutes (re-queue them safely)
+        PrintJob::where('shop_id', $shop->id)
+            ->where('print_status', 'spooling')
+            ->where('updated_at', '<', now()->subMinutes(5))
+            ->update([
+                'print_status' => 'queued',
+            ]);
+
+        $candidateJobs = PrintJob::where('shop_id', $shop->id)
             ->where('payment_status', 'paid')
             ->where('print_status', 'queued')
             ->get();
 
-        foreach ($jobs as $job) {
+        $validJobs = [];
+        foreach ($candidateJobs as $job) {
+            $storagePath = storage_path('app/public/' . $job->file_path);
+            if (!file_exists($storagePath)) {
+                $storagePath = storage_path('app/' . $job->file_path);
+            }
+
+            // If the file was deleted (zero retention or manual) or missing on disk,
+            // immediately fail it so the agent won't loop on 404 or get stuck in spooling!
+            if ($job->is_deleted_from_disk || !file_exists($storagePath)) {
+                $job->update([
+                    'is_deleted_from_disk' => true,
+                    'print_status' => 'failed',
+                    'cancel_reason' => 'ফাইলটি সার্ভার ডিস্কে পাওয়া যায়নি (404 Not Found)',
+                ]);
+                SystemCrashLogger::logCustomError(
+                    'MissingPrintFileError',
+                    "প্রিন্ট ফাইল সার্ভারে পাওয়া যায়নি: {$job->original_name} ({$job->job_token})",
+                    'warning',
+                    [
+                        'shop_id' => $shop->id,
+                        'job_token' => $job->job_token,
+                        'file_path' => $job->file_path,
+                    ]
+                );
+                continue;
+            }
+
             $job->update(['print_status' => 'spooling']);
+            $validJobs[] = $job;
         }
 
-        $data = $jobs->map(function ($job) {
+        $data = collect($validJobs)->map(function ($job) {
             return [
                 'job_token' => $job->job_token,
                 'file_url' => url('/api/agent/jobs/' . $job->job_token . '/file'),
@@ -87,6 +124,41 @@ class AgentController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => 'Job marked as printed and temporary file purged for privacy.',
+        ]);
+    }
+
+    public function markJobFailed(Request $request, $jobToken)
+    {
+        $shop = $this->authenticateShop($request);
+        if (!$shop) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        $job = PrintJob::where('shop_id', $shop->id)
+            ->where('job_token', $jobToken)
+            ->firstOrFail();
+
+        $errorReason = $request->input('error', 'প্রিন্টারে ফাইল পাঠানো ব্যর্থ হয়েছে');
+
+        $job->update([
+            'print_status' => 'failed',
+            'cancel_reason' => $errorReason,
+        ]);
+
+        SystemCrashLogger::logCustomError(
+            'PrintSpoolerError',
+            "প্রিন্টার এজেন্ট ফেইলিউর ({$job->job_token}): {$errorReason}",
+            'error',
+            [
+                'shop_id' => $shop->id,
+                'job_token' => $job->job_token,
+                'original_name' => $job->original_name,
+            ]
+        );
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Job marked as failed.',
         ]);
     }
 
@@ -198,6 +270,11 @@ class AgentController extends Controller
         }
 
         if (!file_exists($storagePath)) {
+            $job->update([
+                'is_deleted_from_disk' => true,
+                'print_status' => 'failed',
+                'cancel_reason' => 'ফাইলটি সার্ভার ডিস্কে পাওয়া যায়নি (404 Not Found)',
+            ]);
             return response()->json(['error' => 'File not found on server disk'], 404);
         }
 

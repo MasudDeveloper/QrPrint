@@ -443,6 +443,21 @@ class ShopController extends Controller
             return back()->with('error', 'এই প্রিন্ট জবটি আপনার দোকানের নয়।');
         }
 
+        // Verify that the file still exists on server disk before attempting to reprint
+        $storagePath = storage_path('app/public/' . $job->file_path);
+        if (!file_exists($storagePath)) {
+            $storagePath = storage_path('app/' . $job->file_path);
+        }
+
+        if ($job->is_deleted_from_disk || !file_exists($storagePath)) {
+            $job->update([
+                'is_deleted_from_disk' => true,
+                'print_status' => 'failed',
+                'cancel_reason' => 'ফাইলটি সার্ভার ডিস্কে পাওয়া যায়নি (404 / আগেই ডিলিট হয়েছে)',
+            ]);
+            return back()->with('error', 'ফাইলটি সার্ভারে নেই (নিরাপত্তার স্বার্থে প্রিন্ট শেষে আগেই মুছে ফেলা হয়েছে)। এটি রিপ্রিন্ট করা সম্ভব নয়। অনুগ্রহ করে ফাইলটি নতুন করে শেয়ার বা আপলোড করুন।');
+        }
+
         $job->update([
             'payment_status' => 'paid',
             'print_status' => 'queued',
@@ -661,20 +676,19 @@ class ShopController extends Controller
             return redirect()->route('shop.quick_print');
         }
 
-        // Locate uploaded file from any standard parameter name
+        // Locate uploaded file from any parameter name or nested array structure
         $file = null;
         if ($request->hasFile('shared_files')) {
             $f = $request->file('shared_files');
-            $file = is_array($f) ? $f[0] : $f;
+            $file = is_array($f) ? \Illuminate\Support\Arr::first($f) : $f;
         } elseif ($request->hasFile('document')) {
             $file = $request->file('document');
         } elseif ($request->hasFile('file')) {
             $file = $request->file('file');
         } else {
-            $all = $request->allFiles();
-            if (!empty($all)) {
-                $f = reset($all);
-                $file = is_array($f) ? $f[0] : $f;
+            $allFiles = \Illuminate\Support\Arr::flatten($request->allFiles());
+            if (!empty($allFiles)) {
+                $file = $allFiles[0];
             }
         }
 
@@ -683,11 +697,42 @@ class ShopController extends Controller
                 ->with('warning_alert', 'কোনো ফাইল শেয়ার করা হয়নি বা ফাইলটি লোড হতে সমস্যা হয়েছে। অনুগ্রহ করে সরাসরি ফাইল নির্বাচন করুন।');
         }
 
-        $allowedExtensions = ['pdf', 'jpg', 'jpeg', 'png', 'webp', 'doc', 'docx', 'txt'];
+        // Broad list of allowed document and image extensions
+        $allowedExtensions = ['pdf', 'jpg', 'jpeg', 'png', 'webp', 'bmp', 'gif', 'jfif', 'heic', 'heif', 'doc', 'docx', 'txt'];
         $ext = strtolower($file->getClientOriginalExtension());
+
+        // WhatsApp / Android Gallery fallback: if original filename lacked extension, detect via MIME type
+        if (empty($ext) || !in_array($ext, $allowedExtensions)) {
+            $mime = strtolower($file->getMimeType() ?: '');
+            $mimeMap = [
+                'application/pdf' => 'pdf',
+                'image/jpeg' => 'jpg',
+                'image/jpg' => 'jpg',
+                'image/png' => 'png',
+                'image/webp' => 'webp',
+                'image/bmp' => 'bmp',
+                'image/x-ms-bmp' => 'bmp',
+                'image/gif' => 'gif',
+                'image/jfif' => 'jpg',
+                'image/heic' => 'heic',
+                'image/heif' => 'heif',
+                'application/msword' => 'doc',
+                'application/vnd.openxmlformats-officedocument.wordprocessingml.document' => 'docx',
+                'text/plain' => 'txt',
+            ];
+            if (isset($mimeMap[$mime])) {
+                $ext = $mimeMap[$mime];
+            } else {
+                $guessed = strtolower($file->guessExtension() ?: '');
+                if ($guessed) {
+                    $ext = $guessed;
+                }
+            }
+        }
+
         if (!in_array($ext, $allowedExtensions)) {
             return redirect()->route('shop.quick_print')
-                ->with('error_alert', 'অসমর্থিত ফাইল ফরম্যাট (.' . $ext . ')! শুধুমাত্র PDF, ছবি (JPG, PNG, WEBP) ও Word ফাইল প্রিন্ট করা যায়।');
+                ->with('error_alert', 'অসমর্থিত ফাইল ফরম্যাট (.' . ($ext ?: 'unknown') . ')! শুধুমাত্র PDF, ছবি (JPG, PNG, WEBP) ও Word ফাইল প্রিন্ট করা যায়।');
         }
 
         $tempDir = storage_path('app/public/share_temp');
@@ -698,7 +743,11 @@ class ShopController extends Controller
         $tempFileName = 'share_' . time() . '_' . Str::random(10) . '.' . $ext;
         $file->storeAs('share_temp', $tempFileName, 'public');
 
-        $originalName = $file->getClientOriginalName();
+        $originalName = $file->getClientOriginalName() ?: ('শেয়ারকৃত_ডকুমেন্ট_' . date('His'));
+        if (!str_contains($originalName, '.')) {
+            $originalName .= '.' . $ext;
+        }
+
         session([
             'quick_print_temp_file' => $tempFileName,
             'quick_print_original_name' => $originalName,
@@ -708,6 +757,30 @@ class ShopController extends Controller
             'file' => $tempFileName,
             'name' => $originalName,
         ])->setStatusCode(303);
+    }
+
+    /**
+     * Dedicated stream route for temporary shared file preview
+     * Ensures correct inline Content-Type header on all mobile & desktop browsers
+     */
+    public function previewTempFile($filename)
+    {
+        $cleanName = basename($filename);
+        $disk = Storage::disk('public');
+        $relativePath = 'share_temp/' . $cleanName;
+
+        if (!$disk->exists($relativePath)) {
+            abort(404, 'ফাইল পাওয়া যায়নি বা মেয়াদ শেষ হয়ে গেছে।');
+        }
+
+        $filePath = $disk->path($relativePath);
+        $mime = $disk->mimeType($relativePath) ?: 'application/octet-stream';
+
+        return response()->file($filePath, [
+            'Content-Type' => $mime,
+            'Content-Disposition' => 'inline; filename="' . $cleanName . '"',
+            'Cache-Control' => 'no-cache, no-store, must-revalidate',
+        ]);
     }
 
     /**
@@ -726,7 +799,7 @@ class ShopController extends Controller
             if (!file_exists($tempDir)) {
                 @mkdir($tempDir, 0777, true);
             }
-            $tempFileName = 'share_' . time() . '_' . Str::random(10) . '.' . $ext;
+            $tempFileName = 'share_' . time() . '_' . Str::random(10) . '.' . ($ext ?: 'pdf');
             $file->storeAs('share_temp', $tempFileName, 'public');
             $originalName = $file->getClientOriginalName();
 
@@ -768,9 +841,9 @@ class ShopController extends Controller
                     'extension' => $ext,
                     'size_formatted' => $sizeFormatted,
                     'is_pdf' => ($ext === 'pdf'),
-                    'is_image' => in_array($ext, ['jpg', 'jpeg', 'png', 'webp']),
+                    'is_image' => in_array($ext, ['jpg', 'jpeg', 'png', 'webp', 'bmp', 'gif', 'jfif', 'heic', 'heif']),
                     'total_pages' => $totalPages,
-                    'url' => asset('storage/' . $relativeTempPath),
+                    'url' => route('shop.quick_print.preview', ['filename' => $tempFileName]),
                 ];
             }
         }
@@ -791,7 +864,7 @@ class ShopController extends Controller
 
         $request->validate([
             'temp_file' => 'nullable|string',
-            'document' => 'nullable|file|max:51200|mimes:pdf,doc,docx,jpg,jpeg,png,webp',
+            'document' => 'nullable|file|max:51200|mimes:pdf,doc,docx,jpg,jpeg,png,webp,bmp,gif',
             'color_mode' => 'required|in:bw,color',
             'copies' => 'required|integer|min:1|max:100',
             'paper_size' => 'nullable|string',

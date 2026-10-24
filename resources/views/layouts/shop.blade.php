@@ -6,7 +6,11 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'শপ ড্যাশবোর্ড') – PrintSheba</title>
     <link rel="icon" type="image/svg+xml" href="{{ asset('logo.svg') }}">
-    <link rel="apple-touch-icon" href="{{ asset('icon-192.png') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="192x192" href="{{ asset('icon-192.png') }}">
+    <link rel="icon" type="image/png" sizes="512x512" href="{{ asset('icon-512.png') }}">
+    <link rel="shortcut icon" href="{{ asset('favicon.ico') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}">
 
     <!-- PWA Web App Manifest & Mobile Integration -->
     <link rel="manifest" href="{{ asset('manifest.json') }}">
@@ -74,7 +78,7 @@
             <!-- Brand Logo Area -->
             <div class="p-6 border-b border-slate-800/80 flex items-center justify-between">
                 <a href="{{ route('shop.dashboard') }}" class="flex items-center gap-3 group">
-                    <img src="{{ asset('logo.svg') }}" alt="PrintSheba Logo" class="w-10 h-10 rounded-2xl shadow-lg shadow-rose-500/20 group-hover:scale-105 transition-transform duration-300">
+                    <img src="{{ asset('logo.svg') }}" onerror="this.onerror=null;this.src='{{ asset('icon-192.png') }}';" alt="PrintSheba Logo" class="w-10 h-10 rounded-2xl shadow-lg shadow-rose-500/20 group-hover:scale-105 transition-transform duration-300">
                     <div>
                         <div class="flex items-center gap-1.5">
                             <span class="font-black text-white font-en text-lg tracking-tight">Print<span class="text-rose-500">Sheba</span></span>
@@ -219,7 +223,7 @@
             <!-- Mobile Header -->
             <header class="lg:hidden bg-slate-900 border-b border-slate-800 px-4 py-3 flex items-center justify-between sticky top-0 z-50">
                 <a href="{{ route('shop.dashboard') }}" class="flex items-center gap-2">
-                    <img src="{{ asset('logo.svg') }}" alt="PrintSheba Logo" class="w-8 h-8 rounded-xl shadow">
+                    <img src="{{ asset('logo.svg') }}" onerror="this.onerror=null;this.src='{{ asset('icon-192.png') }}';" alt="PrintSheba Logo" class="w-8 h-8 rounded-xl shadow">
                     <span class="font-black text-white font-en text-base">Print<span class="text-rose-500">Sheba</span></span>
                 </a>
                 <div class="flex items-center gap-2">
@@ -240,7 +244,7 @@
                     <div>
                         <div class="flex items-center justify-between pb-4 border-b border-slate-800">
                             <div class="flex items-center gap-2.5">
-                                <img src="{{ asset('logo.svg') }}" alt="Logo" class="w-8 h-8 rounded-xl">
+                                <img src="{{ asset('logo.svg') }}" onerror="this.onerror=null;this.src='{{ asset('icon-192.png') }}';" alt="Logo" class="w-8 h-8 rounded-xl">
                                 <span class="font-black text-white font-en text-lg">Print<span class="text-rose-500">Sheba</span></span>
                             </div>
                             <button id="closeDrawer" class="text-slate-400 hover:text-white text-xl font-bold">&times;</button>

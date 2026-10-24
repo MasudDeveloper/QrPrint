@@ -29,7 +29,7 @@ return new class extends Migration
             $table->string('payment_trx_id')->nullable();
             $table->string('payment_sender_number')->nullable();
             $table->enum('payment_status', ['pending', 'paid', 'cancelled'])->default('pending');
-            $table->enum('print_status', ['queued', 'spooling', 'printed', 'failed', 'deleted'])->default('queued');
+            $table->enum('print_status', ['queued', 'spooling', 'printed', 'failed', 'deleted', 'cancelled'])->default('queued');
             $table->boolean('is_deleted_from_disk')->default(false);
             $table->timestamp('printed_at')->nullable();
             $table->timestamps();

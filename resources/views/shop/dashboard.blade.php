@@ -232,12 +232,18 @@
                                             <span>বাতিল</span>
                                         </button>
                                     @else
-                                        <form action="{{ route('shop.jobs.reprint', $job) }}" method="POST" class="inline">
+                                        <form action="{{ route('shop.jobs.reprint', $job) }}" method="POST" class="inline" title="{{ $job->print_status === 'spooling' ? 'স্পুল আটকে থাকলে কিউ রিসেট করে পুনরায় প্রিন্ট পাঠান' : 'পুনরায় প্রিন্টারে পাঠান' }}">
                                             @csrf
-                                            <button type="submit" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold text-xs transition-colors cursor-pointer">
-                                                🔄 ফোর্স প্রিন্ট
+                                            <button type="submit" class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold text-xs transition-colors cursor-pointer flex items-center gap-1">
+                                                <span>🔄</span>
+                                                <span>{{ $job->print_status === 'spooling' ? 'রিসেট / রিট্রাই' : 'ফোর্স প্রিন্ট' }}</span>
                                             </button>
                                         </form>
+
+                                        <button type="button" onclick="openCancelModal({{ $job->id }}, '{{ $job->job_token }}', '{{ addslashes($job->original_name) }}', '{{ route('shop.jobs.cancel', $job) }}')" class="px-2.5 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs font-bold transition-all flex items-center gap-1 cursor-pointer" title="প্রিন্ট বা স্পুলিং আটকে গেলে বাতিল করুন">
+                                            <span>✕</span>
+                                            <span>বাতিল</span>
+                                        </button>
                                     @endif
                                 </div>
                             </td>
@@ -504,6 +510,14 @@
                     </label>
 
                     <label class="flex items-center gap-2.5 p-3 rounded-xl border border-slate-800 bg-slate-950/40 hover:bg-slate-800/50 cursor-pointer has-[:checked]:border-rose-500/50 has-[:checked]:bg-rose-500/10 transition-all">
+                        <input type="radio" name="cancel_reason" value="প্রিন্টার নেটওয়ার্ক সমস্যা বা স্পুল আটকে গেছে" class="accent-rose-500" onchange="toggleCustomReason(false)">
+                        <div class="text-xs">
+                            <span class="font-bold text-white block">🖨️ প্রিন্টার নেটওয়ার্ক সমস্যা বা স্পুল আটকে গেছে</span>
+                            <span class="text-[10px] text-slate-400">প্রিন্টার অফলাইন, ওয়াইফাই সংযোগ বিচ্ছিন্ন বা স্পুলার ড্রাইভারে সমস্যা</span>
+                        </div>
+                    </label>
+
+                    <label class="flex items-center gap-2.5 p-3 rounded-xl border border-slate-800 bg-slate-950/40 hover:bg-slate-800/50 cursor-pointer has-[:checked]:border-rose-500/50 has-[:checked]:bg-rose-500/10 transition-all">
                         <input type="radio" name="cancel_reason" value="other" class="accent-rose-500" onchange="toggleCustomReason(true)">
                         <div class="text-xs">
                             <span class="font-bold text-white block">✏️ অন্যান্য কারণ</span>
@@ -589,12 +603,17 @@
                 `;
             } else {
                 actionHtml += `
-                    <form action="${job.reprint_url}" method="POST" class="inline">
+                    <form action="${job.reprint_url}" method="POST" class="inline" title="${isSpooling ? 'স্পুল আটকে থাকলে কিউ রিসেট করে পুনরায় প্রিন্ট পাঠান' : 'পুনরায় প্রিন্টারে পাঠান'}">
                         <input type="hidden" name="_token" value="${csrfToken}">
-                        <button type="submit" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold text-xs transition-colors cursor-pointer">
-                            🔄 ফোর্স প্রিন্ট
+                        <button type="submit" class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold text-xs transition-colors cursor-pointer flex items-center gap-1">
+                            <span>🔄</span>
+                            <span>${isSpooling ? 'রিসেট / রিট্রাই' : 'ফোর্স প্রিন্ট'}</span>
                         </button>
                     </form>
+                    <button type="button" onclick="openCancelModal(${job.id}, '${escapeHtml(job.job_token)}', '${escapeHtml(job.original_name)}', '${job.cancel_url}')" class="px-2.5 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs font-bold transition-all flex items-center gap-1 cursor-pointer" title="প্রিন্ট বা স্পুলিং আটকে গেলে বাতিল করুন">
+                        <span>✕</span>
+                        <span>বাতিল</span>
+                    </button>
                 `;
             }
             actionHtml += `</div>`;

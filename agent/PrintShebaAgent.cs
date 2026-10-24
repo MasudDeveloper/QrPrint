@@ -450,6 +450,7 @@ namespace PrintSheba
                 {
                     totalErrors++;
                     UpdateStats();
+                    NotifyJobFailed(job.job_token, "উইন্ডোজ প্রিন্ট স্পুলার ড্রাইভারে পাঠাতে ব্যর্থ");
                     Log(string.Format("❌ প্রিন্ট প্রসেস ব্যর্থ: {0}", job.job_token));
                 }
             }
@@ -457,6 +458,7 @@ namespace PrintSheba
             {
                 totalErrors++;
                 UpdateStats();
+                NotifyJobFailed(job.job_token, ex.Message);
                 Log("❌ ফাইল ডাউনলোড/প্রিন্ট ত্রুটি: " + ex.Message);
             }
         }
@@ -747,6 +749,39 @@ namespace PrintSheba
                 catch (Exception ex)
                 {
                     Log("⚠️ ক্লাউডে প্রিন্ট সম্পন্ন আপডেট দিতে সমস্যা: " + ex.Message);
+                }
+            });
+        }
+
+        private void NotifyJobFailed(string jobToken, string reason)
+        {
+            ThreadPool.QueueUserWorkItem(o =>
+            {
+                try
+                {
+                    string url = config.server_url.TrimEnd('/') + "/api/agent/jobs/" + jobToken + "/failed";
+                    var request = (HttpWebRequest)WebRequest.Create(url);
+                    request.Method = "POST";
+                    request.Headers["X-Agent-Token"] = config.api_token;
+                    request.ContentType = "application/json";
+                    string safeReason = (reason ?? "Unknown error").Replace("\\", "\\\\").Replace("\"", "\\\"").Replace("\r", " ").Replace("\n", " ");
+                    byte[] data = System.Text.Encoding.UTF8.GetBytes("{\"error\":\"" + safeReason + "\"}");
+                    request.ContentLength = data.Length;
+                    request.Timeout = 5000;
+
+                    using (var stream = request.GetRequestStream())
+                    {
+                        stream.Write(data, 0, data.Length);
+                    }
+
+                    using (var response = (HttpWebResponse)request.GetResponse())
+                    {
+                        // Job acknowledged failed on server
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log("⚠️ ক্লাউডে প্রিন্ট ব্যর্থতার আপডেট পাঠাতে সমস্যা: " + ex.Message);
                 }
             });
         }

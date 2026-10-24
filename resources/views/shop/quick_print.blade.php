@@ -106,18 +106,51 @@
                             </button>
                         </div>
 
-                        <!-- Live Visual Preview -->
-                        <div class="rounded-2xl bg-slate-950 border border-slate-800/80 p-2 flex items-center justify-center min-h-[300px] max-h-[480px] overflow-hidden relative">
+                        <!-- Live Visual Preview (Mobile & Desktop Optimized) -->
+                        <div class="rounded-2xl bg-slate-950 border border-slate-800/80 p-2 flex items-center justify-center min-h-[300px] max-h-[500px] overflow-hidden relative">
                             @if($fileData['is_image'])
-                                <img src="{{ $fileData['url'] }}" alt="Shared Document Preview" class="max-h-[440px] max-w-full rounded-xl object-contain shadow-md">
-                            @elseif($fileData['is_pdf'])
-                                <div class="w-full h-[440px] flex flex-col">
-                                    <iframe src="{{ $fileData['url'] }}#toolbar=0" class="w-full flex-1 rounded-xl bg-white border border-slate-700"></iframe>
-                                    <div class="pt-2 flex items-center justify-between text-xs text-slate-400 px-1">
-                                        <span>পৃষ্ঠা সংখ্যা: <strong class="text-emerald-400">{{ $fileData['total_pages'] }}</strong></span>
-                                        <a href="{{ $fileData['url'] }}" target="_blank" class="text-emerald-400 hover:underline flex items-center gap-1">
+                                <div class="w-full flex flex-col items-center justify-center">
+                                    <img src="{{ $fileData['url'] }}" alt="Shared Document Preview" class="max-h-[440px] max-w-full rounded-xl object-contain shadow-md" onerror="this.onerror=null; this.src='{{ asset('icon-192.png') }}';">
+                                    <div class="pt-2 w-full flex justify-end text-xs text-slate-400 px-1">
+                                        <a href="{{ $fileData['url'] }}" target="_blank" class="text-emerald-400 hover:underline flex items-center gap-1 font-bold">
                                             ফুলস্ক্রিন ভিউ ↗
                                         </a>
+                                    </div>
+                                </div>
+                            @elseif($fileData['is_pdf'])
+                                <div class="w-full flex flex-col items-center">
+                                    <!-- PDF Loading indicator -->
+                                    <div id="pdfLoadingIndicator" class="flex flex-col items-center justify-center py-12 gap-2 text-emerald-400">
+                                        <svg class="animate-spin h-7 w-7 text-emerald-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        <span class="text-xs text-slate-300 font-medium">পিডিএফ প্রিভিউ লোড হচ্ছে...</span>
+                                    </div>
+
+                                    <!-- PDF Canvas for Android Chrome, iOS & Desktop -->
+                                    <div id="pdfCanvasContainer" class="w-full overflow-auto max-h-[420px] flex justify-center hidden">
+                                        <canvas id="pdfCanvas" class="rounded-xl shadow-lg border border-slate-700 max-w-full"></canvas>
+                                    </div>
+
+                                    <!-- Fallback iframe for desktop if PDF.js is unavailable -->
+                                    <iframe id="pdfFallbackIframe" src="{{ $fileData['url'] }}#toolbar=0" class="hidden w-full h-[400px] rounded-xl bg-white border border-slate-700"></iframe>
+
+                                    <!-- Page navigation controls & Fullscreen view -->
+                                    <div class="pt-2.5 w-full flex items-center justify-between text-xs text-slate-400 px-1 border-t border-slate-800/80 mt-2">
+                                        <div class="flex items-center gap-1.5" id="pdfControls" style="display: none;">
+                                            <button type="button" id="pdfPrevBtn" onclick="renderPdfPage(currentPdfPage - 1)" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed">◀ আগের</button>
+                                            <span class="text-xs font-mono font-bold text-slate-300 px-1">
+                                                পেজ <span id="pdfCurrentPageNum" class="text-emerald-400 font-bold">1</span> / <span id="pdfTotalPagesNum">{{ $fileData['total_pages'] }}</span>
+                                            </span>
+                                            <button type="button" id="pdfNextBtn" onclick="renderPdfPage(currentPdfPage + 1)" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed">পরের ▶</button>
+                                        </div>
+                                        <div class="ml-auto">
+                                            <a href="{{ $fileData['url'] }}" target="_blank" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-emerald-400 hover:text-emerald-300 font-bold border border-slate-700 flex items-center gap-1 transition-all">
+                                                <span>ফুলস্ক্রিন ভিউ</span>
+                                                <span>↗</span>
+                                            </a>
+                                        </div>
                                     </div>
                                 </div>
                             @else
@@ -341,7 +374,12 @@
 
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
+    if (window.pdfjsLib) {
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    }
+
     // Copy Stepper
     function adjustCopies(delta) {
         const input = document.getElementById('copiesInput');
@@ -359,6 +397,82 @@
     function setLabel(text) {
         document.getElementById('customerLabelInput').value = text;
     }
+
+    // PDF.js Visual Rendering Engine (100% Mobile & Desktop Compatible)
+    let pdfDocInstance = null;
+    let currentPdfPage = 1;
+    let totalPdfPages = 1;
+
+    function initPdfViewer(url) {
+        if (!window.pdfjsLib) {
+            document.getElementById('pdfLoadingIndicator')?.classList.add('hidden');
+            document.getElementById('pdfFallbackIframe')?.classList.remove('hidden');
+            return;
+        }
+
+        const loadingTask = pdfjsLib.getDocument({
+            url: url,
+            cMapUrl: 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/cmaps/',
+            cMapPacked: true,
+        });
+
+        loadingTask.promise.then(function(pdf) {
+            pdfDocInstance = pdf;
+            totalPdfPages = pdf.numPages;
+            const totalEl = document.getElementById('pdfTotalPagesNum');
+            if (totalEl) totalEl.textContent = totalPdfPages;
+            const controls = document.getElementById('pdfControls');
+            if (controls) controls.style.display = 'flex';
+            renderPdfPage(1);
+        }).catch(function(err) {
+            console.warn('PDF.js render failed, falling back to desktop iframe:', err);
+            document.getElementById('pdfLoadingIndicator')?.classList.add('hidden');
+            document.getElementById('pdfFallbackIframe')?.classList.remove('hidden');
+        });
+    }
+
+    function renderPdfPage(pageNumber) {
+        if (!pdfDocInstance || pageNumber < 1 || pageNumber > totalPdfPages) return;
+        currentPdfPage = pageNumber;
+
+        const pageEl = document.getElementById('pdfCurrentPageNum');
+        if (pageEl) pageEl.textContent = pageNumber;
+
+        const prevBtn = document.getElementById('pdfPrevBtn');
+        const nextBtn = document.getElementById('pdfNextBtn');
+        if (prevBtn) prevBtn.disabled = (currentPdfPage <= 1);
+        if (nextBtn) nextBtn.disabled = (currentPdfPage >= totalPdfPages);
+
+        pdfDocInstance.getPage(pageNumber).then(function(page) {
+            const canvas = document.getElementById('pdfCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            
+            const containerWidth = canvas.parentElement.clientWidth || 360;
+            const unscaledViewport = page.getViewport({ scale: 1 });
+            const dynamicScale = Math.min((containerWidth - 16) / unscaledViewport.width, 1.6);
+            const viewport = page.getViewport({ scale: Math.max(dynamicScale, 0.7) });
+
+            canvas.height = viewport.height;
+            canvas.width = viewport.width;
+
+            const renderContext = {
+                canvasContext: ctx,
+                viewport: viewport
+            };
+
+            page.render(renderContext).promise.then(function() {
+                document.getElementById('pdfLoadingIndicator')?.classList.add('hidden');
+                document.getElementById('pdfCanvasContainer')?.classList.remove('hidden');
+            });
+        });
+    }
+
+    @if(isset($fileData) && $fileData && $fileData['is_pdf'])
+        document.addEventListener('DOMContentLoaded', function() {
+            initPdfViewer("{{ $fileData['url'] }}");
+        });
+    @endif
 
     // Direct File Selection Preview Handling (for desktop/manual upload)
     function handleDirectFileSelect(input) {
@@ -381,7 +495,7 @@
         const sizeMb = (file.size / (1024 * 1024)).toFixed(2);
         fileSize.textContent = sizeMb >= 1 ? `${sizeMb} MB` : `${(file.size / 1024).toFixed(1)} KB`;
 
-        const isImage = file.type.startsWith('image/');
+        const isImage = file.type.startsWith('image/') || /\.(jpg|jpeg|png|webp|bmp|gif|jfif)$/i.test(file.name);
         const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
 
         if (isImage) {
@@ -393,8 +507,40 @@
             reader.readAsDataURL(file);
         } else if (isPdf) {
             fileIcon.textContent = '📑';
-            const blobUrl = URL.createObjectURL(file);
-            previewContent.innerHTML = `<iframe src="${blobUrl}#toolbar=0" class="w-full h-[340px] rounded-lg bg-white border border-slate-700"></iframe>`;
+            if (window.pdfjsLib) {
+                previewContent.innerHTML = `
+                    <div class="flex flex-col items-center justify-center py-6 gap-2 text-emerald-400">
+                        <svg class="animate-spin h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                        <span class="text-xs text-slate-300">পিডিএফ রেন্ডার হচ্ছে...</span>
+                    </div>
+                `;
+                const fileReader = new FileReader();
+                fileReader.onload = function() {
+                    const typedarray = new Uint8Array(this.result);
+                    pdfjsLib.getDocument({ data: typedarray }).promise.then(function(pdf) {
+                        pdf.getPage(1).then(function(page) {
+                            const canvas = document.createElement('canvas');
+                            const ctx = canvas.getContext('2d');
+                            const viewport = page.getViewport({ scale: 1.0 });
+                            canvas.height = viewport.height;
+                            canvas.width = viewport.width;
+                            canvas.className = 'max-h-[340px] max-w-full rounded-lg shadow border border-slate-700';
+
+                            page.render({ canvasContext: ctx, viewport: viewport }).promise.then(function() {
+                                previewContent.innerHTML = '';
+                                previewContent.appendChild(canvas);
+                            });
+                        });
+                    }).catch(function() {
+                        const blobUrl = URL.createObjectURL(file);
+                        previewContent.innerHTML = `<iframe src="${blobUrl}#toolbar=0" class="w-full h-[320px] rounded-lg bg-white border border-slate-700"></iframe>`;
+                    });
+                };
+                fileReader.readAsArrayBuffer(file);
+            } else {
+                const blobUrl = URL.createObjectURL(file);
+                previewContent.innerHTML = `<iframe src="${blobUrl}#toolbar=0" class="w-full h-[320px] rounded-lg bg-white border border-slate-700"></iframe>`;
+            }
         } else {
             fileIcon.textContent = '📄';
             previewContent.innerHTML = `

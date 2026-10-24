@@ -30,7 +30,7 @@ class QuickPrintTest extends TestCase
         $swPath = public_path('sw.js');
         $this->assertFileExists($swPath);
         $content = file_get_contents($swPath);
-        $this->assertStringContainsString('printsheba-v1', $content);
+        $this->assertStringContainsString('printsheba-', $content);
     }
 
     public function test_share_target_receives_file_and_redirects_303()

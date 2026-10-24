@@ -83,6 +83,16 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::post('/jobs/{job}/approve', [AdminController::class, 'approvePayment'])->name('jobs.approve');
     Route::post('/jobs/{job}/reprint', [AdminController::class, 'reprintJob'])->name('jobs.reprint');
     Route::post('/jobs/{job}/cancel', [AdminController::class, 'cancelJob'])->name('jobs.cancel');
+
+    // System Crash & Error Logs
+    Route::get('/logs', [AdminController::class, 'systemLogs'])->name('logs');
+    Route::get('/logs/{log}/details', [AdminController::class, 'systemLogDetails'])->name('logs.details');
+    Route::post('/logs/{log}/resolve', [AdminController::class, 'resolveSystemLog'])->name('logs.resolve');
+    Route::post('/logs/{log}/unresolve', [AdminController::class, 'unresolveSystemLog'])->name('logs.unresolve');
+    Route::delete('/logs/{log}', [AdminController::class, 'deleteSystemLog'])->name('logs.delete');
+    Route::post('/logs/clear', [AdminController::class, 'clearSystemLogs'])->name('logs.clear');
+    Route::post('/logs/raw/clear', [AdminController::class, 'clearRawLog'])->name('logs.raw.clear');
+    Route::post('/logs/test-crash', [AdminController::class, 'testCrash'])->name('logs.test_crash');
 });
 
 // Impersonation Revert Route
@@ -117,6 +127,7 @@ Route::middleware(['auth'])->prefix('shop')->name('shop.')->group(function () {
 
     // Instant / Share-to-Print Routes for Shop Owners
     Route::match(['get', 'post'], '/quick-print', [ShopController::class, 'quickPrint'])->name('quick_print');
+    Route::get('/quick-print/preview/{filename}', [ShopController::class, 'previewTempFile'])->name('quick_print.preview');
     Route::post('/quick-print/submit', [ShopController::class, 'submitQuickPrint'])->name('quick_print.submit');
     Route::post('/quick-print/delete-temp', [ShopController::class, 'deleteTempShareFile'])->name('quick_print.delete_temp');
 });
@@ -159,6 +170,7 @@ Route::prefix('api/agent')->group(function () {
     Route::get('/jobs', [AgentController::class, 'pollJobs']);
     Route::get('/jobs/{jobToken}/file', [AgentController::class, 'downloadJobFile']);
     Route::post('/jobs/{jobToken}/printed', [AgentController::class, 'markJobPrinted']);
+    Route::post('/jobs/{jobToken}/failed', [AgentController::class, 'markJobFailed']);
     Route::post('/heartbeat', [AgentController::class, 'heartbeat']);
 });
 
