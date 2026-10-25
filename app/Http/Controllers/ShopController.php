@@ -137,7 +137,7 @@ class ShopController extends Controller
             'rate_bw_double' => 'required|numeric|min:0.5',
             'rate_color_single' => 'required|numeric|min:1',
             'rate_color_double' => 'required|numeric|min:1',
-            'rate_photo_passport' => 'required|numeric|min:5',
+            'rate_photo_passport' => 'nullable|numeric|min:0',
             'rate_nid_bw' => 'nullable|numeric|min:1',
             'rate_nid_color' => 'nullable|numeric|min:1',
         ]);
@@ -864,6 +864,7 @@ class ShopController extends Controller
 
         $request->validate([
             'temp_file' => 'nullable|string',
+            'scanned_image_data' => 'nullable|string',
             'document' => 'nullable|file|max:51200|mimes:pdf,doc,docx,jpg,jpeg,png,webp,bmp,gif',
             'color_mode' => 'required|in:bw,color',
             'copies' => 'required|integer|min:1|max:100',
@@ -879,7 +880,21 @@ class ShopController extends Controller
         $extension = null;
         $totalPages = 1;
 
-        if ($request->hasFile('document')) {
+        if ($request->filled('scanned_image_data')) {
+            $base64 = $request->input('scanned_image_data');
+            if (preg_match('/^data:image\/(\w+);base64,/', $base64)) {
+                $base64 = substr($base64, strpos($base64, ',') + 1);
+            }
+            $imageData = base64_decode($base64);
+            if ($imageData !== false) {
+                $extension = 'jpg';
+                $originalName = 'Scanned_Doc_' . date('Ymd_His') . '.jpg';
+                $finalFileName = 'shop_quick_' . time() . '_' . Str::random(8) . '.jpg';
+                Storage::disk('public')->put('print_uploads/' . $finalFileName, $imageData);
+                $totalPages = 1;
+                session()->forget(['quick_print_temp_file', 'quick_print_original_name']);
+            }
+        } elseif ($request->hasFile('document')) {
             $file = $request->file('document');
             $extension = strtolower($file->getClientOriginalExtension());
             $originalName = $file->getClientOriginalName();

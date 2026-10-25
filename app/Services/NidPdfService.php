@@ -126,9 +126,12 @@ class NidPdfService
         imagedestroy($srcImage);
 
         if ($colorMode === 'bw') {
-            // Apply high-quality grayscale + contrast boost for laser printing
+            // CamScanner Clean B&W Whitening Filter (কালি অপচয় রোধ ও ফুল হোয়াইট ব্যাকগ্রাউন্ড):
+            // 1. Convert to grayscale
             imagefilter($canvas, IMG_FILTER_GRAYSCALE);
-            imagefilter($canvas, IMG_FILTER_CONTRAST, -10); // slight contrast boost
+            // 2. High brightness boost + contrast curve to turn patterned card background into pure #FFFFFF
+            imagefilter($canvas, IMG_FILTER_BRIGHTNESS, 30);
+            imagefilter($canvas, IMG_FILTER_CONTRAST, -40);
         }
 
         $tempPath = storage_path('app/temp_nid_' . $tag . '_' . Str::random(10) . '.jpg');

@@ -23,6 +23,7 @@ namespace PrintSheba
         public int poll_interval_sec { get; set; }
         public bool auto_start { get; set; }
         public bool minimize_to_tray { get; set; }
+        public bool force_duplex { get; set; }
 
         public AppConfig()
         {
@@ -33,6 +34,7 @@ namespace PrintSheba
             poll_interval_sec = 3;
             auto_start = false;
             minimize_to_tray = true;
+            force_duplex = false;
         }
     }
 
@@ -79,6 +81,7 @@ namespace PrintSheba
         private ComboBox cmbColorPrinter;
         private CheckBox chkAutoStart;
         private CheckBox chkMinimizeToTray;
+        private CheckBox chkForceDuplex;
         private ListBox lstLog;
         private Label lblTotalPrintsVal;
         private Label lblActiveQueueVal;
@@ -254,6 +257,7 @@ namespace PrintSheba
             txtApiToken.Text = config.api_token;
             chkAutoStart.Checked = config.auto_start;
             chkMinimizeToTray.Checked = config.minimize_to_tray;
+            if (chkForceDuplex != null) chkForceDuplex.Checked = config.force_duplex;
 
             if (!string.IsNullOrEmpty(config.bw_printer) && cmbBwPrinter.Items.Contains(config.bw_printer))
             {
@@ -481,18 +485,19 @@ namespace PrintSheba
         private bool ExecutePrint(string filePath, string printerName, PrintJobItem job)
         {
             string ext = Path.GetExtension(filePath).ToLowerInvariant();
+            bool isDuplex = job.is_duplex || (config != null && config.force_duplex);
 
             // A. Images: Native GDI scaled print
             if (ext == ".jpg" || ext == ".jpeg" || ext == ".png" || ext == ".bmp" || ext == ".gif")
             {
-                return PrintImageNatively(filePath, printerName, job.copies);
+                return PrintImageNatively(filePath, printerName, job.copies, isDuplex);
             }
 
             // B. PDF / Documents: Windows hidden shell print
-            return PrintDocumentSilently(filePath, printerName, job.copies);
+            return PrintDocumentSilently(filePath, printerName, job.copies, isDuplex);
         }
 
-        private bool PrintImageNatively(string filePath, string printerName, int copies)
+        private bool PrintImageNatively(string filePath, string printerName, int copies, bool isDuplex = false)
         {
             try
             {
@@ -501,6 +506,15 @@ namespace PrintSheba
                     var pd = new PrintDocument();
                     pd.PrinterSettings.PrinterName = printerName;
                     pd.PrinterSettings.Copies = (short)Math.Max(1, copies);
+
+                    if (isDuplex && pd.PrinterSettings.CanDuplex)
+                    {
+                        pd.PrinterSettings.Duplex = Duplex.Vertical;
+                    }
+                    else
+                    {
+                        pd.PrinterSettings.Duplex = Duplex.Simplex;
+                    }
 
                     pd.PrintPage += (s, ev) =>
                     {
@@ -525,7 +539,7 @@ namespace PrintSheba
             }
         }
 
-        private bool PrintDocumentSilently(string filePath, string printerName, int copies)
+        private bool PrintDocumentSilently(string filePath, string printerName, int copies, bool isDuplex = false)
         {
             string ext = Path.GetExtension(filePath).ToLowerInvariant();
 
@@ -587,9 +601,10 @@ namespace PrintSheba
 
                     if (!string.IsNullOrEmpty(sumatraExe))
                     {
-                        Log("🚀 সুমাত্রা ইঞ্জিন দিয়ে সরাসরি সাইলেন্ট প্রিন্ট হচ্ছে...");
+                        string duplexParam = isDuplex ? ",duplexlong" : ",simplex";
                         string copiesParam = copies > 1 ? string.Format(",copies={0}", copies) : "";
-                        string args = string.Format("-silent -print-to \"{0}\" -print-settings \"fit{1}\" \"{2}\"", printerName, copiesParam, filePath);
+                        string args = string.Format("-silent -print-to \"{0}\" -print-settings \"fit{1}{2}\" \"{3}\"", printerName, duplexParam, copiesParam, filePath);
+                        Log(string.Format("🚀 সুমাত্রা ইঞ্জিন দিয়ে প্রিন্ট হচ্ছে (মোড: {0}, কপি: {1})...", isDuplex ? "২-সাইড (Duplex/ডুপ্লেক্স)" : "১-সাইড (Simplex)", copies));
 
                         var psi = new ProcessStartInfo
                         {
@@ -875,6 +890,25 @@ namespace PrintSheba
             }
         }
 
+        private void OpenPrinterProperties(string printerName)
+        {
+            if (string.IsNullOrEmpty(printerName) || printerName.StartsWith("--"))
+            {
+                MessageBox.Show("দয়া করে প্রথমে তালিকা থেকে একটি প্রিন্টার সিলেক্ট করুন।", "প্রিন্টার নির্বাচন", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            try
+            {
+                Log("⚙️ উইন্ডোজ প্রিন্টার প্রেফারেন্স / ডুপ্লেক্স কনফিগারেশন উইন্ডো খোলা হচ্ছে: " + printerName);
+                Process.Start("rundll32.exe", string.Format("printui.dll,PrintUIEntry /e /n \"{0}\"", printerName));
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("প্রিন্টার সেটিংস ওপেন করতে সমস্যা: " + ex.Message, "ত্রুটি", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
         // ==================== MODERN PREMIUM BRANDED UI ====================
         private void InitializeComponent()
         {
@@ -1105,15 +1139,42 @@ namespace PrintSheba
 
             // Row 2: B&W Printer
             Label lblBw = new Label { Text = "সাদাকালো প্রিন্টার:", Location = new Point(20, 86), AutoSize = true, Font = new Font("Segoe UI", 9F, FontStyle.Bold), ForeColor = Color.FromArgb(148, 163, 184) };
-            cmbBwPrinter = new ComboBox { Location = new Point(135, 83), Size = new Size(607, 26), DropDownStyle = ComboBoxStyle.DropDownList, Font = new Font("Segoe UI", 9.5F), BackColor = Color.FromArgb(10, 15, 29), ForeColor = Color.White };
+            cmbBwPrinter = new ComboBox { Location = new Point(135, 83), Size = new Size(445, 26), DropDownStyle = ComboBoxStyle.DropDownList, Font = new Font("Segoe UI", 9.5F), BackColor = Color.FromArgb(10, 15, 29), ForeColor = Color.White };
+            Button btnBwProperties = new Button
+            {
+                Text = "⚙️ ড্রাইভার সেটিংস",
+                Location = new Point(588, 83),
+                Size = new Size(154, 26),
+                BackColor = Color.FromArgb(30, 41, 59),
+                ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat,
+                Font = new Font("Segoe UI", 8.5F, FontStyle.Bold),
+                Cursor = Cursors.Hand
+            };
+            btnBwProperties.FlatAppearance.BorderColor = Color.FromArgb(51, 65, 85);
+            btnBwProperties.Click += (s, e) => OpenPrinterProperties(cmbBwPrinter.SelectedItem != null ? cmbBwPrinter.SelectedItem.ToString() : "");
 
             // Row 3: Color Printer
             Label lblCol = new Label { Text = "রঙিন প্রিন্টার:", Location = new Point(20, 122), AutoSize = true, Font = new Font("Segoe UI", 9F, FontStyle.Bold), ForeColor = Color.FromArgb(148, 163, 184) };
-            cmbColorPrinter = new ComboBox { Location = new Point(135, 119), Size = new Size(607, 26), DropDownStyle = ComboBoxStyle.DropDownList, Font = new Font("Segoe UI", 9.5F), BackColor = Color.FromArgb(10, 15, 29), ForeColor = Color.White };
+            cmbColorPrinter = new ComboBox { Location = new Point(135, 119), Size = new Size(445, 26), DropDownStyle = ComboBoxStyle.DropDownList, Font = new Font("Segoe UI", 9.5F), BackColor = Color.FromArgb(10, 15, 29), ForeColor = Color.White };
+            Button btnColorProperties = new Button
+            {
+                Text = "⚙️ ড্রাইভার সেটিংস",
+                Location = new Point(588, 119),
+                Size = new Size(154, 26),
+                BackColor = Color.FromArgb(30, 41, 59),
+                ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat,
+                Font = new Font("Segoe UI", 8.5F, FontStyle.Bold),
+                Cursor = Cursors.Hand
+            };
+            btnColorProperties.FlatAppearance.BorderColor = Color.FromArgb(51, 65, 85);
+            btnColorProperties.Click += (s, e) => OpenPrinterProperties(cmbColorPrinter.SelectedItem != null ? cmbColorPrinter.SelectedItem.ToString() : "");
 
             // Row 4: Checkboxes
-            chkAutoStart = new CheckBox { Text = "কম্পিউটার চালু হলে একা একা ব্যাকগ্রাউন্ডে রান করবে", Location = new Point(135, 154), AutoSize = true, Font = new Font("Segoe UI", 8.8F), ForeColor = Color.FromArgb(203, 213, 225) };
-            chkMinimizeToTray = new CheckBox { Text = "মিনিমাইজ করলে সিস্টেম ট্রেতে লুকাবে", Location = new Point(480, 154), AutoSize = true, Font = new Font("Segoe UI", 8.8F), ForeColor = Color.FromArgb(203, 213, 225) };
+            chkAutoStart = new CheckBox { Text = "উইন্ডোজ স্টার্টআপে চালু", Location = new Point(135, 154), AutoSize = true, Font = new Font("Segoe UI", 8.8F), ForeColor = Color.FromArgb(203, 213, 225) };
+            chkMinimizeToTray = new CheckBox { Text = "ট্রেতে মিনিমাইজ", Location = new Point(310, 154), AutoSize = true, Font = new Font("Segoe UI", 8.8F), ForeColor = Color.FromArgb(203, 213, 225) };
+            chkForceDuplex = new CheckBox { Text = "ফটোকপিয়ার মোড (সব প্রিন্ট ২-সাইড ফোর্স)", Location = new Point(445, 154), AutoSize = true, Font = new Font("Segoe UI", 8.8F, FontStyle.Bold), ForeColor = Color.FromArgb(251, 191, 36) };
 
             // Row 5: Action Buttons (Vibrant Gradient / Modern Solid)
             btnSave = new Button
@@ -1138,6 +1199,7 @@ namespace PrintSheba
                 config.color_printer = cmbColorPrinter.SelectedItem != null ? cmbColorPrinter.SelectedItem.ToString() : "";
                 config.auto_start = chkAutoStart.Checked;
                 config.minimize_to_tray = chkMinimizeToTray.Checked;
+                config.force_duplex = chkForceDuplex.Checked;
                 SaveConfig();
                 Log("💾 নতুন সেটিংস সংরক্ষিত হয়েছে। ক্লাউড সার্ভারে প্রিন্টার সিঙ্ক হচ্ছে...");
                 ThreadPool.QueueUserWorkItem(o =>
@@ -1195,10 +1257,13 @@ namespace PrintSheba
             pnlConfig.Controls.Add(btnToggleToken);
             pnlConfig.Controls.Add(lblBw);
             pnlConfig.Controls.Add(cmbBwPrinter);
+            pnlConfig.Controls.Add(btnBwProperties);
             pnlConfig.Controls.Add(lblCol);
             pnlConfig.Controls.Add(cmbColorPrinter);
+            pnlConfig.Controls.Add(btnColorProperties);
             pnlConfig.Controls.Add(chkAutoStart);
             pnlConfig.Controls.Add(chkMinimizeToTray);
+            pnlConfig.Controls.Add(chkForceDuplex);
             pnlConfig.Controls.Add(btnSave);
             pnlConfig.Controls.Add(btnTestPrint);
             pnlConfig.Controls.Add(btnCheckNow);

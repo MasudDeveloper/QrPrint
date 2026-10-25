@@ -167,6 +167,19 @@
                             </span>
                         </div>
                     </div>
+                    <!-- Filter Toggle Toolbar -->
+                    <div class="flex items-center gap-1 p-1 bg-slate-100 rounded-xl">
+                        <button type="button" onclick="setSideFilter('front', 'clean_bw')" id="frontFilter_clean_bw" class="flex-1 py-1 px-1 rounded-lg text-[10px] font-bold bg-white text-indigo-800 shadow-xs border border-indigo-300">
+                            📄 ক্লিন সাদা (CamScanner)
+                        </button>
+                        <button type="button" onclick="setSideFilter('front', 'magic_color')" id="frontFilter_magic_color" class="flex-1 py-1 px-1 rounded-lg text-[10px] font-bold text-slate-600 hover:text-slate-900">
+                            🎨 ম্যাজিক কালার
+                        </button>
+                        <button type="button" onclick="setSideFilter('front', 'original')" id="frontFilter_original" class="flex-1 py-1 px-1 rounded-lg text-[10px] font-bold text-slate-600 hover:text-slate-900">
+                            🖼️ অরিজিনাল
+                        </button>
+                    </div>
+
                     <div class="flex items-center justify-between gap-2 pt-1">
                         <button type="button" onclick="rotateCard('front')" class="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-bold border border-slate-200 flex items-center gap-1 cursor-pointer">
                             <span>🔄 ঘোরান</span>
@@ -232,6 +245,19 @@
                             </span>
                         </div>
                     </div>
+                    <!-- Filter Toggle Toolbar -->
+                    <div class="flex items-center gap-1 p-1 bg-slate-100 rounded-xl">
+                        <button type="button" onclick="setSideFilter('back', 'clean_bw')" id="backFilter_clean_bw" class="flex-1 py-1 px-1 rounded-lg text-[10px] font-bold bg-white text-blue-800 shadow-xs border border-blue-300">
+                            📄 ক্লিন সাদা (CamScanner)
+                        </button>
+                        <button type="button" onclick="setSideFilter('back', 'magic_color')" id="backFilter_magic_color" class="flex-1 py-1 px-1 rounded-lg text-[10px] font-bold text-slate-600 hover:text-slate-900">
+                            🎨 ম্যাজিক কালার
+                        </button>
+                        <button type="button" onclick="setSideFilter('back', 'original')" id="backFilter_original" class="flex-1 py-1 px-1 rounded-lg text-[10px] font-bold text-slate-600 hover:text-slate-900">
+                            🖼️ অরিজিনাল
+                        </button>
+                    </div>
+
                     <div class="flex items-center justify-between gap-2 pt-1">
                         <button type="button" onclick="rotateCard('back')" class="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-bold border border-slate-200 flex items-center gap-1 cursor-pointer">
                             <span>🔄 ঘোরান</span>
@@ -373,9 +399,90 @@
         const TARGET_HEIGHT = 638;
 
         const cardState = {
-            front: { originalImage: null, rotation: 0, corners: null, croppedCanvas: null },
-            back: { originalImage: null, rotation: 0, corners: null, croppedCanvas: null }
+            front: { originalImage: null, rotation: 0, corners: null, croppedCanvas: null, filter: 'clean_bw' },
+            back: { originalImage: null, rotation: 0, corners: null, croppedCanvas: null, filter: 'clean_bw' }
         };
+
+        function applyFilterToCanvas(srcCanvas, filterMode) {
+            const out = document.createElement('canvas');
+            out.width = srcCanvas.width;
+            out.height = srcCanvas.height;
+            const ctx = out.getContext('2d');
+            ctx.drawImage(srcCanvas, 0, 0);
+
+            if (filterMode === 'original') return out;
+
+            const imgData = ctx.getImageData(0, 0, out.width, out.height);
+            const d = imgData.data;
+            const len = d.length;
+
+            if (filterMode === 'clean_bw') {
+                for (let i = 0; i < len; i += 4) {
+                    const r = d[i], g = d[i + 1], b = d[i + 2];
+                    const lum = 0.299 * r + 0.587 * g + 0.114 * b;
+                    if (lum > 148) {
+                        d[i] = 255; d[i + 1] = 255; d[i + 2] = 255;
+                    } else if (lum < 112) {
+                        d[i] = 0; d[i + 1] = 0; d[i + 2] = 0;
+                    } else {
+                        const val = Math.min(255, Math.floor(((lum - 112) / 36) * 255));
+                        d[i] = val; d[i + 1] = val; d[i + 2] = val;
+                    }
+                }
+            } else if (filterMode === 'magic_color') {
+                for (let i = 0; i < len; i += 4) {
+                    const r = d[i], g = d[i + 1], b = d[i + 2];
+                    const lum = 0.299 * r + 0.587 * g + 0.114 * b;
+                    const max = Math.max(r, g, b), min = Math.min(r, g, b);
+                    const sat = max === 0 ? 0 : (max - min) / max;
+                    if (lum > 145 && (sat < 0.45 || (b > r && b > g && lum > 155))) {
+                        d[i] = 255; d[i + 1] = 255; d[i + 2] = 255;
+                    } else if (lum < 100) {
+                        d[i] = Math.max(0, r - 30);
+                        d[i + 1] = Math.max(0, g - 30);
+                        d[i + 2] = Math.max(0, b - 30);
+                    }
+                }
+            }
+            ctx.putImageData(imgData, 0, 0);
+            return out;
+        }
+
+        function renderSideOutput(side) {
+            const state = cardState[side];
+            if (!state.croppedCanvas) return;
+
+            const mode = state.filter || 'clean_bw';
+            const finalCanvas = applyFilterToCanvas(state.croppedCanvas, mode);
+
+            const previewCanvas = document.getElementById(`${side}Canvas`);
+            previewCanvas.width = TARGET_WIDTH;
+            previewCanvas.height = TARGET_HEIGHT;
+            const pCtx = previewCanvas.getContext('2d');
+            pCtx.drawImage(finalCanvas, 0, 0);
+
+            const croppedInput = document.getElementById(`${side}CroppedData`);
+            if (croppedInput) {
+                croppedInput.value = finalCanvas.toDataURL('image/jpeg', 0.95);
+            }
+
+            if (typeof updateA4Mockup === 'function') updateA4Mockup();
+        }
+
+        function setSideFilter(side, filterMode) {
+            cardState[side].filter = filterMode;
+            ['clean_bw', 'magic_color', 'original'].forEach(m => {
+                const btn = document.getElementById(`${side}Filter_${m}`);
+                if (!btn) return;
+                const activeColor = side === 'front' ? 'text-indigo-800 border-indigo-300' : 'text-blue-800 border-blue-300';
+                if (m === filterMode) {
+                    btn.className = `flex-1 py-1 px-1 rounded-lg text-[10px] font-bold bg-white ${activeColor} shadow-xs border`;
+                } else {
+                    btn.className = 'flex-1 py-1 px-1 rounded-lg text-[10px] font-bold text-slate-600 hover:text-slate-900';
+                }
+            });
+            renderSideOutput(side);
+        }
 
         let activeModalSide = null;
         let activeHandleIndex = -1;
@@ -463,15 +570,6 @@
                             outCtx.drawImage(croppedImg, 0, 0, TARGET_WIDTH, TARGET_HEIGHT);
 
                             cardState[side].croppedCanvas = outCanvas;
-
-                            const previewCanvas = document.getElementById(`${side}Canvas`);
-                            previewCanvas.width = TARGET_WIDTH;
-                            previewCanvas.height = TARGET_HEIGHT;
-                            const pCtx = previewCanvas.getContext('2d');
-                            pCtx.drawImage(outCanvas, 0, 0);
-
-                            document.getElementById(`${side}CroppedData`).value = result.image_data;
-
                             document.getElementById(`${side}UploadBox`).classList.add('hidden');
                             document.getElementById(`${side}PreviewBox`).classList.remove('hidden');
 
@@ -480,7 +578,7 @@
                                 statusBadge.innerText = '✨ AI পারফেক্ট ক্রপ';
                             }
 
-                            updateA4Mockup();
+                            renderSideOutput(side);
                             aiSuccess = true;
 
                             fetchAiCorners(side, file, dataUrl, originalImg.width, originalImg.height);
@@ -736,20 +834,12 @@
 
             renderPerspectiveMesh(rotCanvas, outCtx, corners, TARGET_WIDTH, TARGET_HEIGHT, 6);
             state.croppedCanvas = outCanvas;
-
-            const previewCanvas = document.getElementById(`${side}Canvas`);
-            previewCanvas.width = TARGET_WIDTH;
-            previewCanvas.height = TARGET_HEIGHT;
-            previewCanvas.getContext('2d').drawImage(outCanvas, 0, 0);
-
-            document.getElementById(`${side}CroppedData`).value = outCanvas.toDataURL('image/jpeg', 0.95);
+            renderSideOutput(side);
 
             document.getElementById(`${side}UploadBox`).classList.add('hidden');
             document.getElementById(`${side}PreviewBox`).classList.remove('hidden');
             document.getElementById(`${side}StatusBadge`).className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800';
             document.getElementById(`${side}StatusBadge`).innerText = '✓ ক্রপ সম্পন্ন';
-
-            updateA4Mockup();
         }
 
         function renderPerspectiveMesh(srcCanvas, destCtx, corners, destW, destH, subdivisions) {

@@ -81,15 +81,6 @@
                     <input type="checkbox" name="has_duplex_print" value="1" {{ old('has_duplex_print', $shop->has_duplex_print) ? 'checked' : '' }} class="w-5 h-5 accent-rose-500 rounded">
                 </label>
 
-                <!-- Passport Photo Toggle -->
-                <label class="p-4 rounded-2xl bg-slate-950 border border-slate-800 cursor-pointer flex items-center justify-between hover:border-slate-700 transition-all">
-                    <div>
-                        <span class="text-xs font-bold text-purple-400 block">📸 পাসপোর্ট সাইজ ছবি</span>
-                        <span class="text-[10px] text-slate-400">৪×৬ ফটো পেপার প্রিন্ট</span>
-                    </div>
-                    <input type="checkbox" name="has_passport_photo" value="1" {{ old('has_passport_photo', $shop->has_passport_photo) ? 'checked' : '' }} class="w-5 h-5 accent-purple-500 rounded">
-                </label>
-
                 <!-- NID Card Print Toggle -->
                 <label class="p-4 rounded-2xl bg-slate-950 border border-slate-800 cursor-pointer flex items-center justify-between hover:border-slate-700 transition-all">
                     <div>
@@ -162,17 +153,6 @@
                     <div class="flex items-center gap-2">
                         <span class="text-sm font-bold text-pink-400">৳</span>
                         <input type="number" step="0.5" name="rate_color_double" value="{{ old('rate_color_double', $shop->rate_color_double) }}" required 
-                            class="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 font-bold text-white text-sm">
-                    </div>
-                </div>
-
-                <!-- 4x6 Passport Photo -->
-                <div class="p-4 rounded-2xl bg-slate-950 border border-purple-500/20">
-                    <label class="block text-xs font-bold text-purple-400 mb-1">৪×৬ পাসপোর্ট ছবি (ফটো পেপার)</label>
-                    <span class="text-[11px] text-slate-400 block mb-2">৮ কপি পাসপোর্ট সাইজ ফটো প্রিন্ট রেট</span>
-                    <div class="flex items-center gap-2">
-                        <span class="text-sm font-bold text-purple-400">৳</span>
-                        <input type="number" step="1" name="rate_photo_passport" value="{{ old('rate_photo_passport', $shop->rate_photo_passport) }}" required 
                             class="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 font-bold text-white text-sm">
                     </div>
                 </div>

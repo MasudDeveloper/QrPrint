@@ -135,7 +135,6 @@
                     <select name="type" class="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white focus:outline-none focus:border-rose-500">
                         <option value="bw">সাদাকালো লেজার (HP, Canon)</option>
                         <option value="color">কালার ইঙ্কজেট (Epson, Canon)</option>
-                        <option value="photo">ফটো প্রিন্টার (4x6 Passport)</option>
                         <option value="all">সব ধরনের প্রিন্ট (All-in-one)</option>
                     </select>
                 </div>

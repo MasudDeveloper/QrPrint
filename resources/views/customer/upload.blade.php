@@ -232,17 +232,6 @@
                 @else
                     <input type="hidden" name="is_duplex" id="isDuplex" value="0">
                 @endif
-
-                <!-- Passport Photo Mode (Only if Shop has Passport Photo enabled) -->
-                @if($shop->has_passport_photo)
-                <label class="flex items-center gap-2.5 p-3 rounded-xl bg-purple-50/40 border border-purple-200 cursor-pointer">
-                    <input type="checkbox" name="paper_size" id="isPassport" value="4x6_passport" class="rounded accent-purple-600 rate-trigger">
-                    <div class="text-xs">
-                        <span class="font-bold text-purple-900">৪×৬ পাসপোর্ট সাইজ ছবি</span>
-                        <span class="text-[10px] text-purple-700 block">ফটো পেপারে ৮ কপি পাসপোর্ট গ্রিড (৳{{ $shop->rate_photo_passport }})</span>
-                    </div>
-                </label>
-                @endif
             </div>
 
             <!-- STEP 3: LIVE BILL & PAYMENT -->
@@ -347,29 +336,21 @@
         const rateBwDouble = {{ $shop->rate_bw_double }};
         const rateColorSingle = {{ $shop->rate_color_single }};
         const rateColorDouble = {{ $shop->rate_color_double }};
-        const ratePassport = {{ $shop->rate_photo_passport }};
 
         function calculateBill() {
             const pages = parseInt(document.getElementById('totalPages')?.value) || 1;
             const copies = parseInt(document.getElementById('copies')?.value) || 1;
             const duplexElem = document.getElementById('isDuplex');
             const isDuplex = duplexElem ? (duplexElem.type === 'checkbox' ? duplexElem.checked : false) : false;
-            const passportElem = document.getElementById('isPassport');
-            const isPassport = passportElem ? passportElem.checked : false;
             const colorMode = document.querySelector('input[name="color_mode"]:checked')?.value || document.querySelector('input[name="color_mode"]')?.value || 'bw';
 
-            let total = 0;
-            if (isPassport) {
-                total = ratePassport * copies;
+            let unit = 0;
+            if (colorMode === 'bw') {
+                unit = isDuplex ? (rateBwDouble / 2) : rateBwSingle;
             } else {
-                let unit = 0;
-                if (colorMode === 'bw') {
-                    unit = isDuplex ? (rateBwDouble / 2) : rateBwSingle;
-                } else {
-                    unit = isDuplex ? (rateColorDouble / 2) : rateColorSingle;
-                }
-                total = pages * unit * copies;
+                unit = isDuplex ? (rateColorDouble / 2) : rateColorSingle;
             }
+            const total = pages * unit * copies;
 
             document.getElementById('billDisplay').innerText = '৳ ' + total.toFixed(2);
         }

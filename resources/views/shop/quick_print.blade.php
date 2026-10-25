@@ -60,6 +60,7 @@
     <!-- Main Grid: Left = Preview / Upload, Right = Print Controls -->
     <form id="quickPrintForm" action="{{ route('shop.quick_print.submit') }}" method="POST" enctype="multipart/form-data">
         @csrf
+        <input type="hidden" name="scanned_image_data" id="scannedImageDataInput">
 
         @if($fileData)
             <input type="hidden" name="temp_file" value="{{ $fileData['temp_file'] }}">
@@ -110,11 +111,17 @@
                         <div class="rounded-2xl bg-slate-950 border border-slate-800/80 p-2 flex items-center justify-center min-h-[300px] max-h-[500px] overflow-hidden relative">
                             @if($fileData['is_image'])
                                 <div class="w-full flex flex-col items-center justify-center">
-                                    <img src="{{ $fileData['url'] }}" alt="Shared Document Preview" class="max-h-[440px] max-w-full rounded-xl object-contain shadow-md" onerror="this.onerror=null; this.src='{{ asset('icon-192.png') }}';">
-                                    <div class="pt-2 w-full flex justify-end text-xs text-slate-400 px-1">
+                                    <img id="sharedPreviewImage" src="{{ $fileData['url'] }}" alt="Shared Document Preview" class="max-h-[440px] max-w-full rounded-xl object-contain shadow-md" onerror="this.onerror=null; this.src='{{ asset('icon-192.png') }}';">
+                                    <div class="pt-2 w-full flex flex-wrap items-center justify-between text-xs text-slate-400 px-1 gap-2">
+                                        <button type="button" onclick="openDocScannerModal(document.getElementById('sharedPreviewImage').src)" class="px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs flex items-center gap-1.5 shadow transition-all cursor-pointer">
+                                            <span>📐 কর্নার ডিটেক্ট ও সোজা করুন (Doc Scanner)</span>
+                                        </button>
                                         <a href="{{ $fileData['url'] }}" target="_blank" class="text-emerald-400 hover:underline flex items-center gap-1 font-bold">
                                             ফুলস্ক্রিন ভিউ ↗
                                         </a>
+                                    </div>
+                                    <div id="sharedScanBadge" class="hidden mt-2 inline-flex items-center gap-1 text-[11px] font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-xl border border-emerald-500/20">
+                                        <span>✓</span> <span>A4 সোজা ও হোয়াইট ফিল্টার প্রয়োগ করা হয়েছে</span>
                                     </div>
                                 </div>
                             @elseif($fileData['is_pdf'])
@@ -202,6 +209,14 @@
 
                             <div class="rounded-xl bg-slate-950 p-2 flex items-center justify-center min-h-[260px] max-h-[380px] overflow-hidden" id="clientPreviewContent">
                                 <!-- Image or PDF frame injected via JS -->
+                            </div>
+                            <div id="directDocScannerBtnContainer" class="hidden pt-1">
+                                <button type="button" onclick="openDocScannerModal(currentDirectImageDataUrl)" class="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow transition-all cursor-pointer">
+                                    <span>📐 কর্নার ডিটেক্ট ও ডকুমেন্ট সোজা করুন (Doc Scanner)</span>
+                                </button>
+                                <div id="directScanBadge" class="hidden mt-2 inline-flex items-center gap-1 text-[11px] font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-xl border border-emerald-500/20">
+                                    <span>✓</span> <span>A4 সোজা ও হোয়াইট ফিল্টার প্রয়োগ করা হয়েছে</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -502,7 +517,9 @@
             fileIcon.textContent = '🖼️';
             const reader = new FileReader();
             reader.onload = (e) => {
+                currentDirectImageDataUrl = e.target.result;
                 previewContent.innerHTML = `<img src="${e.target.result}" class="max-h-[340px] max-w-full rounded-lg object-contain shadow">`;
+                document.getElementById('directDocScannerBtnContainer')?.classList.remove('hidden');
             };
             reader.readAsDataURL(file);
         } else if (isPdf) {
@@ -556,10 +573,369 @@
     function clearDirectFile() {
         const input = document.getElementById('documentInput');
         if (input) input.value = '';
+        currentDirectImageDataUrl = null;
+        document.getElementById('scannedImageDataInput').value = '';
+        document.getElementById('directDocScannerBtnContainer')?.classList.add('hidden');
+        document.getElementById('directScanBadge')?.classList.add('hidden');
         const prompt = document.getElementById('dropzonePrompt');
         const preview = document.getElementById('clientPreviewWrapper');
         if (prompt) prompt.classList.remove('hidden');
         if (preview) preview.classList.add('hidden');
+    }
+
+    // ==================== DOC SCANNER & CAMSCANNER FILTER ENGINE ====================
+    let currentDirectImageDataUrl = null;
+    let scannerImg = null;
+    let scannerRotation = 0;
+    let scannerCorners = null; // [tl, tr, br, bl]
+    let activeScannerHandle = -1;
+    let scannerFilterMode = 'clean_bw';
+
+    const A4_TARGET_WIDTH = 1240;
+    const A4_TARGET_HEIGHT = 1754; // Standard A4 ratio 1:1.414
+
+    function openDocScannerModal(imgSrc) {
+        if (!imgSrc) return;
+        const modal = document.getElementById('docScannerModal');
+        modal.classList.remove('hidden');
+
+        scannerRotation = 0;
+        scannerFilterMode = 'clean_bw';
+        updateScannerFilterButtons();
+
+        scannerImg = new Image();
+        scannerImg.crossOrigin = 'anonymous';
+        scannerImg.onload = function() {
+            initScannerCanvas();
+        };
+        scannerImg.src = imgSrc;
+    }
+
+    function closeDocScannerModal() {
+        const modal = document.getElementById('docScannerModal');
+        modal.classList.add('hidden');
+    }
+
+    function initScannerCanvas() {
+        if (!scannerImg) return;
+        const canvas = document.getElementById('scannerCanvas');
+
+        const isRotated = scannerRotation % 180 !== 0;
+        const w = isRotated ? scannerImg.height : scannerImg.width;
+        const h = isRotated ? scannerImg.width : scannerImg.height;
+
+        canvas.width = w;
+        canvas.height = h;
+
+        // Auto corners with 5% inset
+        const insetX = w * 0.05;
+        const insetY = h * 0.05;
+        scannerCorners = [
+            { x: insetX, y: insetY },
+            { x: w - insetX, y: insetY },
+            { x: w - insetX, y: h - insetY },
+            { x: insetX, y: h - insetY }
+        ];
+
+        drawScannerCanvas();
+        setupScannerInteractions();
+    }
+
+    function drawScannerCanvas() {
+        const canvas = document.getElementById('scannerCanvas');
+        if (!canvas || !scannerImg) return;
+        const ctx = canvas.getContext('2d');
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Draw rotated base image
+        ctx.save();
+        ctx.translate(canvas.width / 2, canvas.height / 2);
+        ctx.rotate((scannerRotation * Math.PI) / 180);
+        ctx.drawImage(scannerImg, -scannerImg.width / 2, -scannerImg.height / 2);
+        ctx.restore();
+
+        if (!scannerCorners || scannerCorners.length < 4) return;
+
+        // Darken outside quad area
+        ctx.save();
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Clip inside quad
+        ctx.beginPath();
+        ctx.moveTo(scannerCorners[0].x, scannerCorners[0].y);
+        ctx.lineTo(scannerCorners[1].x, scannerCorners[1].y);
+        ctx.lineTo(scannerCorners[2].x, scannerCorners[2].y);
+        ctx.lineTo(scannerCorners[3].x, scannerCorners[3].y);
+        ctx.closePath();
+        ctx.clip();
+
+        ctx.translate(canvas.width / 2, canvas.height / 2);
+        ctx.rotate((scannerRotation * Math.PI) / 180);
+        ctx.drawImage(scannerImg, -scannerImg.width / 2, -scannerImg.height / 2);
+        ctx.restore();
+
+        // Draw green quad border
+        ctx.save();
+        ctx.strokeStyle = '#10b981';
+        ctx.lineWidth = Math.max(3, canvas.width / 260);
+        ctx.beginPath();
+        ctx.moveTo(scannerCorners[0].x, scannerCorners[0].y);
+        ctx.lineTo(scannerCorners[1].x, scannerCorners[1].y);
+        ctx.lineTo(scannerCorners[2].x, scannerCorners[2].y);
+        ctx.lineTo(scannerCorners[3].x, scannerCorners[3].y);
+        ctx.closePath();
+        ctx.stroke();
+
+        // Draw corner handles
+        const handleRadius = Math.max(16, canvas.width / 45);
+        scannerCorners.forEach((pt) => {
+            ctx.beginPath();
+            ctx.arc(pt.x, pt.y, handleRadius, 0, Math.PI * 2);
+            ctx.fillStyle = '#10b981';
+            ctx.fill();
+            ctx.lineWidth = Math.max(2, handleRadius / 4);
+            ctx.strokeStyle = '#ffffff';
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.arc(pt.x, pt.y, handleRadius / 3, 0, Math.PI * 2);
+            ctx.fillStyle = '#ffffff';
+            ctx.fill();
+        });
+        ctx.restore();
+    }
+
+    function setupScannerInteractions() {
+        const canvas = document.getElementById('scannerCanvas');
+        if (!canvas || canvas._hasScannerListeners) return;
+        canvas._hasScannerListeners = true;
+
+        function getPoint(evt) {
+            const rect = canvas.getBoundingClientRect();
+            const clientX = evt.touches ? evt.touches[0].clientX : evt.clientX;
+            const clientY = evt.touches ? evt.touches[0].clientY : evt.clientY;
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            return {
+                x: (clientX - rect.left) * scaleX,
+                y: (clientY - rect.top) * scaleY
+            };
+        }
+
+        function onStart(evt) {
+            if (!scannerCorners) return;
+            const pt = getPoint(evt);
+            const hitDist = Math.max(45, canvas.width / 18);
+
+            activeScannerHandle = -1;
+            let minDist = hitDist;
+
+            scannerCorners.forEach((c, idx) => {
+                const dist = Math.hypot(c.x - pt.x, c.y - pt.y);
+                if (dist < minDist) {
+                    minDist = dist;
+                    activeScannerHandle = idx;
+                }
+            });
+
+            if (activeScannerHandle !== -1) {
+                evt.preventDefault();
+            }
+        }
+
+        function onMove(evt) {
+            if (activeScannerHandle === -1 || !scannerCorners) return;
+            evt.preventDefault();
+            const pt = getPoint(evt);
+            scannerCorners[activeScannerHandle].x = Math.max(0, Math.min(canvas.width, pt.x));
+            scannerCorners[activeScannerHandle].y = Math.max(0, Math.min(canvas.height, pt.y));
+            drawScannerCanvas();
+        }
+
+        function onEnd() {
+            activeScannerHandle = -1;
+        }
+
+        canvas.addEventListener('mousedown', onStart);
+        window.addEventListener('mousemove', onMove);
+        window.addEventListener('mouseup', onEnd);
+
+        canvas.addEventListener('touchstart', onStart, { passive: false });
+        window.addEventListener('touchmove', onMove, { passive: false });
+        window.addEventListener('touchend', onEnd);
+    }
+
+    function rotateScannerDoc() {
+        scannerRotation = (scannerRotation + 90) % 360;
+        initScannerCanvas();
+    }
+
+    function resetScannerCorners() {
+        const canvas = document.getElementById('scannerCanvas');
+        if (!canvas) return;
+        const w = canvas.width;
+        const h = canvas.height;
+        const insetX = w * 0.05;
+        const insetY = h * 0.05;
+        scannerCorners = [
+            { x: insetX, y: insetY },
+            { x: w - insetX, y: insetY },
+            { x: w - insetX, y: h - insetY },
+            { x: insetX, y: h - insetY }
+        ];
+        drawScannerCanvas();
+    }
+
+    function setDocFilter(mode) {
+        scannerFilterMode = mode;
+        updateScannerFilterButtons();
+    }
+
+    function updateScannerFilterButtons() {
+        ['clean_bw', 'magic_color', 'original'].forEach(m => {
+            const btn = document.getElementById(`docFilter_${m}`);
+            if (!btn) return;
+            if (m === scannerFilterMode) {
+                btn.className = 'flex-1 py-1.5 px-2 rounded-xl text-xs font-bold bg-emerald-600 text-white shadow-sm border border-emerald-500 transition-all';
+            } else {
+                btn.className = 'flex-1 py-1.5 px-2 rounded-xl text-xs font-bold bg-slate-800 text-slate-300 border border-slate-700 hover:text-white transition-all';
+            }
+        });
+    }
+
+    function applyDocScanner() {
+        if (!scannerImg || !scannerCorners) return;
+
+        const isRotated = scannerRotation % 180 !== 0;
+        const rw = isRotated ? scannerImg.height : scannerImg.width;
+        const rh = isRotated ? scannerImg.width : scannerImg.height;
+
+        const rotCanvas = document.createElement('canvas');
+        rotCanvas.width = rw;
+        rotCanvas.height = rh;
+        const rCtx = rotCanvas.getContext('2d');
+        rCtx.translate(rw / 2, rh / 2);
+        rCtx.rotate((scannerRotation * Math.PI) / 180);
+        rCtx.drawImage(scannerImg, -scannerImg.width / 2, -scannerImg.height / 2);
+
+        // Perform subdivision mesh perspective warp to A4 (1240 x 1754)
+        const a4Canvas = document.createElement('canvas');
+        a4Canvas.width = A4_TARGET_WIDTH;
+        a4Canvas.height = A4_TARGET_HEIGHT;
+        const a4Ctx = a4Canvas.getContext('2d');
+
+        renderScannerMesh(rotCanvas, a4Ctx, scannerCorners, A4_TARGET_WIDTH, A4_TARGET_HEIGHT, 6);
+
+        // Apply CamScanner filter
+        if (scannerFilterMode !== 'original') {
+            const imgData = a4Ctx.getImageData(0, 0, A4_TARGET_WIDTH, A4_TARGET_HEIGHT);
+            const d = imgData.data;
+            const len = d.length;
+
+            if (scannerFilterMode === 'clean_bw') {
+                for (let i = 0; i < len; i += 4) {
+                    const r = d[i], g = d[i + 1], b = d[i + 2];
+                    const lum = 0.299 * r + 0.587 * g + 0.114 * b;
+                    if (lum > 148) {
+                        d[i] = 255; d[i + 1] = 255; d[i + 2] = 255;
+                    } else if (lum < 112) {
+                        d[i] = 0; d[i + 1] = 0; d[i + 2] = 0;
+                    } else {
+                        const val = Math.min(255, Math.floor(((lum - 112) / 36) * 255));
+                        d[i] = val; d[i + 1] = val; d[i + 2] = val;
+                    }
+                }
+            } else if (scannerFilterMode === 'magic_color') {
+                for (let i = 0; i < len; i += 4) {
+                    const r = d[i], g = d[i + 1], b = d[i + 2];
+                    const lum = 0.299 * r + 0.587 * g + 0.114 * b;
+                    const max = Math.max(r, g, b), min = Math.min(r, g, b);
+                    const sat = max === 0 ? 0 : (max - min) / max;
+                    if (lum > 145 && (sat < 0.45 || (b > r && b > g && lum > 155))) {
+                        d[i] = 255; d[i + 1] = 255; d[i + 2] = 255;
+                    } else if (lum < 100) {
+                        d[i] = Math.max(0, r - 30);
+                        d[i + 1] = Math.max(0, g - 30);
+                        d[i + 2] = Math.max(0, b - 30);
+                    }
+                }
+            }
+            a4Ctx.putImageData(imgData, 0, 0);
+        }
+
+        const dataUrl = a4Canvas.toDataURL('image/jpeg', 0.95);
+        document.getElementById('scannedImageDataInput').value = dataUrl;
+
+        // Update previews on screen
+        const sharedImg = document.getElementById('sharedPreviewImage');
+        if (sharedImg) {
+            sharedImg.src = dataUrl;
+            document.getElementById('sharedScanBadge')?.classList.remove('hidden');
+        }
+
+        const clientContent = document.getElementById('clientPreviewContent');
+        if (clientContent && !sharedImg) {
+            clientContent.innerHTML = `<img src="${dataUrl}" class="max-h-[340px] max-w-full rounded-lg object-contain shadow">`;
+            document.getElementById('directScanBadge')?.classList.remove('hidden');
+        }
+
+        closeDocScannerModal();
+
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'success',
+                title: '✓ ডকুমেন্ট সোজা ও হোয়াইট ফিল্টার প্রয়োগ হয়েছে!',
+                showConfirmButton: false,
+                timer: 2500
+            });
+        }
+    }
+
+    function renderScannerMesh(srcCanvas, destCtx, corners, destW, destH, n) {
+        const [c0, c1, c2, c3] = corners;
+        function interp(u, v) {
+            const topX = c0.x + (c1.x - c0.x) * u, topY = c0.y + (c1.y - c0.y) * u;
+            const botX = c3.x + (c2.x - c3.x) * u, botY = c3.y + (c2.y - c3.y) * u;
+            return { x: topX + (botX - topX) * v, y: topY + (botY - topY) * v };
+        }
+        destCtx.clearRect(0, 0, destW, destH);
+        for (let i = 0; i < n; i++) {
+            for (let j = 0; j < n; j++) {
+                const u0 = i / n, u1 = (i + 1) / n;
+                const v0 = j / n, v1 = (j + 1) / n;
+                const p00 = interp(u0, v0), p10 = interp(u1, v0);
+                const p01 = interp(u0, v1), p11 = interp(u1, v1);
+                const dX0 = u0 * destW, dX1 = u1 * destW;
+                const dY0 = v0 * destH, dY1 = v1 * destH;
+                drawAffineTri(destCtx, srcCanvas, p00.x, p00.y, p10.x, p10.y, p01.x, p01.y, dX0, dY0, dX1, dY0, dX0, dY1);
+                drawAffineTri(destCtx, srcCanvas, p10.x, p10.y, p11.x, p11.y, p01.x, p01.y, dX1, dY0, dX1, dY1, dX0, dY1);
+            }
+        }
+    }
+
+    function drawAffineTri(ctx, im, x0, y0, x1, y1, x2, y2, u0, v0, u1, v1, u2, v2) {
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(u0, v0);
+        ctx.lineTo(u1, v1);
+        ctx.lineTo(u2, v2);
+        ctx.closePath();
+        ctx.clip();
+        const delta = x0 * (y1 - y2) + x1 * (y2 - y0) + x2 * (y0 - y1);
+        if (Math.abs(delta) < 1e-5) { ctx.restore(); return; }
+        const a = (u0 * (y1 - y2) + u1 * (y2 - y0) + u2 * (y0 - y1)) / delta;
+        const b = (u0 * (x2 - x1) + u1 * (x0 - x2) + u2 * (x1 - x0)) / delta;
+        const c = (u0 * (x1 * y2 - x2 * y1) + u1 * (x2 * y0 - x0 * y2) + u2 * (x0 * y1 - x1 * y0)) / delta;
+        const d = (v0 * (y1 - y2) + v1 * (y2 - y0) + v2 * (y0 - y1)) / delta;
+        const e = (v0 * (x2 - x1) + v1 * (x0 - x2) + v2 * (x1 - x0)) / delta;
+        const f = (v0 * (x1 * y2 - x2 * y1) + v1 * (x2 * y0 - x0 * y2) + v2 * (x0 * y1 - x1 * y0)) / delta;
+        ctx.transform(a, d, b, e, c, f);
+        ctx.drawImage(im, 0, 0);
+        ctx.restore();
     }
 
     // Form submission state to prevent double clicks
@@ -575,4 +951,61 @@
         });
     }
 </script>
+
+<!-- Document Scanner Modal (CamScanner style 4-Corner Perspective Warper & Background Whitening) -->
+<div id="docScannerModal" class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-5">
+    <div class="bg-slate-900 border border-slate-700 rounded-3xl max-w-4xl w-full max-h-[96vh] flex flex-col overflow-hidden shadow-2xl">
+        <!-- Modal Header -->
+        <div class="p-4 sm:px-6 border-b border-slate-800 flex items-center justify-between bg-slate-950/50">
+            <div class="flex items-center gap-2.5">
+                <span class="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-lg">📐</span>
+                <div>
+                    <h3 class="text-sm sm:text-base font-black text-white">ডকুমেন্ট স্ক্যানার ও কর্নার সোজা করার টুল</h3>
+                    <p class="text-[11px] text-slate-400">ডকুমেন্টের ৪টি কোণা টেনে ঠিক করুন ও ক্যামস্ক্যানার হোয়াইট ফিল্টার প্রয়োগ করুন</p>
+                </div>
+            </div>
+            <button type="button" onclick="closeDocScannerModal()" class="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition text-sm cursor-pointer">
+                ✕
+            </button>
+        </div>
+
+        <!-- Modal Body: Interactive Canvas -->
+        <div class="p-4 flex-1 overflow-auto flex flex-col items-center justify-center bg-slate-950/80 relative min-h-[320px]">
+            <canvas id="scannerCanvas" class="max-h-[50vh] max-w-full rounded-xl border border-slate-700 cursor-crosshair touch-none shadow-2xl"></canvas>
+            <div class="mt-2 text-[10px] sm:text-xs text-slate-400 text-center flex items-center justify-center gap-2">
+                <span>💡 কোণাগুলো টেনে ডকুমেন্টের সীমানা নির্দিষ্ট করুন</span>
+                <span>•</span>
+                <button type="button" onclick="resetScannerCorners()" class="text-emerald-400 hover:underline font-bold cursor-pointer">📐 অটো কর্নার রিসেট</button>
+                <span>•</span>
+                <button type="button" onclick="rotateScannerDoc()" class="text-teal-400 hover:underline font-bold cursor-pointer">🔄 ৯০° ঘোরান</button>
+            </div>
+        </div>
+
+        <!-- Filter Selection Toolbar -->
+        <div class="p-3 sm:px-6 bg-slate-950/90 border-t border-slate-800 flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-1.5 flex-1 min-w-[280px]">
+                <span class="text-xs font-bold text-slate-300 mr-1">ফিল্টার:</span>
+                <button type="button" onclick="setDocFilter('clean_bw')" id="docFilter_clean_bw" class="flex-1 py-1.5 px-2 rounded-xl text-xs font-bold bg-emerald-600 text-white shadow-sm border border-emerald-500 transition-all cursor-pointer">
+                    📄 ক্লিন সাদাকালো (CamScanner)
+                </button>
+                <button type="button" onclick="setDocFilter('magic_color')" id="docFilter_magic_color" class="flex-1 py-1.5 px-2 rounded-xl text-xs font-bold bg-slate-800 text-slate-300 border border-slate-700 hover:text-white transition-all cursor-pointer">
+                    🎨 ম্যাজিক কালার
+                </button>
+                <button type="button" onclick="setDocFilter('original')" id="docFilter_original" class="flex-1 py-1.5 px-2 rounded-xl text-xs font-bold bg-slate-800 text-slate-300 border border-slate-700 hover:text-white transition-all cursor-pointer">
+                    🖼️ অরিজিনাল
+                </button>
+            </div>
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="p-4 sm:px-6 border-t border-slate-800 bg-slate-900 flex items-center justify-between gap-3">
+            <button type="button" onclick="closeDocScannerModal()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs transition cursor-pointer">
+                বাতিল
+            </button>
+            <button type="button" onclick="applyDocScanner()" class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs shadow-lg shadow-emerald-600/30 transition flex items-center gap-2 cursor-pointer">
+                <span>✓ সোজা ও ফিল্টার সম্পন্ন করুন</span>
+            </button>
+        </div>
+    </div>
+</div>
 @endsection

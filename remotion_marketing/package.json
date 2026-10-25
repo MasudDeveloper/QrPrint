@@ -1,0 +1,30 @@
+{
+  "name": "printsheba-marketing-video",
+  "version": "1.0.0",
+  "private": true,
+  "description": "High-converting motion graphics and SVG animated marketing video for PrintSheba using Remotion",
+  "scripts": {
+    "start": "remotion studio src/index.ts",
+    "studio": "remotion studio src/index.ts",
+    "preview": "remotion studio src/index.ts",
+    "build": "remotion render src/index.ts PrintShebaPromo out/printsheba-promo.mp4",
+    "render": "remotion render src/index.ts PrintShebaPromo out/printsheba-promo.mp4",
+    "render:customer": "remotion render src/index.ts Tutorial-Customer out/tutorial-customer.mp4",
+    "render:shopkeeper": "remotion render src/index.ts Tutorial-Shopkeeper out/tutorial-shopkeeper.mp4",
+    "render:shopkeeper:full": "remotion render src/index.ts Tutorial-Shopkeeper-Full out/tutorial-shopkeeper-full.mp4",
+    "render:office": "remotion render src/index.ts Tutorial-Office out/tutorial-office.mp4",
+    "still": "remotion still src/index.ts PrintShebaPromo out/thumbnail.png"
+  },
+  "dependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "remotion": "^4.0.260"
+  },
+  "devDependencies": {
+    "@remotion/cli": "^4.0.538",
+    "@remotion/eslint-config": "^4.0.538",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "typescript": "^5.7.0"
+  }
+}

@@ -38,3 +38,8 @@ storage/framework/cache/
 storage/framework/sessions/
 storage/framework/views/
 storage/logs/
+
+# Remotion marketing video build outputs
+remotion_marketing/node_modules/
+remotion_marketing/out/
+remotion_marketing/.remotion/
