@@ -114,22 +114,32 @@
                         <span>🏢 অফিস ডিরেক্ট প্রিন্ট</span>
                         <span class="text-[10px] text-indigo-700 font-normal">কোনো পেমেন্ট ছাড়াই সরাসরি প্রিন্ট</span>
                     </div>
+                    <div class="flex justify-between pt-2 border-t border-slate-200 text-sm">
+                        <span class="font-bold text-slate-700">প্রিন্ট মোড:</span>
+                        <span class="font-black text-indigo-600">জিরো পেমেন্ট (১০০% ফ্রি)</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">অনুমোদন স্ট্যাটাস:</span>
+                        <span class="font-bold uppercase text-[10px] px-2 py-0.5 rounded bg-indigo-100 text-indigo-800">
+                            অটো-অনুমোদিত (OFFICE-FREE)
+                        </span>
+                    </div>
+                @else
+                    <div class="flex justify-between pt-2 border-t border-slate-200 text-sm">
+                        <span class="font-bold text-slate-700">মোট প্রদেয় বিল:</span>
+                        <span class="font-black text-emerald-600 font-en">৳ {{ number_format($job->total_amount, 2) }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">পেমেন্ট স্ট্যাটাস:</span>
+                        <span id="paymentStatusBadge" class="font-bold uppercase text-[10px] px-2 py-0.5 rounded {{ $job->print_status === 'cancelled' ? 'bg-rose-100 text-rose-800' : ($job->payment_status === 'paid' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800') }}">
+                            {{ $job->print_status === 'cancelled' ? 'বাতিল (CANCELLED)' : ($job->payment_status === 'paid' ? 'পরিশোধিত (PAID)' : 'অপেক্ষমান (PENDING)') }}
+                        </span>
+                    </div>
                 @endif
-
-                <div class="flex justify-between pt-2 border-t border-slate-200 text-sm">
-                    <span class="font-bold text-slate-700">মোট প্রদেয় বিল:</span>
-                    <span class="font-black text-emerald-600 font-en">৳ {{ number_format($job->total_amount, 2) }}</span>
-                </div>
-                <div class="flex justify-between">
-                    <span class="text-slate-500">পেমেন্ট স্ট্যাটাস:</span>
-                    <span id="paymentStatusBadge" class="font-bold uppercase text-[10px] px-2 py-0.5 rounded {{ $job->print_status === 'cancelled' ? 'bg-rose-100 text-rose-800' : ($job->payment_status === 'paid' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800') }}">
-                        {{ $job->print_status === 'cancelled' ? 'বাতিল (CANCELLED)' : ($job->payment_status === 'paid' ? 'পরিশোধিত (PAID)' : 'অপেক্ষমান (PENDING)') }}
-                    </span>
-                </div>
             </div>
 
-            <!-- bKash Direct Online Payment Button (If Unpaid & bKash PGW is enabled) -->
-            @if($job->payment_status !== 'paid' && $job->print_status !== 'cancelled' && \App\Services\BkashPgwService::isEnabled())
+            <!-- bKash Direct Online Payment Button (For Commercial Unpaid Prints only) -->
+            @if(!$job->is_office_job && $job->payment_status !== 'paid' && $job->print_status !== 'cancelled' && \App\Services\BkashPgwService::isEnabled())
                 <div class="p-4 rounded-2xl bg-gradient-to-r from-pink-50 to-rose-50 border border-pink-200 text-left space-y-2">
                     <div class="flex items-center justify-between text-xs font-bold text-pink-900">
                         <span class="flex items-center gap-1.5">
@@ -149,7 +159,7 @@
 
             <!-- Back or New Print button -->
             <div class="pt-2">
-                <a href="{{ $job->is_office_job ? route('customer.office_upload', $job->shop->slug) : route('customer.upload', $job->shop->slug) }}" class="inline-block w-full py-3.5 rounded-2xl bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white font-bold text-xs shadow-lg shadow-rose-500/20 transition-all">
+                <a href="{{ $job->is_office_job ? route('customer.office_upload', $job->shop->slug) : route('customer.upload', $job->shop->slug) }}" class="inline-block w-full py-3.5 rounded-2xl bg-gradient-to-r {{ $job->is_office_job ? 'from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 shadow-indigo-600/20' : 'from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 shadow-rose-500/20' }} text-white font-bold text-xs shadow-lg transition-all">
                     + নতুন ডকুমেন্ট প্রিন্ট করুন
                 </a>
             </div>

@@ -127,43 +127,60 @@ class ShopController extends Controller
     public function updateRates(Request $request)
     {
         $shop = $this->getShop();
+        $isOffice = $shop->is_office_mode;
 
-        $request->validate([
+        $rules = [
             'name' => 'required|string|max:255',
             'phone' => 'nullable|string|max:20',
-            'bkash_number' => 'nullable|string|max:20',
-            'nagad_number' => 'nullable|string|max:20',
-            'rate_bw_single' => 'required|numeric|min:0.5',
-            'rate_bw_double' => 'required|numeric|min:0.5',
-            'rate_color_single' => 'required|numeric|min:1',
-            'rate_color_double' => 'required|numeric|min:1',
-            'rate_photo_passport' => 'nullable|numeric|min:0',
-            'rate_nid_bw' => 'nullable|numeric|min:1',
-            'rate_nid_color' => 'nullable|numeric|min:1',
-        ]);
+        ];
 
-        $data = $request->only([
-            'name',
-            'phone',
-            'bkash_number',
-            'nagad_number',
-            'rate_bw_single',
-            'rate_bw_double',
-            'rate_color_single',
-            'rate_color_double',
-            'rate_photo_passport',
-            'rate_nid_bw',
-            'rate_nid_color',
-        ]);
-        $data['has_color_print'] = $request->boolean('has_color_print');
-        $data['has_duplex_print'] = $request->boolean('has_duplex_print');
-        $data['has_passport_photo'] = $request->boolean('has_passport_photo');
-        $data['has_nid_print'] = $request->boolean('has_nid_print');
-        $data['is_office_mode'] = $request->boolean('is_office_mode');
+        if (!$isOffice) {
+            $rules['bkash_number'] = 'nullable|string|max:20';
+            $rules['nagad_number'] = 'nullable|string|max:20';
+            $rules['rate_bw_single'] = 'required|numeric|min:0.5';
+            $rules['rate_bw_double'] = 'required|numeric|min:0.5';
+            $rules['rate_color_single'] = 'required|numeric|min:1';
+            $rules['rate_color_double'] = 'required|numeric|min:1';
+            $rules['rate_photo_passport'] = 'nullable|numeric|min:0';
+            $rules['rate_nid_bw'] = 'nullable|numeric|min:1';
+            $rules['rate_nid_color'] = 'nullable|numeric|min:1';
+        }
+
+        $request->validate($rules);
+
+        if ($isOffice) {
+            $data = $request->only(['name', 'phone']);
+            $data['has_color_print'] = $request->boolean('has_color_print');
+            $data['has_duplex_print'] = $request->boolean('has_duplex_print');
+            $data['has_nid_print'] = $request->boolean('has_nid_print');
+            // Ensure rates stay zero for office mode
+            $data['rate_bw_single'] = 0.00;
+            $data['rate_bw_double'] = 0.00;
+            $data['rate_color_single'] = 0.00;
+            $data['rate_color_double'] = 0.00;
+        } else {
+            $data = $request->only([
+                'name',
+                'phone',
+                'bkash_number',
+                'nagad_number',
+                'rate_bw_single',
+                'rate_bw_double',
+                'rate_color_single',
+                'rate_color_double',
+                'rate_photo_passport',
+                'rate_nid_bw',
+                'rate_nid_color',
+            ]);
+            $data['has_color_print'] = $request->boolean('has_color_print');
+            $data['has_duplex_print'] = $request->boolean('has_duplex_print');
+            $data['has_passport_photo'] = $request->boolean('has_passport_photo');
+            $data['has_nid_print'] = $request->boolean('has_nid_print');
+        }
 
         $shop->update($data);
 
-        return back()->with('success', 'দোকানের প্রিন্ট সার্ভিস সেটিংস ও রেট সফলভাবে সংরক্ষিত হয়েছে!');
+        return back()->with('success', $isOffice ? 'অফিসের প্রিন্ট সার্ভিস সেটিংস সফলভাবে সংরক্ষিত হয়েছে!' : 'দোকানের প্রিন্ট সার্ভিস সেটিংস ও রেট সফলভাবে সংরক্ষিত হয়েছে!');
     }
 
     public function printers()

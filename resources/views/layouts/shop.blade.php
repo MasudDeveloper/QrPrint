@@ -114,7 +114,8 @@
                     </span>
                 </div>
 
-                <!-- Android App Status -->
+                @if(!isset($shop) || !$shop->is_office_mode)
+                <!-- Android App Status (For Commercial Shops) -->
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-1.5">
                         <span class="text-xs">📱</span>
@@ -128,6 +129,18 @@
                         {{ $isAppOnline ? 'কানেক্টেড' : 'ডিসকানেক্ট' }}
                     </span>
                 </div>
+                @else
+                <!-- Office Mode Badge -->
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-1.5">
+                        <span class="text-xs">🏢</span>
+                        <span class="text-[10px] text-slate-400">প্রিন্ট মোড:</span>
+                    </div>
+                    <span class="inline-flex items-center gap-1 text-[9px] font-bold px-2 py-0.5 rounded-full text-indigo-300 bg-indigo-500/10 border border-indigo-500/20">
+                        জিরো পেমেন্ট (ফ্রি)
+                    </span>
+                </div>
+                @endif
             </div>
 
             <!-- Sidebar Navigation Menu -->

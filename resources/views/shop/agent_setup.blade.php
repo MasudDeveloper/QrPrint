@@ -1,19 +1,25 @@
 @extends('layouts.shop')
 
-@section('title', 'উইন্ডোজ এজেন্ট সফটওয়্যার – ' . $shop->name)
+@section('title', ($shop->is_office_mode ? 'অফিস প্রিন্ট এজেন্ট' : 'উইন্ডোজ এজেন্ট সফটওয়্যার') . ' – ' . $shop->name)
 
 @section('content')
 <div class="max-w-5xl mx-auto space-y-8">
     <div>
-        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/15 text-rose-400 text-xs font-bold uppercase mb-2 border border-rose-500/30">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full {{ $shop->is_office_mode ? 'bg-indigo-500/15 text-indigo-400 border border-indigo-500/30' : 'bg-rose-500/15 text-rose-400 border border-rose-500/30' }} text-xs font-bold uppercase mb-2">
             <span>💻</span> Standalone Windows Executable (.EXE)
         </div>
-        <h1 class="text-2xl sm:text-3xl font-black text-white">উইন্ডোজ অটো-প্রিন্ট এজেন্ট সফটওয়্যার</h1>
-        <p class="text-xs sm:text-sm text-slate-400 mt-1">আপনার দোকানের কম্পিউটারে এই সফটওয়্যারটি ব্যাকগ্রাউন্ডে চালু থাকলেই কাস্টমারের দেওয়া পেইড ফাইল কোনো মানুষের স্পর্শ ছাড়াই প্রিন্টারে অটোমেটিক বের হবে।</p>
+        <h1 class="text-2xl sm:text-3xl font-black text-white">
+            {{ $shop->is_office_mode ? 'অফিস সেন্ট্রাল অটো-প্রিন্ট এজেন্ট' : 'উইন্ডোজ অটো-প্রিন্ট এজেন্ট সফটওয়্যার' }}
+        </h1>
+        <p class="text-xs sm:text-sm text-slate-400 mt-1">
+            {{ $shop->is_office_mode 
+                ? 'আপনার অফিসের কম্পিউটারে এই সফটওয়্যারটি ব্যাকগ্রাউন্ডে চালু থাকলেই কর্মীদের পাঠানো ফাইল কোনো মানুষের স্পর্শ ছাড়াই প্রিন্টারে অটোমেটিক বের হবে।'
+                : 'আপনার দোকানের কম্পিউটারে এই সফটওয়্যারটি ব্যাকগ্রাউন্ডে চালু থাকলেই কাস্টমারের দেওয়া পেইড ফাইল কোনো মানুষের স্পর্শ ছাড়াই প্রিন্টারে অটোমেটিক বের হবে।' }}
+        </p>
     </div>
 
     <!-- PRIMARY DOWNLOAD CARD -->
-    <div class="bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 rounded-3xl p-6 sm:p-8 text-white shadow-2xl border border-slate-800 relative overflow-hidden">
+    <div class="bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 rounded-3xl p-6 sm:p-8 text-white shadow-2xl border {{ $shop->is_office_mode ? 'border-indigo-900/50' : 'border-slate-800' }} relative overflow-hidden">
         <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div class="space-y-3 max-w-xl">
                 <div class="flex items-center gap-2">
@@ -29,7 +35,7 @@
                 <div class="flex flex-wrap gap-2 pt-1 text-[11px] font-bold text-slate-300">
                     <span class="px-2.5 py-1 rounded-lg bg-slate-800/80 border border-slate-700">✓ সাইজ: মাত্র ৩০ KB</span>
                     <span class="px-2.5 py-1 rounded-lg bg-slate-800/80 border border-slate-700">✓ Windows 7 / 8 / 10 / 11</span>
-                    <span class="px-2.5 py-1 rounded-lg bg-slate-800/80 border border-slate-700">✓ সিস্টেম ট্রে সাপোর্ট</span>
+                    <span class="px-2.5 py-1 rounded-lg bg-slate-800/80 border border-slate-700">✓ সিস্টেম ট্রে ব্যাকগ্রাউন্ড সার্ভিস</span>
                 </div>
             </div>
 
@@ -52,64 +58,86 @@
                 <!-- Quick Copy API Token Box -->
                 <div class="p-3 rounded-2xl bg-slate-950/90 border border-slate-800 space-y-1.5">
                     <div class="flex items-center justify-between text-[11px] text-slate-400">
-                        <span>আপনার দোকানের API Token:</span>
-                        <button type="button" onclick="navigator.clipboard.writeText('{{ $shop->api_token }}'); this.innerText='কপি হয়েছে!'; setTimeout(() => this.innerText='কপি করুন', 2000)" class="text-rose-400 hover:text-rose-300 font-bold cursor-pointer text-[10px]">
+                        <span>{{ $shop->is_office_mode ? 'আপনার অফিসের API Token:' : 'আপনার দোকানের API Token:' }}</span>
+                        <button type="button" onclick="navigator.clipboard.writeText('{{ $shop->api_token }}'); this.innerText='কপি হয়েছে!'; setTimeout(() => this.innerText='কপি করুন', 2000)" class="{{ $shop->is_office_mode ? 'text-indigo-400 hover:text-indigo-300' : 'text-rose-400 hover:text-rose-300' }} font-bold cursor-pointer text-[10px]">
                             কপি করুন 📋
                         </button>
                     </div>
                     <div class="flex items-center justify-between gap-2 p-1.5 bg-slate-900 rounded-lg border border-slate-800">
-                        <code class="text-[11px] font-mono text-rose-300 truncate select-all">{{ $shop->api_token }}</code>
+                        <code class="text-[11px] font-mono {{ $shop->is_office_mode ? 'text-indigo-300' : 'text-rose-300' }} truncate select-all">{{ $shop->api_token }}</code>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="absolute -right-10 -bottom-10 w-44 h-44 bg-rose-500/10 rounded-full blur-2xl"></div>
+        <div class="absolute -right-10 -bottom-10 w-44 h-44 {{ $shop->is_office_mode ? 'bg-indigo-500/10' : 'bg-rose-500/10' }} rounded-full blur-2xl"></div>
     </div>
 
-    <!-- ANDROID PAYMENT LISTENER APP DOWNLOAD CARD -->
-    <div class="bg-gradient-to-br from-emerald-950/40 via-slate-900 to-slate-950 rounded-3xl p-6 sm:p-8 text-white shadow-2xl border border-emerald-500/30 relative overflow-hidden">
-        <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <div class="space-y-3 max-w-xl">
-                <div class="flex items-center gap-2">
-                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                    <span class="text-xs font-bold text-emerald-400 uppercase tracking-wider">অ্যান্ড্রয়েড APK • ভার্সন ২.০ প্রস্তুত</span>
-                </div>
-                <h2 class="text-xl sm:text-2xl font-black text-white">
-                    PrintSheba Payment (বিকাশ ও নগদ অটো-লিসেনার APK)
-                </h2>
-                <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
-                    যে ফোনে আপনার বিকাশ বা নগদ পার্সোনাল সিম ঢুকানো আছে, সেই ফোনে এই অ্যাপটি ইনস্টল করে রাখুন। কাস্টমার টাকা পাঠানো মাত্র এসএমএস রিড করে প্রিন্টারে অটোমেটিক প্রিন্ট কমান্ড চলে যাবে।
-                </p>
-                <div class="flex flex-wrap gap-2 pt-1 text-[11px] font-bold text-slate-300">
-                    <span class="px-2.5 py-1 rounded-lg bg-emerald-950/80 border border-emerald-800/80">✓ ১০০% স্বয়ংক্রিয় bKash / Nagad ট্রানজেকশন ম্যাচিং</span>
-                    <span class="px-2.5 py-1 rounded-lg bg-emerald-950/80 border border-emerald-800/80">✓ ব্যাকগ্রাউন্ড রানিং</span>
-                </div>
-            </div>
-
-            <!-- Action Download Buttons -->
-            <div class="flex flex-col gap-3 shrink-0">
-                <a href="{{ route('shop.agent_download_apk') }}" class="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-black text-sm shadow-xl shadow-emerald-500/25 transition-all hover:scale-105 text-center cursor-pointer">
-                    <span>📱 ডাউনলোড করুন Android APK</span>
-                </a>
-                <div class="p-3.5 rounded-2xl bg-slate-950/90 border border-emerald-500/30 text-[11px] space-y-2">
-                    <div class="text-slate-400 font-bold">অ্যাপের সেটিংস এ এই তথ্যগুলো দিন:</div>
-                    <div class="flex items-center justify-between gap-2 p-1.5 bg-slate-900 rounded-lg border border-slate-800">
-                        <span class="font-mono text-emerald-400 text-[10px] truncate">URL: {{ url('/') }}</span>
-                        <button type="button" onclick="navigator.clipboard.writeText('{{ url('/') }}'); this.innerText='কপি!'; setTimeout(() => this.innerText='কপি', 2000)" class="text-emerald-400 hover:text-emerald-300 font-bold cursor-pointer text-[10px] shrink-0">
-                            কপি
-                        </button>
+    @if(!$shop->is_office_mode)
+        <!-- ANDROID PAYMENT LISTENER APP DOWNLOAD CARD (COMMERCIAL SHOPS ONLY) -->
+        <div class="bg-gradient-to-br from-emerald-950/40 via-slate-900 to-slate-950 rounded-3xl p-6 sm:p-8 text-white shadow-2xl border border-emerald-500/30 relative overflow-hidden">
+            <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                <div class="space-y-3 max-w-xl">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                        <span class="text-xs font-bold text-emerald-400 uppercase tracking-wider">অ্যান্ড্রয়েড APK • ভার্সন ২.০ প্রস্তুত</span>
                     </div>
-                    <div class="flex items-center justify-between gap-2 p-1.5 bg-slate-900 rounded-lg border border-slate-800">
-                        <span class="font-mono text-emerald-400 text-[10px] truncate max-w-[140px]">Token: {{ $shop->api_token }}</span>
-                        <button type="button" onclick="navigator.clipboard.writeText('{{ $shop->api_token }}'); this.innerText='কপি!'; setTimeout(() => this.innerText='কপি', 2000)" class="text-emerald-400 hover:text-emerald-300 font-bold cursor-pointer text-[10px] shrink-0">
-                            কপি
-                        </button>
+                    <h2 class="text-xl sm:text-2xl font-black text-white">
+                        PrintSheba Payment (বিকাশ ও নগদ অটো-লিসেনার APK)
+                    </h2>
+                    <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                        যে ফোনে আপনার বিকাশ বা নগদ পার্সোনাল সিম ঢুকানো আছে, সেই ফোনে এই অ্যাপটি ইনস্টল করে রাখুন। কাস্টমার টাকা পাঠানো মাত্র এসএমএস রিড করে প্রিন্টারে অটোমেটিক প্রিন্ট কমান্ড চলে যাবে।
+                    </p>
+                    <div class="flex flex-wrap gap-2 pt-1 text-[11px] font-bold text-slate-300">
+                        <span class="px-2.5 py-1 rounded-lg bg-emerald-950/80 border border-emerald-800/80">✓ ১০০% স্বয়ংক্রিয় bKash / Nagad ট্রানজেকশন ম্যাচিং</span>
+                        <span class="px-2.5 py-1 rounded-lg bg-emerald-950/80 border border-emerald-800/80">✓ ব্যাকগ্রাউন্ড রানিং</span>
+                    </div>
+                </div>
+
+                <!-- Action Download Buttons -->
+                <div class="flex flex-col gap-3 shrink-0">
+                    <a href="{{ route('shop.agent_download_apk') }}" class="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-black text-sm shadow-xl shadow-emerald-500/25 transition-all hover:scale-105 text-center cursor-pointer">
+                        <span>📱 ডাউনলোড করুন Android APK</span>
+                    </a>
+                    <div class="p-3.5 rounded-2xl bg-slate-950/90 border border-emerald-500/30 text-[11px] space-y-2">
+                        <div class="text-slate-400 font-bold">অ্যাপের সেটিংস এ এই তথ্যগুলো দিন:</div>
+                        <div class="flex items-center justify-between gap-2 p-1.5 bg-slate-900 rounded-lg border border-slate-800">
+                            <span class="font-mono text-emerald-400 text-[10px] truncate">URL: {{ url('/') }}</span>
+                            <button type="button" onclick="navigator.clipboard.writeText('{{ url('/') }}'); this.innerText='কপি!'; setTimeout(() => this.innerText='কপি', 2000)" class="text-emerald-400 hover:text-emerald-300 font-bold cursor-pointer text-[10px] shrink-0">
+                                কপি
+                            </button>
+                        </div>
+                        <div class="flex items-center justify-between gap-2 p-1.5 bg-slate-900 rounded-lg border border-slate-800">
+                            <span class="font-mono text-emerald-400 text-[10px] truncate max-w-[140px]">Token: {{ $shop->api_token }}</span>
+                            <button type="button" onclick="navigator.clipboard.writeText('{{ $shop->api_token }}'); this.innerText='কপি!'; setTimeout(() => this.innerText='কপি', 2000)" class="text-emerald-400 hover:text-emerald-300 font-bold cursor-pointer text-[10px] shrink-0">
+                                কপি
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+    @else
+        <!-- OFFICE ZERO-PAYMENT ARCHITECTURE CARD -->
+        <div class="bg-gradient-to-br from-indigo-950/40 via-slate-900 to-slate-950 rounded-3xl p-6 sm:p-8 text-white shadow-2xl border border-indigo-500/30 relative overflow-hidden">
+            <div class="flex flex-col sm:flex-row items-start gap-5">
+                <div class="w-14 h-14 rounded-2xl bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 flex items-center justify-center text-3xl shrink-0 shadow-lg shadow-indigo-500/10">
+                    🏢
+                </div>
+                <div class="space-y-2">
+                    <div class="inline-flex items-center gap-2 px-3 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-[10px] font-bold uppercase">
+                        <span>●</span> অফিস মোড সক্রিয় • জিরো পেমেন্ট অটো-প্রিন্ট
+                    </div>
+                    <h2 class="text-lg sm:text-xl font-black text-white">
+                        অফিস মোডে কোনো পেমেন্ট অ্যাপ বা অ্যান্ড্রয়েড APK-র প্রয়োজন নেই
+                    </h2>
+                    <p class="text-xs sm:text-sm text-slate-300 leading-relaxed max-w-3xl">
+                        আপনার প্রতিষ্ঠানটি <strong>অফিস সেন্ট্রাল প্রিন্ট নেটওয়ার্কে</strong> পরিচালিত। এখানে কর্মীরা সরাসরি পেনড্রাইভ বা ক্যাবল ছাড়া বিনা মূল্যে প্রিন্ট দেন। তাই দোকানদারদের মতো কোনো <em>বিকাশ বা নগদ পেমেন্ট লিসেনার অ্যাপ</em>-এর দরকার নেই। শুধুমাত্র ওপরের <strong>PrintShebaAgent.exe</strong> সফটওয়্যারটি প্রিন্টারের সাথে যুক্ত পিসিতে চালু রাখলেই সব কর্মীর প্রিন্ট স্বয়ংক্রিয়ভাবে বের হবে।
+                    </p>
+                </div>
+            </div>
+        </div>
+    @endif
 
     <!-- 3 STEP SETUP INSTRUCTIONS (WINDOWS AGENT) -->
     <div class="bg-slate-900/80 rounded-3xl p-6 sm:p-8 border border-slate-800 shadow-xl space-y-6">
@@ -120,7 +148,9 @@
                 </h3>
                 <p class="text-xs text-slate-400">কম্পিউটারে কোনো কিছু ইনস্টল ছাড়াই ২ মিনিটে স্বয়ংক্রিয় প্রিন্টিং চালু করুন</p>
             </div>
-            <span class="px-3 py-1 rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-400 font-bold text-xs">Windows 7/8/10/11</span>
+            <span class="px-3 py-1 rounded-full {{ $shop->is_office_mode ? 'bg-indigo-500/10 border-indigo-500/20 text-indigo-300' : 'bg-rose-500/10 border-rose-500/20 text-rose-400' }} font-bold text-xs border">
+                Windows 7/8/10/11
+            </span>
         </div>
 
         <div class="grid md:grid-cols-3 gap-6">
@@ -129,7 +159,7 @@
                 <span class="w-8 h-8 rounded-xl bg-emerald-500 text-white font-black text-sm flex items-center justify-center">১</span>
                 <h4 class="text-sm font-black text-white">সম্পূর্ণ প্যাকেজ (ZIP) ডাউনলোড করুন</h4>
                 <p class="text-xs text-slate-400 leading-relaxed">
-                    উপরের সবুজ <strong>"📦 সম্পূর্ণ প্যাকেজ জিপ (ZIP) ডাউনলোড"</strong> বাটনে ক্লিক করে ফাইলটি ডাউনলোড করুন এবং রাইট ক্লিক করে <strong>Extract / আনজিপ</strong> করুন। এতে এজেন্ট, সাইলেন্ট প্রিন্টার ইঞ্জিন এবং আপনার দোকানের টোকেনসহ কনফিগ ফাইল একসাথে পেয়ে যাবেন।
+                    উপরের সবুজ <strong>"📦 সম্পূর্ণ প্যাকেজ জিপ (ZIP) ডাউনলোড"</strong> বাটনে ক্লিক করে ফাইলটি ডাউনলোড করুন এবং রাইট ক্লিক করে <strong>Extract / আনজিপ</strong> করুন। এতে এজেন্ট, সাইলেন্ট প্রিন্টার ইঞ্জিন এবং আপনার {{ $shop->is_office_mode ? 'অফিসের' : 'দোকানের' }} টোকেনসহ কনফিগ ফাইল একসাথে পেয়ে যাবেন।
                 </p>
             </div>
 
@@ -157,47 +187,49 @@
         </div>
     </div>
 
-    <!-- ANDROID APP DETAILED SETUP INSTRUCTIONS -->
-    <div class="bg-slate-900/80 rounded-3xl p-6 sm:p-8 border border-emerald-500/30 shadow-xl space-y-6">
-        <div class="flex items-center justify-between border-b border-slate-800 pb-4">
-            <div>
-                <h3 class="text-lg font-bold text-white flex items-center gap-2">
-                    <span>📱 অ্যান্ড্রয়েড পেমেন্ট লিসেনার (APK) সেটআপ গাইড</span>
-                </h3>
-                <p class="text-xs text-slate-400">যে ফোনে আপনার বিকাশ ও নগদ পার্সোনাল সিম রয়েছে, সেই ফোনে এটি চালু রাখুন</p>
+    @if(!$shop->is_office_mode)
+        <!-- ANDROID APP DETAILED SETUP INSTRUCTIONS (FOR SHOPS ONLY) -->
+        <div class="bg-slate-900/80 rounded-3xl p-6 sm:p-8 border border-emerald-500/30 shadow-xl space-y-6">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+                <div>
+                    <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                        <span>📱 অ্যান্ড্রয়েড পেমেন্ট লিসেনার (APK) সেটআপ গাইড</span>
+                    </h3>
+                    <p class="text-xs text-slate-400">যে ফোনে আপনার বিকাশ ও নগদ পার্সোনাল সিম রয়েছে, সেই ফোনে এটি চালু রাখুন</p>
+                </div>
+                <span class="px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-bold text-xs">Android 7.0 - 14+</span>
             </div>
-            <span class="px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-bold text-xs">Android 7.0 - 14+</span>
+
+            <div class="grid md:grid-cols-3 gap-6">
+                <!-- App Step 1 -->
+                <div class="bg-slate-950 rounded-2xl p-5 border border-slate-800 space-y-3">
+                    <span class="w-8 h-8 rounded-xl bg-emerald-500 text-white font-black text-sm flex items-center justify-center">১</span>
+                    <h4 class="text-sm font-black text-white">APK ইনস্টল করুন</h4>
+                    <p class="text-xs text-slate-400 leading-relaxed">
+                        উপরের <strong>"📱 ডাউনলোড করুন Android APK"</strong> বাটনে ক্লিক করে ফোনে অ্যাপটি নামিয়ে ওপেন করুন। ফোন থেকে Unknown Sources বা Install Unknown Apps পারমিশনটি অন করে ইনস্টল সম্পন্ন করুন।
+                    </p>
+                </div>
+
+                <!-- App Step 2 -->
+                <div class="bg-slate-950 rounded-2xl p-5 border border-slate-800 space-y-3">
+                    <span class="w-8 h-8 rounded-xl bg-teal-500 text-white font-black text-sm flex items-center justify-center">২</span>
+                    <h4 class="text-sm font-black text-white">নোটিফিকেশন অ্যাক্সেস চালু করুন</h4>
+                    <p class="text-xs text-slate-400 leading-relaxed">
+                        অ্যাপে ঢুকলে <strong>"🔔 নোটিফিকেশন অ্যাক্সেস চালু করুন"</strong> দেখতে পাবেন। বাটনে চাপ দিয়ে তালিকায় <strong>PrintSheba Payment Listener</strong> চালু করে দিন। এতে কোনো ঝুঁকিপূর্ণ এসএমএস পারমিশন ছাড়াই বিকাশ ও নগদ নিরাপদে কাজ করবে।
+                    </p>
+                </div>
+
+                <!-- App Step 3 -->
+                <div class="bg-slate-950 rounded-2xl p-5 border border-slate-800 space-y-3">
+                    <span class="w-8 h-8 rounded-xl bg-cyan-500 text-white font-black text-sm flex items-center justify-center">৩</span>
+                    <h4 class="text-sm font-black text-white">টোকেন দিয়ে সংযোগ যাচাই করুন</h4>
+                    <p class="text-xs text-slate-400 leading-relaxed">
+                        অ্যাপের সার্ভার URL বক্সে <code class="text-emerald-400 font-mono">{{ url('/') }}</code> এবং API Token বক্সে আপনার শপ টোকেনটি বসিয়ে <strong>"সংযোগ যাচাই"</strong> ও <strong>"সেটিংস সেভ"</strong> এ চাপ দিন। ব্যস, কাজ শেষ!
+                    </p>
+                </div>
+            </div>
         </div>
-
-        <div class="grid md:grid-cols-3 gap-6">
-            <!-- App Step 1 -->
-            <div class="bg-slate-950 rounded-2xl p-5 border border-slate-800 space-y-3">
-                <span class="w-8 h-8 rounded-xl bg-emerald-500 text-white font-black text-sm flex items-center justify-center">১</span>
-                <h4 class="text-sm font-black text-white">APK ইনস্টল করুন</h4>
-                <p class="text-xs text-slate-400 leading-relaxed">
-                    উপরের <strong>"📱 ডাউনলোড করুন Android APK"</strong> বাটনে ক্লিক করে ফোনে অ্যাপটি নামিয়ে ওপেন করুন। ফোন থেকে Unknown Sources বা Install Unknown Apps পারমিশনটি অন করে ইনস্টল সম্পন্ন করুন।
-                </p>
-            </div>
-
-            <!-- App Step 2 -->
-            <div class="bg-slate-950 rounded-2xl p-5 border border-slate-800 space-y-3">
-                <span class="w-8 h-8 rounded-xl bg-teal-500 text-white font-black text-sm flex items-center justify-center">২</span>
-                <h4 class="text-sm font-black text-white">নোটিফিকেশন অ্যাক্সেস চালু করুন</h4>
-                <p class="text-xs text-slate-400 leading-relaxed">
-                    অ্যাপে ঢুকলে <strong>"🔔 নোটিফিকেশন অ্যাক্সেস চালু করুন"</strong> দেখতে পাবেন। বাটনে চাপ দিয়ে তালিকায় <strong>PrintSheba Payment Listener</strong> চালু করে দিন। এতে কোনো ঝুঁকিপূর্ণ এসএমএস পারমিশন ছাড়াই বিকাশ ও নগদ ১০০% নিরাপদে কাজ করবে এবং কোনো ব্যাংকিং অ্যাপে কোনো ক্ষতিকর সতর্কতা আসবে না।
-                </p>
-            </div>
-
-            <!-- App Step 3 -->
-            <div class="bg-slate-950 rounded-2xl p-5 border border-slate-800 space-y-3">
-                <span class="w-8 h-8 rounded-xl bg-cyan-500 text-white font-black text-sm flex items-center justify-center">৩</span>
-                <h4 class="text-sm font-black text-white">টোকেন দিয়ে সংযোগ যাচাই করুন</h4>
-                <p class="text-xs text-slate-400 leading-relaxed">
-                    অ্যাপের সার্ভার URL বক্সে <code class="text-emerald-400 font-mono">{{ url('/') }}</code> এবং API Token বক্সে আপনার শপ টোকেনটি বসিয়ে <strong>"সংযোগ যাচাই"</strong> ও <strong>"সেটিংস সেভ"</strong> এ চাপ দিন। ব্যস, কাজ শেষ!
-                </p>
-            </div>
-        </div>
-    </div>
+    @endif
 
     <!-- ADVANCED FEATURES CHECKLIST -->
     <div class="bg-slate-900/80 rounded-3xl p-6 sm:p-8 border border-slate-800 shadow-xl space-y-4">
@@ -207,18 +239,20 @@
 
         <div class="grid sm:grid-cols-2 gap-4 text-xs font-semibold text-slate-300">
             <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 flex items-start gap-3">
-                <span class="text-rose-400 text-base">🖨️</span>
+                <span class="{{ $shop->is_office_mode ? 'text-indigo-400' : 'text-rose-400' }} text-base">🖨️</span>
                 <div>
                     <div class="font-bold text-white">কালার ও সাদাকালো অটো-রাউটিং</div>
-                    <div class="text-[11px] text-slate-400 mt-0.5">কাস্টমার কালার প্রিন্ট দিলে কালার প্রিন্টারে এবং সাদাকালো দিলে লেজার প্রিন্টারে নিজে নিজে চলে যাবে।</div>
+                    <div class="text-[11px] text-slate-400 mt-0.5">
+                        {{ $shop->is_office_mode ? 'কর্মীরা কালার প্রিন্ট দিলে কালার প্রিন্টারে এবং সাদাকালো দিলে লেজার প্রিন্টারে নিজে নিজে চলে যাবে।' : 'কাস্টমার কালার প্রিন্ট দিলে কালার প্রিন্টারে এবং সাদাকালো দিলে লেজার প্রিন্টারে নিজে নিজে চলে যাবে।' }}
+                    </div>
                 </div>
             </div>
 
             <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 flex items-start gap-3">
                 <span class="text-emerald-400 text-base">🛡️</span>
                 <div>
-                    <div class="font-bold text-white">১০০% কাস্টমার গোপনীয়তা (Zero-Retention)</div>
-                    <div class="text-[11px] text-slate-400 mt-0.5">প্রিন্টারে পেপার যাওয়ার সাথে সাথেই লোকাল মেমোরি থেকে কাস্টমারের ফাইল নিরাপদভাবে ডিলিট হয়ে যায়।</div>
+                    <div class="font-bold text-white">{{ $shop->is_office_mode ? '১০০% অফিস ডেটা গোপনীয়তা (Zero-Retention)' : '১০০% কাস্টমার গোপনীয়তা (Zero-Retention)' }}</div>
+                    <div class="text-[11px] text-slate-400 mt-0.5">প্রিন্টারে পেপার যাওয়ার সাথে সাথেই লোকাল মেমোরি থেকে ফাইল নিরাপদভাবে ডিলিট হয়ে যায়।</div>
                 </div>
             </div>
 

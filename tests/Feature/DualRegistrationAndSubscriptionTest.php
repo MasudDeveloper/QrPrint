@@ -143,5 +143,58 @@ class DualRegistrationAndSubscriptionTest extends TestCase
         $this->assertTrue($shop->isSubscriptionActive());
         $this->assertGreaterThan(350, $shop->days_remaining);
     }
+
+    public function test_office_agent_setup_does_not_show_payment_listener_apk(): void
+    {
+        $user = User::factory()->create(['role' => 'shop_owner']);
+        $shop = Shop::create([
+            'user_id' => $user->id,
+            'name' => 'Walton Hi-Tech IT',
+            'slug' => 'walton-it',
+            'phone' => '01722334455',
+            'is_office_mode' => true,
+            'subscription_plan' => 'office_trial',
+        ]);
+
+        $response = $this->actingAs($user)->get(route('shop.agent_setup'));
+
+        $response->assertStatus(200);
+        $response->assertSee('অফিস সেন্ট্রাল অটো-প্রিন্ট এজেন্ট');
+        $response->assertSee('অফিস মোডে কোনো পেমেন্ট অ্যাপ বা অ্যান্ড্রয়েড APK-র প্রয়োজন নেই');
+        $response->assertDontSee('PrintSheba Payment (বিকাশ ও নগদ অটো-লিসেনার APK)');
+    }
+
+    public function test_office_settings_page_hides_rate_matrix_and_payment_numbers(): void
+    {
+        $user = User::factory()->create(['role' => 'shop_owner']);
+        $shop = Shop::create([
+            'user_id' => $user->id,
+            'name' => 'Square Pharma Branch',
+            'slug' => 'square-pharma',
+            'phone' => '01855667788',
+            'is_office_mode' => true,
+            'subscription_plan' => 'office_trial',
+        ]);
+
+        $response = $this->actingAs($user)->get(route('shop.rates'));
+
+        $response->assertStatus(200);
+        $response->assertSee('অফিস সেটিংস ও প্রিন্টার কনফিগারেশন');
+        $response->assertDontSee('বিকাশ পার্সোনাল নম্বর (bKash)');
+        $response->assertDontSee('প্রতি পেজ প্রিন্ট রেট তালিকা (টাকা)');
+
+        // Submit office settings without any rate fields
+        $updateResponse = $this->actingAs($user)->post(route('shop.rates.update'), [
+            'name' => 'Square Pharma Central',
+            'phone' => '01855667799',
+            'has_color_print' => 1,
+            'has_duplex_print' => 1,
+        ]);
+
+        $updateResponse->assertSessionHas('success');
+        $shop->refresh();
+        $this->assertEquals('Square Pharma Central', $shop->name);
+        $this->assertEquals(0.00, $shop->rate_bw_single);
+    }
 }
 
