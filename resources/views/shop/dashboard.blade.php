@@ -26,7 +26,7 @@
                 <span>{{ $shop->name }}</span>
             </h1>
             <p class="text-xs sm:text-sm text-slate-400 max-w-xl">
-                {{ $shop->is_office_mode ? 'অফিস কর্মীদের সেলফ-সার্ভিস প্রিন্ট কিউ, জিরো-পেমেন্ট ও পেপার ব্যবহার ট্র্যাকিং ড্যাশবোর্ড' : 'কাস্টমার সেলফ-সার্ভিস প্রিন্ট কিউ, ডিজিটাল পেমেন্ট ও লাইভ আয় বিবরণী ড্যাশবোর্ড' }}
+                {{ $shop->is_office_mode ? 'অফিস কর্মীদের সেন্ট্রাল অটো-প্রিন্ট কিউ ও পেপার ব্যবহার ট্র্যাকিং ড্যাশবোর্ড' : 'কাস্টমার সেলফ-সার্ভিস প্রিন্ট কিউ, ডিজিটাল পেমেন্ট ও লাইভ আয় বিবরণী ড্যাশবোর্ড' }}
             </p>
             
             <div class="flex flex-wrap items-center gap-3 pt-2">
@@ -113,7 +113,7 @@
             <div class="mt-4">
                 @if($shop->is_office_mode)
                     <span id="metricTodayOfficePrints" class="text-3xl font-black text-indigo-400 font-en">{{ $todayPrintsCount }} টি</span>
-                    <span class="text-[11px] text-slate-400 block font-bold mt-1">জিরো পেমেন্ট অটো-প্রিন্ট মোড</span>
+                    <span class="text-[11px] text-slate-400 block font-bold mt-1">সেন্ট্রাল অটো-প্রিন্ট নেটওয়ার্ক</span>
                 @else
                     <span id="metricTodayEarnings" class="text-3xl font-black text-emerald-400 font-en">৳ {{ number_format($todayEarnings, 2) }}</span>
                     <span class="text-[11px] text-slate-400 block font-bold mt-1">১০০% আপনার নিজস্ব বিকাশ/নগদে</span>
@@ -164,11 +164,15 @@
                 <thead class="bg-slate-950/70 text-slate-400 font-bold border-b border-slate-800 uppercase text-[10px] tracking-wider">
                     <tr>
                         <th class="px-6 py-4">টোকেন</th>
-                        <th class="px-6 py-4">কাস্টমার</th>
+                        <th class="px-6 py-4">{{ $shop->is_office_mode ? 'কর্মী ও রেফারেন্স' : 'কাস্টমার' }}</th>
                         <th class="px-6 py-4">ডকুমেন্ট</th>
                         <th class="px-6 py-4">কালার মোড</th>
-                        <th class="px-6 py-4">বিল</th>
-                        <th class="px-6 py-4">পেমেন্ট</th>
+                        @if($shop->is_office_mode)
+                            <th class="px-6 py-4">কপি ও পেজ</th>
+                        @else
+                            <th class="px-6 py-4">বিল</th>
+                            <th class="px-6 py-4">পেমেন্ট</th>
+                        @endif
                         <th class="px-6 py-4">স্ট্যাটাস</th>
                         <th class="px-6 py-4 text-right">অ্যাকশন</th>
                     </tr>
@@ -178,21 +182,14 @@
                         <tr class="hover:bg-slate-800/40 transition-colors">
                             <td class="px-6 py-4 font-mono font-bold text-white">{{ $job->job_token }}</td>
                             <td class="px-6 py-4 font-medium text-slate-300">
-                                <div>{{ $job->customer_name }}</div>
-                                @if($job->customer_phone)
+                                <div>{{ $job->customer_name ?: ($shop->is_office_mode ? 'অফিস কর্মী' : 'কাস্টমার') }}</div>
+                                @if($job->customer_phone && !$shop->is_office_mode)
                                     <span class="text-[10px] text-slate-500 font-mono">{{ $job->customer_phone }}</span>
                                 @endif
                                 @if($job->pickup_reference)
                                     <div class="mt-1">
-                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 font-bold text-[10px] border border-amber-500/30">
-                                            🏷️ খাম: {{ $job->pickup_reference }}
-                                        </span>
-                                    </div>
-                                @endif
-                                @if($job->is_office_job)
-                                    <div class="mt-1">
-                                        <span class="inline-flex items-center gap-1 px-2 py-0.2 rounded-md bg-indigo-500/20 text-indigo-300 font-bold text-[9px] border border-indigo-500/30">
-                                            🏢 অফিস
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md {{ $shop->is_office_mode ? 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30' : 'bg-amber-500/20 text-amber-300 border-amber-500/30' }} font-bold text-[10px] border">
+                                            🏷️ {{ $shop->is_office_mode ? 'রেফারেন্স:' : 'খাম:' }} {{ $job->pickup_reference }}
                                         </span>
                                     </div>
                                 @endif
@@ -203,21 +200,23 @@
                                     {{ $job->color_mode === 'color' ? 'কালার' : 'সাদাকালো' }}
                                 </span>
                             </td>
-                            <td class="px-6 py-4 font-mono font-bold text-emerald-400">
-                                @if($job->is_office_job)
-                                    <span class="text-indigo-400 text-xs">ফ্রি (অফিস)</span>
-                                @else
+                            @if($shop->is_office_mode)
+                                <td class="px-6 py-4 font-mono font-bold text-slate-200">
+                                    {{ $job->copies }} কপি ({{ $job->total_pages }} পেজ)
+                                </td>
+                            @else
+                                <td class="px-6 py-4 font-mono font-bold text-emerald-400">
                                     ৳{{ $job->total_amount }}
-                                @endif
-                            </td>
-                            <td class="px-6 py-4">
-                                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold {{ $job->payment_status === 'paid' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20' }}">
-                                    {{ $job->payment_status === 'paid' ? 'পরিশোধিত' : 'ক্যাশ/পেন্ডিং' }}
-                                </span>
-                                @if($job->payment_trx_id)
-                                    <span class="text-[9px] text-slate-500 font-mono block mt-0.5">{{ $job->payment_trx_id }}</span>
-                                @endif
-                            </td>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold {{ $job->payment_status === 'paid' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20' }}">
+                                        {{ $job->payment_status === 'paid' ? 'পরিশোধিত' : 'ক্যাশ/পেন্ডিং' }}
+                                    </span>
+                                    @if($job->payment_trx_id)
+                                        <span class="text-[9px] text-slate-500 font-mono block mt-0.5">{{ $job->payment_trx_id }}</span>
+                                    @endif
+                                </td>
+                            @endif
                             <td class="px-6 py-4">
                                 <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold {{ $job->print_status === 'spooling' ? 'bg-rose-500/20 text-rose-400 animate-pulse border border-rose-500/30' : 'bg-blue-500/15 text-blue-400 border border-blue-500/20' }}">
                                     {{ $job->print_status === 'spooling' ? 'স্পুল হচ্ছে...' : 'কিউতে আছে' }}
@@ -225,11 +224,11 @@
                             </td>
                             <td class="px-6 py-4 text-right">
                                 <div class="flex items-center justify-end gap-1.5">
-                                    <a href="{{ route('shop.jobs.slip', $job) }}" target="_blank" class="px-2.5 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold text-xs transition-colors flex items-center gap-1" title="খামের স্লিপ প্রিন্ট করুন">
+                                    <a href="{{ route('shop.jobs.slip', $job) }}" target="_blank" class="px-2.5 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold text-xs transition-colors flex items-center gap-1" title="স্লিপ প্রিন্ট করুন">
                                         <span>🏷️ স্লিপ</span>
                                     </a>
 
-                                    @if($job->payment_status !== 'paid')
+                                    @if(!$shop->is_office_mode && $job->payment_status !== 'paid')
                                         <form action="{{ route('shop.jobs.approve', $job) }}" method="POST" class="inline">
                                             @csrf
                                             <button type="submit" class="px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold text-xs shadow-md shadow-emerald-500/20 transition-all cursor-pointer flex items-center gap-1">
@@ -261,8 +260,8 @@
                         </tr>
                     @empty
                         <tr id="pendingJobsEmptyRow">
-                            <td colspan="8" class="px-6 py-8 text-center text-slate-500">
-                                বর্তমানে কোনো প্রিন্ট কিউতে নেই। কাস্টমার QR স্ক্যান করলেই এখানে স্বয়ংক্রিয়ভাবে ভেসে উঠবে।
+                            <td colspan="{{ $shop->is_office_mode ? 7 : 8 }}" class="px-6 py-8 text-center text-slate-500">
+                                {{ $shop->is_office_mode ? 'বর্তমানে কোনো প্রিন্ট কিউতে নেই। কর্মীরা ডকুমেন্ট আপলোড করলেই এখানে স্বয়ংক্রিয়ভাবে প্রিন্ট হবে।' : 'বর্তমানে কোনো প্রিন্ট কিউতে নেই। কাস্টমার QR স্ক্যান করলেই এখানে স্বয়ংক্রিয়ভাবে ভেসে উঠবে।' }}
                             </td>
                         </tr>
                     @endforelse
@@ -285,8 +284,13 @@
                         <th class="px-6 py-4">টোকেন</th>
                         <th class="px-6 py-4">ফাইল</th>
                         <th class="px-6 py-4">পেজ ও সাইজ</th>
-                        <th class="px-6 py-4">টাকা</th>
-                        <th class="px-6 py-4">পেমেন্ট মেথড</th>
+                        @if($shop->is_office_mode)
+                            <th class="px-6 py-4">কর্মী / রেফারেন্স</th>
+                            <th class="px-6 py-4">কালার মোড</th>
+                        @else
+                            <th class="px-6 py-4">টাকা</th>
+                            <th class="px-6 py-4">পেমেন্ট মেথড</th>
+                        @endif
                         <th class="px-6 py-4">প্রিন্টের সময়</th>
                         <th class="px-6 py-4 text-right">রিপ্রিন্ট</th>
                     </tr>
@@ -297,36 +301,38 @@
                             <td class="px-6 py-4 font-mono font-bold text-white">
                                 <div>{{ $job->job_token }}</div>
                                 @if($job->pickup_reference)
-                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 font-bold text-[10px] border border-amber-500/30 mt-1">
-                                        🏷️ খাম: {{ $job->pickup_reference }}
-                                    </span>
-                                @endif
-                                @if($job->is_office_job)
-                                    <span class="inline-flex items-center gap-1 px-2 py-0.2 rounded-md bg-indigo-500/20 text-indigo-300 font-bold text-[9px] border border-indigo-500/30 mt-1">
-                                        🏢 অফিস
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md {{ $shop->is_office_mode ? 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30' : 'bg-amber-500/20 text-amber-300 border-amber-500/30' }} font-bold text-[10px] border mt-1">
+                                        🏷️ {{ $shop->is_office_mode ? 'রেফারেন্স:' : 'খাম:' }} {{ $job->pickup_reference }}
                                     </span>
                                 @endif
                             </td>
                             <td class="px-6 py-4 text-slate-400 max-w-xs truncate">{{ $job->original_name }}</td>
                             <td class="px-6 py-4 font-bold text-slate-200">{{ $job->total_pages }} পেজ ({{ $job->paper_size }})</td>
-                            <td class="px-6 py-4 font-mono font-bold text-emerald-400">
-                                @if($job->is_office_job)
-                                    <span class="text-indigo-400 text-xs">ফ্রি (অফিস)</span>
-                                @else
+                            @if($shop->is_office_mode)
+                                <td class="px-6 py-4 text-slate-300 font-medium">
+                                    <div>{{ $job->customer_name ?: 'অফিস কর্মী' }}</div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold {{ $job->color_mode === 'color' ? 'bg-pink-500/10 text-pink-400 border border-pink-500/20' : 'bg-slate-800 text-slate-300' }}">
+                                        {{ $job->color_mode === 'color' ? 'কালার' : 'সাদাকালো' }}
+                                    </span>
+                                </td>
+                            @else
+                                <td class="px-6 py-4 font-mono font-bold text-emerald-400">
                                     ৳{{ $job->total_amount }}
-                                @endif
-                            </td>
-                            <td class="px-6 py-4">
-                                <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase {{ $job->payment_method === 'bkash' ? 'bg-pink-500/10 text-pink-400 border border-pink-500/20' : ($job->payment_method === 'nagad' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 'bg-slate-800 text-slate-300') }}">
-                                    {{ $job->payment_method }}
-                                </span>
-                            </td>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase {{ $job->payment_method === 'bkash' ? 'bg-pink-500/10 text-pink-400 border border-pink-500/20' : ($job->payment_method === 'nagad' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 'bg-slate-800 text-slate-300') }}">
+                                        {{ $job->payment_method }}
+                                    </span>
+                                </td>
+                            @endif
                             <td class="px-6 py-4 text-slate-500 text-[11px]">
                                 {{ $job->printed_at ? $job->printed_at->format('h:i A') : $job->created_at->format('h:i A') }}
                             </td>
                             <td class="px-6 py-4 text-right">
                                 <div class="flex items-center justify-end gap-1.5">
-                                    <a href="{{ route('shop.jobs.slip', $job) }}" target="_blank" class="px-2.5 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold text-xs transition-colors flex items-center gap-1" title="খামের স্লিপ প্রিন্ট করুন">
+                                    <a href="{{ route('shop.jobs.slip', $job) }}" target="_blank" class="px-2.5 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold text-xs transition-colors flex items-center gap-1" title="স্লিপ প্রিন্ট করুন">
                                         <span>🏷️ স্লিপ</span>
                                     </a>
                                     <form action="{{ route('shop.jobs.reprint', $job) }}" method="POST" class="inline" onsubmit="return confirm('আপনি কি এই ডকুমেন্টটি পুনরায় প্রিন্ট করতে চান?')">
@@ -341,7 +347,9 @@
                         </tr>
                     @empty
                         <tr id="completedJobsEmptyRow">
-                            <td colspan="7" class="px-6 py-8 text-center text-slate-500">এখনো কোনো প্রিন্ট সম্পন্ন হয়নি</td>
+                            <td colspan="7" class="px-6 py-8 text-center text-slate-500">
+                                {{ $shop->is_office_mode ? 'আজকে এখনো কোনো ডকুমেন্ট প্রিন্ট হয়নি' : 'এখনো কোনো প্রিন্ট সম্পন্ন হয়নি' }}
+                            </td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -355,12 +363,12 @@
         <div class="p-6 border-b border-slate-800 flex items-center justify-between">
             <div class="flex items-center gap-2">
                 <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
-                <h3 class="text-base font-bold text-white">বাতিলকৃত অর্ডারসমূহ (Cancelled Orders)</h3>
+                <h3 class="text-base font-bold text-white">{{ $shop->is_office_mode ? 'বাতিলকৃত প্রিন্ট টাস্কসমূহ' : 'বাতিলকৃত অর্ডারসমূহ (Cancelled Orders)' }}</h3>
                 <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/10 text-rose-400 border border-rose-500/20">
                     {{ $cancelledJobs->count() }} টি
                 </span>
             </div>
-            <span class="text-xs text-slate-400">কাস্টমার না এলে বা ভুল অর্ডারে বাতিল হওয়া লিস্ট</span>
+            <span class="text-xs text-slate-400">{{ $shop->is_office_mode ? 'ভুল কমান্ড বা অপ্রয়োজনীয় বাতিল হওয়া প্রিন্ট লিস্ট' : 'কাস্টমার না এলে বা ভুল অর্ডারে বাতিল হওয়া লিস্ট' }}</span>
         </div>
 
         <div class="overflow-x-auto">
@@ -368,9 +376,13 @@
                 <thead class="bg-slate-950/70 text-slate-400 font-bold border-b border-slate-800 uppercase text-[10px] tracking-wider">
                     <tr>
                         <th class="px-6 py-4">টোকেন</th>
-                        <th class="px-6 py-4">গ্রাহক</th>
+                        <th class="px-6 py-4">{{ $shop->is_office_mode ? 'কর্মী / রেফারেন্স' : 'গ্রাহক' }}</th>
                         <th class="px-6 py-4">ফাইল</th>
-                        <th class="px-6 py-4">টাকা</th>
+                        @if($shop->is_office_mode)
+                            <th class="px-6 py-4">কপি ও পেজ</th>
+                        @else
+                            <th class="px-6 py-4">টাকা</th>
+                        @endif
                         <th class="px-6 py-4">বাতিলের কারণ</th>
                         <th class="px-6 py-4 text-right">বাতিলের সময়</th>
                     </tr>
@@ -381,22 +393,26 @@
                             <td class="px-6 py-4 font-mono font-bold text-white">
                                 <div>{{ $cJob->job_token }}</div>
                                 @if($cJob->pickup_reference)
-                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 font-bold text-[10px] border border-amber-500/30 mt-1">
-                                        🏷️ খাম: {{ $cJob->pickup_reference }}
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md {{ $shop->is_office_mode ? 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30' : 'bg-amber-500/20 text-amber-300 border-amber-500/30' }} font-bold text-[10px] border mt-1">
+                                        🏷️ {{ $shop->is_office_mode ? 'রেফারেন্স:' : 'খাম:' }} {{ $cJob->pickup_reference }}
                                     </span>
                                 @endif
                             </td>
                             <td class="px-6 py-4 font-medium text-slate-300">
-                                <div>{{ $cJob->customer_name }}</div>
-                                @if($cJob->customer_phone)
+                                <div>{{ $cJob->customer_name ?: ($shop->is_office_mode ? 'অফিস কর্মী' : 'কাস্টমার') }}</div>
+                                @if($cJob->customer_phone && !$shop->is_office_mode)
                                     <span class="text-[10px] text-slate-500 font-mono">{{ $cJob->customer_phone }}</span>
                                 @endif
                             </td>
                             <td class="px-6 py-4 text-slate-400 max-w-xs truncate">{{ $cJob->original_name }}</td>
-                            <td class="px-6 py-4 font-mono font-bold text-slate-400">৳{{ $cJob->total_amount }}</td>
+                            @if($shop->is_office_mode)
+                                <td class="px-6 py-4 font-mono text-slate-300">{{ $cJob->copies }} × {{ $cJob->total_pages }} পেজ</td>
+                            @else
+                                <td class="px-6 py-4 font-mono font-bold text-slate-400">৳{{ $cJob->total_amount }}</td>
+                            @endif
                             <td class="px-6 py-4">
                                 <span class="px-2.5 py-1 rounded-lg text-xs font-bold bg-rose-500/10 text-rose-300 border border-rose-500/20 inline-block">
-                                    {{ $cJob->cancel_reason ?: 'কাস্টমার দোকানে আসেননি / ক্যাশ দেননি' }}
+                                    {{ $cJob->cancel_reason ?: ($shop->is_office_mode ? 'অর্ডার বাতিল করা হয়েছে' : 'কাস্টমার দোকানে আসেননি / ক্যাশ দেননি') }}
                                 </span>
                             </td>
                             <td class="px-6 py-4 text-right text-slate-500 font-mono text-[11px]">
@@ -410,7 +426,8 @@
     </div>
     @endif
 
-    <!-- Live bKash/Nagad Payments & SMS Listener Log -->
+    @if(!$shop->is_office_mode)
+    <!-- Live bKash/Nagad Payments & SMS Listener Log (COMMERCIAL SHOPS ONLY) -->
     <div class="bg-slate-900/80 rounded-3xl border border-slate-800 shadow-sm overflow-hidden">
         <div class="p-6 border-b border-slate-800 flex items-center justify-between">
             <div class="flex items-center gap-2">
@@ -461,6 +478,7 @@
             </table>
         </div>
     </div>
+    @endif
 
     <!-- Cancel Job Modal -->
     <div id="cancelJobModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
@@ -556,6 +574,7 @@
 
 <script>
     const csrfToken = '{{ csrf_token() }}';
+    const isOfficeMode = {{ $shop->is_office_mode ? 'true' : 'false' }};
 
     function escapeHtml(str) {
         if (!str) return '';
@@ -571,8 +590,8 @@
         if (!jobs || jobs.length === 0) {
             tbody.innerHTML = `
                 <tr id="pendingJobsEmptyRow">
-                    <td colspan="8" class="px-6 py-8 text-center text-slate-500">
-                        বর্তমানে কোনো প্রিন্ট কিউতে নেই। কাস্টমার QR স্ক্যান করলেই এখানে স্বয়ংক্রিয়ভাবে ভেসে উঠবে।
+                    <td colspan="${isOfficeMode ? 7 : 8}" class="px-6 py-8 text-center text-slate-500">
+                        ${isOfficeMode ? 'বর্তমানে কোনো প্রিন্ট কিউতে নেই। কর্মীরা ডকুমেন্ট আপলোড করলেই এখানে স্বয়ংক্রিয়ভাবে প্রিন্ট হবে।' : 'বর্তমানে কোনো প্রিন্ট কিউতে নেই। কাস্টমার QR স্ক্যান করলেই এখানে স্বয়ংক্রিয়ভাবে ভেসে উঠবে।'}
                     </td>
                 </tr>
             `;
@@ -585,19 +604,27 @@
             const isPaid = job.payment_status === 'paid';
             const isColor = job.color_mode === 'color';
 
-            const phoneHtml = job.customer_phone ? `<span class="text-[10px] text-slate-500 font-mono">${escapeHtml(job.customer_phone)}</span>` : '';
-            const trxHtml = job.payment_trx_id ? `<span class="text-[9px] text-slate-500 font-mono block mt-0.5">${escapeHtml(job.payment_trx_id)}</span>` : '';
+            const phoneHtml = (job.customer_phone && !isOfficeMode) ? `<span class="text-[10px] text-slate-500 font-mono">${escapeHtml(job.customer_phone)}</span>` : '';
+            const trxHtml = (job.payment_trx_id && !isOfficeMode) ? `<span class="text-[9px] text-slate-500 font-mono block mt-0.5">${escapeHtml(job.payment_trx_id)}</span>` : '';
+            const refBadge = job.pickup_reference ? `
+                <div class="mt-1">
+                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md ${isOfficeMode ? 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30' : 'bg-amber-500/20 text-amber-300 border-amber-500/30'} font-bold text-[10px] border">
+                        🏷️ ${isOfficeMode ? 'রেফারেন্স:' : 'খাম:'} ${escapeHtml(job.pickup_reference)}
+                    </span>
+                </div>
+            ` : '';
 
             let actionHtml = `
                 <div class="flex items-center justify-end gap-1.5">
             `;
             if (job.slip_url) {
                 actionHtml += `
-                    <a href="${job.slip_url}" target="_blank" class="px-2.5 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold text-xs transition-colors flex items-center gap-1" title="খামের স্লিপ প্রিন্ট করুন">
+                    <a href="${job.slip_url}" target="_blank" class="px-2.5 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold text-xs transition-colors flex items-center gap-1" title="স্লিপ প্রিন্ট করুন">
                         <span>🏷️ স্লিপ</span>
                     </a>
                 `;
             }
+            @if(!$shop->is_office_mode)
             if (!isPaid) {
                 actionHtml += `
                     <form action="${job.approve_url}" method="POST" class="inline">
@@ -613,6 +640,7 @@
                     </button>
                 `;
             } else {
+            @endif
                 actionHtml += `
                     <form action="${job.reprint_url}" method="POST" class="inline" title="${isSpooling ? 'স্পুল আটকে থাকলে কিউ রিসেট করে পুনরায় প্রিন্ট পাঠান' : 'পুনরায় প্রিন্টারে পাঠান'}">
                         <input type="hidden" name="_token" value="${csrfToken}">
@@ -626,22 +654,20 @@
                         <span>বাতিল</span>
                     </button>
                 `;
+            @if(!$shop->is_office_mode)
             }
+            @endif
             actionHtml += `</div>`;
 
-            html += `
-                <tr class="hover:bg-slate-800/40 transition-colors">
-                    <td class="px-6 py-4 font-mono font-bold text-white">${escapeHtml(job.job_token)}</td>
-                    <td class="px-6 py-4 font-medium text-slate-300">
-                        <div>${escapeHtml(job.customer_name || 'কাস্টমার')}</div>
-                        ${phoneHtml}
+            let middleCols = '';
+            if (isOfficeMode) {
+                middleCols = `
+                    <td class="px-6 py-4 font-mono font-bold text-slate-200">
+                        ${job.copies || 1} কপি (${job.total_pages || 1} পেজ)
                     </td>
-                    <td class="px-6 py-4 text-slate-400 max-w-xs truncate">${escapeHtml(job.original_name)}</td>
-                    <td class="px-6 py-4">
-                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold ${isColor ? 'bg-pink-500/10 text-pink-400 border border-pink-500/20' : 'bg-slate-800 text-slate-300'}">
-                            ${isColor ? 'কালার' : 'সাদাকালো'}
-                        </span>
-                    </td>
+                `;
+            } else {
+                middleCols = `
                     <td class="px-6 py-4 font-mono font-bold text-emerald-400">৳${job.total_amount}</td>
                     <td class="px-6 py-4">
                         <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold ${isPaid ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'}">
@@ -649,6 +675,24 @@
                         </span>
                         ${trxHtml}
                     </td>
+                `;
+            }
+
+            html += `
+                <tr class="hover:bg-slate-800/40 transition-colors">
+                    <td class="px-6 py-4 font-mono font-bold text-white">${escapeHtml(job.job_token)}</td>
+                    <td class="px-6 py-4 font-medium text-slate-300">
+                        <div>${escapeHtml(job.customer_name || (isOfficeMode ? 'অফিস কর্মী' : 'কাস্টমার'))}</div>
+                        ${phoneHtml}
+                        ${refBadge}
+                    </td>
+                    <td class="px-6 py-4 text-slate-400 max-w-xs truncate">${escapeHtml(job.original_name)}</td>
+                    <td class="px-6 py-4">
+                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold ${isColor ? 'bg-pink-500/10 text-pink-400 border border-pink-500/20' : 'bg-slate-800 text-slate-300'}">
+                            ${isColor ? 'কালার' : 'সাদাকালো'}
+                        </span>
+                    </td>
+                    ${middleCols}
                     <td class="px-6 py-4">
                         <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold ${isSpooling ? 'bg-rose-500/20 text-rose-400 animate-pulse border border-rose-500/30' : 'bg-blue-500/15 text-blue-400 border border-blue-500/20'}">
                             ${isSpooling ? 'স্পুল হচ্ছে...' : 'কিউতে আছে'}
@@ -671,7 +715,7 @@
         if (!jobs || jobs.length === 0) {
             tbody.innerHTML = `
                 <tr id="completedJobsEmptyRow">
-                    <td colspan="7" class="px-6 py-8 text-center text-slate-500">এখনো কোনো প্রিন্ট সম্পন্ন হয়নি</td>
+                    <td colspan="7" class="px-6 py-8 text-center text-slate-500">${isOfficeMode ? 'আজকে এখনো কোনো ডকুমেন্ট প্রিন্ট হয়নি' : 'এখনো কোনো প্রিন্ট সম্পন্ন হয়নি'}</td>
                 </tr>
             `;
             return;
@@ -679,22 +723,52 @@
 
         let html = '';
         jobs.forEach(job => {
-            const method = (job.payment_method || 'cash').toLowerCase();
-            let methodClass = 'bg-slate-800 text-slate-300';
-            if (method === 'bkash') methodClass = 'bg-pink-500/10 text-pink-400 border border-pink-500/20';
-            else if (method === 'nagad') methodClass = 'bg-amber-500/10 text-amber-400 border border-amber-500/20';
+            const refBadge = job.pickup_reference ? `
+                <div class="mt-1">
+                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md ${isOfficeMode ? 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30' : 'bg-amber-500/20 text-amber-300 border-amber-500/30'} font-bold text-[10px] border">
+                        🏷️ ${isOfficeMode ? 'রেফারেন্স:' : 'খাম:'} ${escapeHtml(job.pickup_reference)}
+                    </span>
+                </div>
+            ` : '';
 
-            html += `
-                <tr class="hover:bg-slate-800/40 transition-colors">
-                    <td class="px-6 py-4 font-mono font-bold text-white">${escapeHtml(job.job_token)}</td>
-                    <td class="px-6 py-4 text-slate-400 max-w-xs truncate">${escapeHtml(job.original_name)}</td>
-                    <td class="px-6 py-4 font-bold text-slate-200">${job.total_pages} পেজ (${escapeHtml(job.paper_size)})</td>
+            let middleCols = '';
+            if (isOfficeMode) {
+                const isColor = job.color_mode === 'color';
+                middleCols = `
+                    <td class="px-6 py-4 text-slate-300 font-medium">
+                        <div>${escapeHtml(job.customer_name || 'অফিস কর্মী')}</div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold ${isColor ? 'bg-pink-500/10 text-pink-400 border border-pink-500/20' : 'bg-slate-800 text-slate-300'}">
+                            ${isColor ? 'কালার' : 'সাদাকালো'}
+                        </span>
+                    </td>
+                `;
+            } else {
+                const method = (job.payment_method || 'cash').toLowerCase();
+                let methodClass = 'bg-slate-800 text-slate-300';
+                if (method === 'bkash') methodClass = 'bg-pink-500/10 text-pink-400 border border-pink-500/20';
+                else if (method === 'nagad') methodClass = 'bg-amber-500/10 text-amber-400 border border-amber-500/20';
+
+                middleCols = `
                     <td class="px-6 py-4 font-mono font-bold text-emerald-400">৳${job.total_amount}</td>
                     <td class="px-6 py-4">
                         <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase ${methodClass}">
                             ${escapeHtml(job.payment_method || 'CASH')}
                         </span>
                     </td>
+                `;
+            }
+
+            html += `
+                <tr class="hover:bg-slate-800/40 transition-colors">
+                    <td class="px-6 py-4 font-mono font-bold text-white">
+                        <div>${escapeHtml(job.job_token)}</div>
+                        ${refBadge}
+                    </td>
+                    <td class="px-6 py-4 text-slate-400 max-w-xs truncate">${escapeHtml(job.original_name)}</td>
+                    <td class="px-6 py-4 font-bold text-slate-200">${job.total_pages} পেজ (${escapeHtml(job.paper_size)})</td>
+                    ${middleCols}
                     <td class="px-6 py-4 text-slate-500 text-[11px]">
                         ${escapeHtml(job.time_str)}
                     </td>
@@ -703,7 +777,7 @@
                             <input type="hidden" name="_token" value="${csrfToken}">
                             <button type="submit" class="px-3 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 font-bold text-xs transition-colors cursor-pointer flex items-center gap-1 ml-auto">
                                 <span>🖨️</span>
-                                <span>রি-প্রিন্ট করুন</span>
+                                <span>রি-প্রিন্ট</span>
                             </button>
                         </form>
                     </td>

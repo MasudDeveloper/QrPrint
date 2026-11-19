@@ -112,16 +112,16 @@
                 @if($job->is_office_job)
                     <div class="p-2.5 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-900 text-xs flex items-center justify-between font-bold">
                         <span>🏢 অফিস ডিরেক্ট প্রিন্ট</span>
-                        <span class="text-[10px] text-indigo-700 font-normal">কোনো পেমেন্ট ছাড়াই সরাসরি প্রিন্ট</span>
+                        <span class="text-[10px] text-indigo-700 font-normal">সেন্ট্রাল নেটওয়ার্ক প্রিন্ট</span>
                     </div>
                     <div class="flex justify-between pt-2 border-t border-slate-200 text-sm">
                         <span class="font-bold text-slate-700">প্রিন্ট মোড:</span>
-                        <span class="font-black text-indigo-600">জিরো পেমেন্ট (১০০% ফ্রি)</span>
+                        <span class="font-black text-indigo-600">সেন্ট্রাল অটো-প্রিন্ট</span>
                     </div>
                     <div class="flex justify-between">
                         <span class="text-slate-500">অনুমোদন স্ট্যাটাস:</span>
                         <span class="font-bold uppercase text-[10px] px-2 py-0.5 rounded bg-indigo-100 text-indigo-800">
-                            অটো-অনুমোদিত (OFFICE-FREE)
+                            অনুমোদিত (APPROVED)
                         </span>
                     </div>
                 @else

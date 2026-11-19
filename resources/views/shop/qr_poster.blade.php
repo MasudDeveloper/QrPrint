@@ -95,9 +95,9 @@
                 <span class="text-[10px] text-slate-500">PDF বা ডক</span>
             </div>
             <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200">
-                <span class="w-6 h-6 rounded-full {{ $shop->is_office_mode ? 'bg-emerald-600' : 'bg-pink-500' }} text-white font-bold text-xs flex items-center justify-center mx-auto mb-1">৩</span>
-                <span class="text-xs font-black text-slate-900 block">{{ $shop->is_office_mode ? 'জিরো পেমেন্ট' : 'পেমেন্ট' }}</span>
-                <span class="text-[10px] text-slate-500">{{ $shop->is_office_mode ? '১০০% ফ্রি' : 'বিকাশ / নগদ' }}</span>
+                <span class="w-6 h-6 rounded-full {{ $shop->is_office_mode ? 'bg-indigo-600' : 'bg-pink-500' }} text-white font-bold text-xs flex items-center justify-center mx-auto mb-1">৩</span>
+                <span class="text-xs font-black text-slate-900 block">{{ $shop->is_office_mode ? 'প্রিন্ট সেটিংস' : 'পেমেন্ট' }}</span>
+                <span class="text-[10px] text-slate-500">{{ $shop->is_office_mode ? 'কপি ও কালার' : 'বিকাশ / নগদ' }}</span>
             </div>
             <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200">
                 <span class="w-6 h-6 rounded-full bg-teal-600 text-white font-bold text-xs flex items-center justify-center mx-auto mb-1">৪</span>

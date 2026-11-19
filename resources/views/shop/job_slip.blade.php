@@ -46,7 +46,7 @@
         
         <!-- Header -->
         <div class="text-center border-b-2 border-dashed border-slate-300 pb-3 space-y-0.5">
-            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">ডেলিভারি খাম / প্যাকেট স্লিপ</span>
+            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">{{ $job->is_office_job ? 'অফিস ডকুমেন্ট প্রিন্ট স্লিপ' : 'ডেলিভারি খাম / প্যাকেট স্লিপ' }}</span>
             <h1 class="text-base font-black text-slate-900 leading-tight">{{ $shop->name }}</h1>
             @if($shop->phone)
                 <span class="text-[11px] font-mono text-slate-600 block">{{ $shop->phone }}</span>
@@ -54,9 +54,9 @@
         </div>
 
         <!-- BIG HIGHLIGHT: ENVELOPE REFERENCE / CODE -->
-        <div class="p-4 rounded-2xl bg-amber-100 border-2 border-amber-500 text-center space-y-1">
-            <span class="text-[10px] font-bold text-amber-800 uppercase tracking-wider block">খাম / ডেলিভারি রেফারেন্স</span>
-            <div class="text-xl sm:text-2xl font-black text-amber-950 font-mono tracking-wide break-words">
+        <div class="p-4 rounded-2xl {{ $job->is_office_job ? 'bg-indigo-50 border-2 border-indigo-400' : 'bg-amber-100 border-2 border-amber-500' }} text-center space-y-1">
+            <span class="text-[10px] font-bold {{ $job->is_office_job ? 'text-indigo-800' : 'text-amber-800' }} uppercase tracking-wider block">{{ $job->is_office_job ? 'কর্মকর্তা ও প্রিন্ট রেফারেন্স' : 'খাম / ডেলিভারি রেফারেন্স' }}</span>
+            <div class="text-xl sm:text-2xl font-black {{ $job->is_office_job ? 'text-indigo-950' : 'text-amber-950' }} font-mono tracking-wide break-words">
                 {{ $job->pickup_reference ?: $job->job_token }}
             </div>
             @if($job->pickup_reference)
@@ -100,14 +100,22 @@
                 </span>
             </div>
 
+            @if($job->is_office_job)
+            <div class="flex justify-between pt-1 text-xs">
+                <span class="text-slate-500">প্রিন্ট মোড:</span>
+                <span class="font-bold text-indigo-700">সেন্ট্রাল অটো-প্রিন্ট</span>
+            </div>
+            <div class="flex justify-between pt-1 text-xs">
+                <span class="text-slate-500">অনুমোদন:</span>
+                <span class="font-bold uppercase text-[10px] px-2 py-0.5 rounded bg-indigo-100 text-indigo-800">
+                    অনুমোদিত (APPROVED)
+                </span>
+            </div>
+            @else
             <div class="flex justify-between pt-1 text-sm">
                 <span class="font-bold text-slate-700">মোট বিল:</span>
                 <span class="font-black text-emerald-600 font-en">
-                    @if($job->is_office_job)
-                        ফ্রি (অফিস)
-                    @else
-                        ৳ {{ number_format($job->total_amount, 2) }}
-                    @endif
+                    ৳ {{ number_format($job->total_amount, 2) }}
                 </span>
             </div>
 
@@ -117,6 +125,7 @@
                     {{ $job->payment_status === 'paid' ? 'পরিশোধিত (PAID)' : 'ক্যাশ বাকি / পেন্ডিং' }}
                 </span>
             </div>
+            @endif
 
             <div class="flex justify-between pt-1 text-[10px] text-slate-400 font-mono">
                 <span>অর্ডারের সময়:</span>
@@ -127,7 +136,7 @@
         <!-- Cutting Guide Border -->
         <div class="border-t-2 border-dashed border-slate-300 pt-3 text-center">
             <span class="text-[10px] text-slate-500 block">
-                ✂️ স্লিপটি কেটে খামের ওপর লাগিয়ে রাখুন অথবা রেফারেন্স নম্বরটি খামে লিখুন
+                {{ $job->is_office_job ? '✂️ স্লিপটি কেটে পেপারের সাথে ক্লিপ করুন অথবা রেফারেন্স চেক করুন' : '✂️ স্লিপটি কেটে খামের ওপর লাগিয়ে রাখুন অথবা রেফারেন্স নম্বরটি খামে লিখুন' }}
             </span>
         </div>
     </div>

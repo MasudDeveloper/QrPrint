@@ -559,6 +559,8 @@ class ShopController extends Controller
                     'customer_phone' => $job->customer_phone,
                     'original_name' => $job->original_name,
                     'color_mode' => $job->color_mode,
+                    'copies' => $job->copies,
+                    'total_pages' => $job->total_pages,
                     'total_amount' => $job->total_amount,
                     'payment_status' => $job->payment_status,
                     'payment_method' => $job->payment_method,
@@ -583,10 +585,15 @@ class ShopController extends Controller
                     'id' => $job->id,
                     'job_token' => $job->job_token,
                     'original_name' => $job->original_name,
+                    'customer_name' => $job->customer_name,
+                    'pickup_reference' => $job->pickup_reference,
+                    'color_mode' => $job->color_mode,
+                    'copies' => $job->copies,
                     'total_pages' => $job->total_pages,
                     'paper_size' => $job->paper_size,
                     'total_amount' => $job->total_amount,
                     'payment_method' => $job->payment_method,
+                    'is_office_job' => (bool) $job->is_office_job,
                     'time_str' => $job->printed_at ? $job->printed_at->format('h:i A') : $job->created_at->format('h:i A'),
                     'reprint_url' => route('shop.jobs.reprint', $job),
                 ];
@@ -594,6 +601,7 @@ class ShopController extends Controller
 
         return response()->json([
             'status' => 'success',
+            'is_office_mode' => (bool) $shop->is_office_mode,
             'today_earnings' => number_format($todayEarnings, 2),
             'today_prints_count' => $todayPrintsCount,
             'pending_count' => $pendingJobs->count(),
@@ -1111,40 +1119,74 @@ class ShopController extends Controller
             fputs($file, "\xEF\xBB\xBF");
 
             // Header Row
-            fputcsv($file, [
-                'টোকেন নং (Token)',
-                'তারিখ ও সময় (Date & Time)',
-                'গ্রাহক / রেফারেন্স (Customer / Ref)',
-                'ফাইল নাম (File Name)',
-                'পেজ সংখ্যা (Pages)',
-                'কপি (Copies)',
-                'মোট পেজ (Total Sheets)',
-                'মোড (Color/BW)',
-                'ডুপ্লেক্স (Duplex)',
-                'পেমেন্ট মেথড (Method)',
-                'ট্রানজেকশন আইডি (TrxID)',
-                'টাকার পরিমাণ (Amount Tk)',
-                'পেমেন্ট অবস্থা (Payment Status)',
-                'প্রিন্ট অবস্থা (Print Status)'
-            ]);
+            if ($shop->is_office_mode) {
+                fputcsv($file, [
+                    'টোকেন নং (Token)',
+                    'তারিখ ও সময় (Date & Time)',
+                    'কর্মকর্তা / বিভাগ (Employee / Dept)',
+                    'রেফারেন্স / পিসি (Reference / PC)',
+                    'ফাইল নাম (File Name)',
+                    'পেজ সংখ্যা (Pages)',
+                    'কপি (Copies)',
+                    'মোট পেজ শিট (Total Sheets)',
+                    'মোড (Color/BW)',
+                    'ডুপ্লেক্স (Duplex)',
+                    'পেপার সাইজ (Paper Size)',
+                    'প্রিন্ট অবস্থা (Print Status)'
+                ]);
+            } else {
+                fputcsv($file, [
+                    'টোকেন নং (Token)',
+                    'তারিখ ও সময় (Date & Time)',
+                    'গ্রাহক / রেফারেন্স (Customer / Ref)',
+                    'ফাইল নাম (File Name)',
+                    'পেজ সংখ্যা (Pages)',
+                    'কপি (Copies)',
+                    'মোট পেজ (Total Sheets)',
+                    'মোড (Color/BW)',
+                    'ডুপ্লেক্স (Duplex)',
+                    'পেমেন্ট মেথড (Method)',
+                    'ট্রানজেকশন আইডি (TrxID)',
+                    'টাকার পরিমাণ (Amount Tk)',
+                    'পেমেন্ট অবস্থা (Payment Status)',
+                    'প্রিন্ট অবস্থা (Print Status)'
+                ]);
+            }
 
             foreach ($jobs as $job) {
-                fputcsv($file, [
-                    $job->job_token,
-                    $job->created_at->format('d/m/Y h:i A'),
-                    $job->pickup_reference ?: ($job->customer_name ?: 'কাস্টমার'),
-                    $job->original_name ?: $job->file_name,
-                    $job->total_pages,
-                    $job->copies,
-                    $job->total_pages * $job->copies,
-                    $job->color_mode === 'color' ? 'কালার' : 'সাদাকালো',
-                    $job->is_duplex ? 'উভয় পাশ (Duplex)' : 'এক পাশ',
-                    strtoupper($job->payment_method),
-                    $job->payment_trx_id ?: '-',
-                    number_format($job->total_amount, 2),
-                    $job->payment_status === 'paid' ? 'পরিশোধিত (PAID)' : 'অপেক্ষমান (PENDING)',
-                    $job->print_status === 'printed' ? 'প্রিন্ট সম্পন্ন' : ($job->print_status === 'cancelled' ? 'বাতিল' : 'কিউতে আছে')
-                ]);
+                if ($shop->is_office_mode) {
+                    fputcsv($file, [
+                        $job->job_token,
+                        $job->created_at->format('d/m/Y h:i A'),
+                        $job->customer_name ?: 'অফিস কর্মী',
+                        $job->pickup_reference ?: '-',
+                        $job->original_name ?: $job->file_name,
+                        $job->total_pages,
+                        $job->copies,
+                        $job->total_pages * $job->copies,
+                        $job->color_mode === 'color' ? 'কালার' : 'সাদাকালো',
+                        $job->is_duplex ? 'উভয় পাশ (Duplex)' : 'এক পাশ',
+                        $job->paper_size ?: 'A4',
+                        $job->print_status === 'printed' ? 'প্রিন্ট সম্পন্ন' : ($job->print_status === 'cancelled' ? 'বাতিল' : 'কিউতে আছে')
+                    ]);
+                } else {
+                    fputcsv($file, [
+                        $job->job_token,
+                        $job->created_at->format('d/m/Y h:i A'),
+                        $job->pickup_reference ?: ($job->customer_name ?: 'কাস্টমার'),
+                        $job->original_name ?: $job->file_name,
+                        $job->total_pages,
+                        $job->copies,
+                        $job->total_pages * $job->copies,
+                        $job->color_mode === 'color' ? 'কালার' : 'সাদাকালো',
+                        $job->is_duplex ? 'উভয় পাশ (Duplex)' : 'এক পাশ',
+                        strtoupper($job->payment_method),
+                        $job->payment_trx_id ?: '-',
+                        number_format($job->total_amount, 2),
+                        $job->payment_status === 'paid' ? 'পরিশোধিত (PAID)' : 'অপেক্ষমান (PENDING)',
+                        $job->print_status === 'printed' ? 'প্রিন্ট সম্পন্ন' : ($job->print_status === 'cancelled' ? 'বাতিল' : 'কিউতে আছে')
+                    ]);
+                }
             }
             fclose($file);
         };

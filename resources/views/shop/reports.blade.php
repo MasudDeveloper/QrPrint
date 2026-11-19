@@ -71,34 +71,59 @@
 
     <!-- Summary Metrics Cards -->
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <!-- Total Revenue -->
-        <div class="p-5 rounded-3xl bg-slate-900/80 border border-slate-800 space-y-1">
-            <span class="text-xs font-bold text-slate-400 block">সর্বমোট আয় (Total Revenue)</span>
-            <div class="text-2xl sm:text-3xl font-black text-emerald-400 font-en">৳ {{ number_format($metrics['total_revenue'], 2) }}</div>
-            <span class="text-[10px] text-slate-500 block">পরিশোধিত সকল অর্ডার থেকে</span>
-        </div>
+        @if($shop->is_office_mode)
+            <!-- Total Paper Sheets -->
+            <div class="p-5 rounded-3xl bg-slate-900/80 border border-indigo-900/40 space-y-1">
+                <span class="text-xs font-bold text-slate-400 block">মোট পেপার ব্যবহার (Sheets)</span>
+                <div class="text-2xl sm:text-3xl font-black text-indigo-400 font-en">{{ number_format($metrics['total_pages_printed']) }} <span class="text-sm font-normal text-slate-400">পাতা</span></div>
+                <span class="text-[10px] text-slate-500 block">সফলভাবে প্রিন্ট হওয়া মোট শিট</span>
+            </div>
 
-        <!-- Cash vs Digital Breakdown -->
-        <div class="p-5 rounded-3xl bg-slate-900/80 border border-slate-800 space-y-1">
-            <span class="text-xs font-bold text-slate-400 block">ক্যাশ বনাম ডিজিটাল আয়</span>
-            <div class="text-sm font-bold text-slate-200 pt-1 space-y-1">
-                <div class="flex justify-between">
-                    <span class="text-slate-400">💵 ক্যাশ আয়:</span>
-                    <span class="font-en text-white font-bold">৳ {{ number_format($metrics['cash_revenue'], 2) }}</span>
-                </div>
-                <div class="flex justify-between">
-                    <span class="text-pink-400">📱 বিকাশ/নগদ:</span>
-                    <span class="font-en text-pink-400 font-bold">৳ {{ number_format($metrics['digital_revenue'], 2) }}</span>
+            <!-- Total Office Tasks -->
+            <div class="p-5 rounded-3xl bg-slate-900/80 border border-slate-800 space-y-1">
+                <span class="text-xs font-bold text-slate-400 block">সম্পন্ন প্রিন্ট টাস্ক</span>
+                <div class="text-2xl sm:text-3xl font-black text-emerald-400 font-en">{{ $metrics['printed_jobs'] }} <span class="text-sm font-normal text-slate-400">টি</span></div>
+                <span class="text-[10px] text-slate-500 block">কর্মীদের পাঠানো সফল প্রিন্ট</span>
+            </div>
+        @else
+            <!-- Total Revenue -->
+            <div class="p-5 rounded-3xl bg-slate-900/80 border border-slate-800 space-y-1">
+                <span class="text-xs font-bold text-slate-400 block">সর্বমোট আয় (Total Revenue)</span>
+                <div class="text-2xl sm:text-3xl font-black text-emerald-400 font-en">৳ {{ number_format($metrics['total_revenue'], 2) }}</div>
+                <span class="text-[10px] text-slate-500 block">পরিশোধিত সকল অর্ডার থেকে</span>
+            </div>
+
+            <!-- Cash vs Digital Breakdown -->
+            <div class="p-5 rounded-3xl bg-slate-900/80 border border-slate-800 space-y-1">
+                <span class="text-xs font-bold text-slate-400 block">ক্যাশ বনাম ডিজিটাল আয়</span>
+                <div class="text-sm font-bold text-slate-200 pt-1 space-y-1">
+                    <div class="flex justify-between">
+                        <span class="text-slate-400">💵 ক্যাশ আয়:</span>
+                        <span class="font-en text-white font-bold">৳ {{ number_format($metrics['cash_revenue'], 2) }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-pink-400">📱 বিকাশ/নগদ:</span>
+                        <span class="font-en text-pink-400 font-bold">৳ {{ number_format($metrics['digital_revenue'], 2) }}</span>
+                    </div>
                 </div>
             </div>
-        </div>
+        @endif
 
-        <!-- Total Prints & Pages -->
-        <div class="p-5 rounded-3xl bg-slate-900/80 border border-slate-800 space-y-1">
-            <span class="text-xs font-bold text-slate-400 block">প্রিন্ট ও পেজ সংখ্যা</span>
-            <div class="text-2xl sm:text-3xl font-black text-cyan-400 font-en">{{ number_format($metrics['total_pages_printed']) }} <span class="text-sm font-normal text-slate-400">পেজ</span></div>
-            <span class="text-[10px] text-slate-500 block">মোট {{ $metrics['printed_jobs'] }} টি সফল অর্ডার প্রিন্ট হয়েছে</span>
-        </div>
+        @if(!$shop->is_office_mode)
+            <!-- Total Prints & Pages -->
+            <div class="p-5 rounded-3xl bg-slate-900/80 border border-slate-800 space-y-1">
+                <span class="text-xs font-bold text-slate-400 block">প্রিন্ট ও পেজ সংখ্যা</span>
+                <div class="text-2xl sm:text-3xl font-black text-cyan-400 font-en">{{ number_format($metrics['total_pages_printed']) }} <span class="text-sm font-normal text-slate-400">পেজ</span></div>
+                <span class="text-[10px] text-slate-500 block">মোট {{ $metrics['printed_jobs'] }} টি সফল অর্ডার প্রিন্ট হয়েছে</span>
+            </div>
+        @else
+            <!-- Cancelled Jobs -->
+            <div class="p-5 rounded-3xl bg-slate-900/80 border border-slate-800 space-y-1">
+                <span class="text-xs font-bold text-slate-400 block">বাতিলকৃত প্রিন্ট টাস্ক</span>
+                <div class="text-2xl sm:text-3xl font-black text-rose-400 font-en">{{ $metrics['cancelled_jobs'] }} <span class="text-sm font-normal text-slate-400">টি</span></div>
+                <span class="text-[10px] text-slate-500 block">বাতিল বা ব্যর্থ হওয়া টাস্ক</span>
+            </div>
+        @endif
 
         <!-- Color vs BW Breakdown -->
         <div class="p-5 rounded-3xl bg-slate-900/80 border border-slate-800 space-y-1">
@@ -133,12 +158,17 @@
                     <tr>
                         <th class="px-5 py-3.5">টোকেন নং</th>
                         <th class="px-5 py-3.5">তারিখ ও সময়</th>
-                        <th class="px-5 py-3.5">গ্রাহক / রেফারেন্স</th>
+                        <th class="px-5 py-3.5">{{ $shop->is_office_mode ? 'কর্মকর্তা' : 'গ্রাহক / রেফারেন্স' }}</th>
                         <th class="px-5 py-3.5">ফাইল</th>
                         <th class="px-5 py-3.5">পেজ × কপি</th>
                         <th class="px-5 py-3.5">মোড</th>
-                        <th class="px-5 py-3.5">মেথড / TrxID</th>
-                        <th class="px-5 py-3.5 text-right">টাকার পরিমাণ</th>
+                        @if($shop->is_office_mode)
+                            <th class="px-5 py-3.5">রেফারেন্স / পিসি</th>
+                            <th class="px-5 py-3.5 text-right">পেপার সাইজ</th>
+                        @else
+                            <th class="px-5 py-3.5">মেথড / TrxID</th>
+                            <th class="px-5 py-3.5 text-right">টাকার পরিমাণ</th>
+                        @endif
                         <th class="px-5 py-3.5 text-center">স্ট্যাটাস</th>
                     </tr>
                 </thead>
@@ -148,7 +178,7 @@
                             <td class="px-5 py-4 font-mono font-bold text-white">{{ $job->job_token }}</td>
                             <td class="px-5 py-4 text-slate-400 font-mono">{{ $job->created_at->format('d M, h:i A') }}</td>
                             <td class="px-5 py-4 font-bold text-slate-200">
-                                {{ $job->pickup_reference ?: ($job->customer_name ?: 'কাস্টমার') }}
+                                {{ $shop->is_office_mode ? ($job->customer_name ?: 'অফিস কর্মী') : ($job->pickup_reference ?: ($job->customer_name ?: 'কাস্টমার')) }}
                             </td>
                             <td class="px-5 py-4 max-w-[180px] truncate text-slate-300" title="{{ $job->original_name }}">
                                 {{ $job->original_name }}
@@ -162,15 +192,24 @@
                                     {{ $job->color_mode === 'color' ? 'কালার' : 'সাদাকালো' }}
                                 </span>
                             </td>
-                            <td class="px-5 py-4">
-                                <div class="font-bold text-white uppercase text-[11px]">{{ $job->payment_method }}</div>
-                                @if($job->payment_trx_id)
-                                    <span class="font-mono text-[10px] text-slate-400">{{ $job->payment_trx_id }}</span>
-                                @endif
-                            </td>
-                            <td class="px-5 py-4 text-right font-en font-black text-sm {{ $job->payment_status === 'paid' ? 'text-emerald-400' : 'text-slate-400' }}">
-                                ৳ {{ number_format($job->total_amount, 2) }}
-                            </td>
+                            @if($shop->is_office_mode)
+                                <td class="px-5 py-4 font-mono text-slate-300">
+                                    {{ $job->pickup_reference ?: '-' }}
+                                </td>
+                                <td class="px-5 py-4 text-right font-mono font-bold text-slate-300">
+                                    {{ $job->paper_size ?: 'A4' }}
+                                </td>
+                            @else
+                                <td class="px-5 py-4">
+                                    <div class="font-bold text-white uppercase text-[11px]">{{ $job->payment_method }}</div>
+                                    @if($job->payment_trx_id)
+                                        <span class="font-mono text-[10px] text-slate-400">{{ $job->payment_trx_id }}</span>
+                                    @endif
+                                </td>
+                                <td class="px-5 py-4 text-right font-en font-black text-sm {{ $job->payment_status === 'paid' ? 'text-emerald-400' : 'text-slate-400' }}">
+                                    ৳ {{ number_format($job->total_amount, 2) }}
+                                </td>
+                            @endif
                             <td class="px-5 py-4 text-center">
                                 @if($job->print_status === 'printed')
                                     <span class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">

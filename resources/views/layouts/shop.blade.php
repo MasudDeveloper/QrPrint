@@ -137,7 +137,7 @@
                         <span class="text-[10px] text-slate-400">প্রিন্ট মোড:</span>
                     </div>
                     <span class="inline-flex items-center gap-1 text-[9px] font-bold px-2 py-0.5 rounded-full text-indigo-300 bg-indigo-500/10 border border-indigo-500/20">
-                        জিরো পেমেন্ট (ফ্রি)
+                        সেন্ট্রাল নেটওয়ার্ক
                     </span>
                 </div>
                 @endif
@@ -155,7 +155,7 @@
                 <a href="{{ route('shop.dashboard') }}" 
                    class="flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-semibold transition-all duration-200 {{ request()->routeIs('shop.dashboard') ? $activeNavBg : 'text-slate-300 hover:bg-slate-800/70 hover:text-white' }}">
                     <span class="text-lg">📊</span>
-                    <span>{{ $isOffice ? 'লাইভ কিউ (জিরো পেমেন্ট)' : 'লাইভ কিউ ও আয়' }}</span>
+                    <span>{{ $isOffice ? 'লাইভ প্রিন্ট কিউ' : 'লাইভ কিউ ও আয়' }}</span>
                 </a>
 
                 <a href="{{ route('shop.quick_print') }}" 
@@ -283,7 +283,7 @@
                             @php
                                 $mActiveBg = (isset($shop) && $shop->is_office_mode) ? 'bg-indigo-600 text-white' : 'bg-rose-500 text-white';
                             @endphp
-                            <a href="{{ route('shop.dashboard') }}" class="block px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('shop.dashboard') ? $mActiveBg : 'text-slate-300 hover:bg-slate-800' }}">📊 {{ (isset($shop) && $shop->is_office_mode) ? 'লাইভ কিউ (জিরো পেমেন্ট)' : 'লাইভ কিউ ও আয়' }}</a>
+                            <a href="{{ route('shop.dashboard') }}" class="block px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('shop.dashboard') ? $mActiveBg : 'text-slate-300 hover:bg-slate-800' }}">📊 {{ (isset($shop) && $shop->is_office_mode) ? 'লাইভ প্রিন্ট কিউ' : 'লাইভ কিউ ও আয়' }}</a>
                             <a href="{{ route('shop.reports') }}" class="block px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('shop.reports') ? $mActiveBg : 'text-slate-300 hover:bg-slate-800' }}">📈 {{ (isset($shop) && $shop->is_office_mode) ? 'কর্মী ও পেপার অডিট' : 'আয় ও অডিট রিপোর্ট' }}</a>
                             <a href="{{ route('shop.quick_print') }}" class="block px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('shop.quick_print') ? 'bg-emerald-500 text-white' : 'text-slate-300 hover:bg-slate-800' }}">⚡ ইনস্ট্যান্ট / শেয়ার প্রিন্ট</a>
                             <a href="{{ route('shop.qr_poster') }}" class="block px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('shop.qr_poster') ? $mActiveBg : 'text-slate-300 hover:bg-slate-800' }}">🖼️ {{ (isset($shop) && $shop->is_office_mode) ? 'অফিস QR পোস্টার' : 'কিউআর পোস্টার' }}</a>

@@ -160,8 +160,36 @@ class DualRegistrationAndSubscriptionTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertSee('অফিস সেন্ট্রাল অটো-প্রিন্ট এজেন্ট');
-        $response->assertSee('অফিস মোডে কোনো পেমেন্ট অ্যাপ বা অ্যান্ড্রয়েড APK-র প্রয়োজন নেই');
+        $response->assertDontSee('অফিস মোডে কোনো পেমেন্ট অ্যাপ বা অ্যান্ড্রয়েড APK-র প্রয়োজন নেই');
         $response->assertDontSee('PrintSheba Payment (বিকাশ ও নগদ অটো-লিসেনার APK)');
+        $response->assertDontSee('জিরো পেমেন্ট');
+    }
+
+    public function test_office_dashboard_and_poster_have_no_payment_traces(): void
+    {
+        $user = User::factory()->create(['role' => 'shop_owner']);
+        $shop = Shop::create([
+            'user_id' => $user->id,
+            'name' => 'Apex Footwear HQ',
+            'slug' => 'apex-hq',
+            'phone' => '01711223344',
+            'is_office_mode' => true,
+            'subscription_plan' => 'office_basic_yearly',
+        ]);
+
+        // Dashboard check
+        $dashResponse = $this->actingAs($user)->get(route('shop.dashboard'));
+        $dashResponse->assertStatus(200);
+        $dashResponse->assertDontSee('জিরো পেমেন্ট');
+        $dashResponse->assertDontSee('লাইভ বিকাশ ও নগদ পেমেন্ট লগ');
+        $dashResponse->assertDontSee('ক্যাশ পেলাম / প্রিন্ট');
+        $dashResponse->assertDontSee('ফ্রি (অফিস)');
+
+        // Poster check
+        $posterResponse = $this->actingAs($user)->get(route('shop.qr_poster'));
+        $posterResponse->assertStatus(200);
+        $posterResponse->assertDontSee('জিরো পেমেন্ট');
+        $posterResponse->assertDontSee('১০০% ফ্রি');
     }
 
     public function test_office_settings_page_hides_rate_matrix_and_payment_numbers(): void

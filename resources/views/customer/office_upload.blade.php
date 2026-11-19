@@ -81,14 +81,14 @@
         <!-- Intro Banner -->
         <div class="p-4 rounded-3xl bg-gradient-to-r from-indigo-950 via-slate-900 to-indigo-900 text-white shadow-lg space-y-1.5 border border-indigo-800/40 relative overflow-hidden">
             <div class="flex items-center justify-between">
-                <span class="px-2 py-0.5 rounded-md bg-indigo-500/20 text-indigo-300 text-[10px] font-bold border border-indigo-500/30">জিরো পেমেন্ট • ১০০% ফ্রি</span>
+                <span class="px-2 py-0.5 rounded-md bg-indigo-500/20 text-indigo-300 text-[10px] font-bold border border-indigo-500/30">সেন্ট্রাল নেটওয়ার্ক • ইনস্ট্যান্ট প্রিন্ট</span>
                 <span class="text-[10px] text-emerald-400 font-bold flex items-center gap-1">
-                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> ইনস্ট্যান্ট অটো-প্রিন্ট
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> অটো-প্রিন্ট প্রস্তুত
                 </span>
             </div>
             <h2 class="text-base font-black">অফিস সেন্ট্রাল প্রিন্ট নেটওয়ার্ক</h2>
             <p class="text-[11px] text-slate-300 leading-relaxed">
-                অফিসের যেকোনো কম্পিউটার বা মোবাইল থেকে ফাইল আপলোড করে প্রিন্ট দিন। কোনো বিল বা পেমেন্ট ছাড়াই সরাসরি প্রিন্টার থেকে পেজ বের হবে।
+                অফিসের যেকোনো কম্পিউটার বা মোবাইল থেকে ফাইল আপলোড করে সরাসরি কমান্ড দিন। নিমিষেই সেন্ট্রাল প্রিন্টার থেকে প্রিন্ট হয়ে বের হয়ে যাবে।
             </p>
         </div>
 
@@ -149,7 +149,7 @@
                         <label class="block text-xs font-bold text-slate-700 mb-1">পিসি / রেফারেন্স নং:</label>
                         <input type="text" name="pickup_reference" 
                             class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-900 focus:outline-none focus:border-indigo-500"
-                            placeholder="যেমন: পিসি-৩ / মার্চ বিল">
+                            placeholder="যেমন: পিসি-৩ / অডিট ফাইল">
                     </div>
                 </div>
                 <span class="text-[10px] text-slate-400 block">

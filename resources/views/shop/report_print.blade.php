@@ -42,24 +42,35 @@
         </div>
     </div>
 
-    <!-- Financial Summary Box -->
+    <!-- Financial / Office Summary Box -->
     <div class="grid grid-cols-4 gap-3 p-4 border border-black rounded-xl text-center">
         <div>
             <span class="text-[11px] font-bold text-slate-700 block">মোট জব</span>
             <span class="text-xl font-black text-black font-en">{{ $metrics['total_jobs'] }}</span>
         </div>
         <div>
-            <span class="text-[11px] font-bold text-slate-700 block">মোট পেজ</span>
+            <span class="text-[11px] font-bold text-slate-700 block">{{ $shop->is_office_mode ? 'মোট পেপার শিট' : 'মোট পেজ' }}</span>
             <span class="text-xl font-black text-black font-en">{{ $metrics['total_pages_printed'] }}</span>
         </div>
-        <div>
-            <span class="text-[11px] font-bold text-slate-700 block">ক্যাশ আয়</span>
-            <span class="text-xl font-black text-black font-en">৳ {{ number_format($metrics['cash_revenue'], 2) }}</span>
-        </div>
-        <div>
-            <span class="text-[11px] font-bold text-slate-700 block">মোট আয় (রেভিনিউ)</span>
-            <span class="text-xl font-black text-black font-en">৳ {{ number_format($metrics['total_revenue'], 2) }}</span>
-        </div>
+        @if($shop->is_office_mode)
+            <div>
+                <span class="text-[11px] font-bold text-slate-700 block">সফল প্রিন্ট</span>
+                <span class="text-xl font-black text-black font-en">{{ $metrics['printed_jobs'] }}</span>
+            </div>
+            <div>
+                <span class="text-[11px] font-bold text-slate-700 block">বাতিল টাস্ক</span>
+                <span class="text-xl font-black text-black font-en">{{ $metrics['cancelled_jobs'] }}</span>
+            </div>
+        @else
+            <div>
+                <span class="text-[11px] font-bold text-slate-700 block">ক্যাশ আয়</span>
+                <span class="text-xl font-black text-black font-en">৳ {{ number_format($metrics['cash_revenue'], 2) }}</span>
+            </div>
+            <div>
+                <span class="text-[11px] font-bold text-slate-700 block">মোট আয় (রেভিনিউ)</span>
+                <span class="text-xl font-black text-black font-en">৳ {{ number_format($metrics['total_revenue'], 2) }}</span>
+            </div>
+        @endif
     </div>
 
     <!-- Table -->
@@ -69,12 +80,17 @@
                 <tr class="border-b border-black text-[10px] uppercase font-bold text-slate-800">
                     <th class="py-2">টোকেন নং</th>
                     <th class="py-2">সময়</th>
-                    <th class="py-2">গ্রাহক / রেফারেন্স</th>
+                    <th class="py-2">{{ $shop->is_office_mode ? 'কর্মকর্তা' : 'গ্রাহক / রেফারেন্স' }}</th>
                     <th class="py-2">ফাইল নাম</th>
                     <th class="py-2">পেজ × কপি</th>
                     <th class="py-2">মোড</th>
-                    <th class="py-2">পেমেন্ট</th>
-                    <th class="py-2 text-right">টাকা (৳)</th>
+                    @if($shop->is_office_mode)
+                        <th class="py-2">রেফারেন্স / পিসি</th>
+                        <th class="py-2 text-right">পেপার সাইজ</th>
+                    @else
+                        <th class="py-2">পেমেন্ট</th>
+                        <th class="py-2 text-right">টাকা (৳)</th>
+                    @endif
                 </tr>
             </thead>
             <tbody class="divide-y divide-slate-300">
@@ -82,12 +98,17 @@
                     <tr>
                         <td class="py-2 font-mono font-bold">{{ $job->job_token }}</td>
                         <td class="py-2 text-slate-700 font-mono">{{ $job->created_at->format('h:i A') }}</td>
-                        <td class="py-2 font-bold">{{ $job->pickup_reference ?: ($job->customer_name ?: 'কাস্টমার') }}</td>
+                        <td class="py-2 font-bold">{{ $shop->is_office_mode ? ($job->customer_name ?: 'অফিস কর্মী') : ($job->pickup_reference ?: ($job->customer_name ?: 'কাস্টমার')) }}</td>
                         <td class="py-2 max-w-[140px] truncate">{{ $job->original_name }}</td>
                         <td class="py-2 font-mono">{{ $job->total_pages }} × {{ $job->copies }}</td>
                         <td class="py-2">{{ $job->color_mode === 'color' ? 'কালার' : 'সাদাকালো' }}</td>
-                        <td class="py-2 uppercase font-mono">{{ $job->payment_method }} {{ $job->payment_trx_id ? '(' . $job->payment_trx_id . ')' : '' }}</td>
-                        <td class="py-2 text-right font-en font-bold">৳ {{ number_format($job->total_amount, 2) }}</td>
+                        @if($shop->is_office_mode)
+                            <td class="py-2 font-mono">{{ $job->pickup_reference ?: '-' }}</td>
+                            <td class="py-2 text-right font-mono">{{ $job->paper_size ?: 'A4' }}</td>
+                        @else
+                            <td class="py-2 uppercase font-mono">{{ $job->payment_method }} {{ $job->payment_trx_id ? '(' . $job->payment_trx_id . ')' : '' }}</td>
+                            <td class="py-2 text-right font-en font-bold">৳ {{ number_format($job->total_amount, 2) }}</td>
+                        @endif
                     </tr>
                 @endforeach
             </tbody>
@@ -102,7 +123,7 @@
         </div>
         <div class="text-right">
             <div class="w-48 border-t border-black mb-1 ml-auto"></div>
-            <span>দোকানদারের অনুমোদন স্বাক্ষর</span>
+            <span>{{ $shop->is_office_mode ? 'বিভাগীয় প্রধান / অ্যাডমিন স্বাক্ষর' : 'দোকানদারের অনুমোদন স্বাক্ষর' }}</span>
         </div>
     </div>
 

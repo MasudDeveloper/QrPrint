@@ -362,14 +362,14 @@
                     <div class="pt-2">
                         <button type="submit" id="submitPrintBtn" class="w-full py-4 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:from-emerald-600 hover:to-teal-600 active:scale-[0.99] text-white font-black text-base shadow-xl shadow-emerald-500/25 transition-all flex items-center justify-center gap-3">
                             <span class="text-xl">🖨️</span>
-                            <span id="btnText">সরাসরি দোকানে প্রিন্ট করুন</span>
+                            <span id="btnText">{{ (isset($shop) && $shop->is_office_mode) ? 'সরাসরি অফিসে প্রিন্ট করুন' : 'সরাসরি দোকানে প্রিন্ট করুন' }}</span>
                             <span class="text-xs px-2 py-0.5 rounded-md bg-black/20 font-mono font-normal">১-ট্যাপ</span>
                         </button>
                     </div>
 
                     <div class="text-center">
                         <p class="text-[11px] text-slate-400">
-                            🔒 পেমেন্ট স্বয়ংক্রিয়ভাবে অনুমোদিত হিসেবে উইন্ডোজ এজেন্ট কিউতে সরাসরি পৌঁছে যাবে
+                            🔒 {{ (isset($shop) && $shop->is_office_mode) ? 'ফাইলটি অনুমোদিত হয়ে সেন্ট্রাল প্রিন্ট কিউতে সরাসরি পৌঁছে যাবে' : 'পেমেন্ট স্বয়ংক্রিয়ভাবে অনুমোদিত হিসেবে উইন্ডোজ এজেন্ট কিউতে সরাসরি পৌঁছে যাবে' }}
                         </p>
                     </div>
 

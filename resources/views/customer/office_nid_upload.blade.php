@@ -102,7 +102,7 @@
         <div class="p-4 rounded-3xl bg-gradient-to-r from-indigo-950 via-slate-900 to-indigo-900 text-white shadow-lg space-y-1.5 border border-indigo-800/40 relative overflow-hidden">
             <div class="flex items-center gap-2">
                 <span class="px-2 py-0.5 rounded-md bg-indigo-500/20 text-indigo-300 text-[10px] font-bold border border-indigo-500/30">অফিস স্মার্ট এনআইডি</span>
-                <span class="text-[10px] text-emerald-400 font-bold">জিরো পেমেন্ট • ১:১ স্কেল</span>
+                <span class="text-[10px] text-emerald-400 font-bold">সেন্ট্রাল নেটওয়ার্ক • ১:১ স্কেল</span>
             </div>
             <h2 class="text-base font-black">অফিস এনআইডি স্মার্ট ক্রপ ও প্রিন্ট</h2>
             <p class="text-[11px] text-slate-300 leading-relaxed">

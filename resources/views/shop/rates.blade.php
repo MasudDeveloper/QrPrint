@@ -18,17 +18,17 @@
     <form action="{{ route('shop.rates.update') }}" method="POST" class="bg-slate-900/80 rounded-3xl p-6 sm:p-8 border {{ $shop->is_office_mode ? 'border-indigo-900/50' : 'border-slate-800' }} shadow-xl space-y-6">
         @csrf
 
-        <!-- Office Mode Zero-Payment Banner -->
+        <!-- Office Mode Network Banner -->
         @if($shop->is_office_mode)
             <div class="p-4 sm:p-5 rounded-2xl bg-indigo-950/40 border border-indigo-500/30 flex items-start gap-4">
                 <span class="text-3xl">🏢</span>
                 <div class="space-y-1">
                     <div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-indigo-500/20 text-indigo-300 text-[10px] font-bold uppercase">
-                        জিরো পেমেন্ট সক্রিয় • ১০০% ফ্রি
+                        সেন্ট্রাল অফিস নেটওয়ার্ক সক্রিয়
                     </div>
-                    <h3 class="text-sm font-bold text-white">অফিস মোডে কোনো বিকাশ/নগদ পেমেন্ট বা রেটের প্রয়োজন নেই</h3>
+                    <h3 class="text-sm font-bold text-white">অভ্যন্তরীণ অটো-প্রিন্ট নেটওয়ার্ক</h3>
                     <p class="text-xs text-slate-300 leading-relaxed">
-                        আপনার অফিসের কর্মীরা মোবাইল বা পিসি থেকে ডকুমেন্ট আপলোড দিলে কোনো বিল বা পেমেন্ট ছাড়াই সরাসরি প্রিন্টারে প্রিন্ট হয়ে যাবে। তাই কোনো বিকাশ/নগদ পার্সোনাল নম্বর বা পেজ রেট চার্ট কনফিগার করার প্রয়োজন নেই।
+                        প্রতিষ্ঠানের কর্মীরা QR কোড স্ক্যান করে বা নিজস্ব লিংক থেকে সরাসরি সেন্ট্রাল প্রিন্টারে ডকুমেন্ট প্রিন্ট দিতে পারবেন। নিচে প্রতিষ্ঠানের সাধারণ তথ্য কনফিগার করুন।
                     </p>
                 </div>
             </div>

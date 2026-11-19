@@ -117,26 +117,6 @@
                 </div>
             </div>
         </div>
-    @else
-        <!-- OFFICE ZERO-PAYMENT ARCHITECTURE CARD -->
-        <div class="bg-gradient-to-br from-indigo-950/40 via-slate-900 to-slate-950 rounded-3xl p-6 sm:p-8 text-white shadow-2xl border border-indigo-500/30 relative overflow-hidden">
-            <div class="flex flex-col sm:flex-row items-start gap-5">
-                <div class="w-14 h-14 rounded-2xl bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 flex items-center justify-center text-3xl shrink-0 shadow-lg shadow-indigo-500/10">
-                    🏢
-                </div>
-                <div class="space-y-2">
-                    <div class="inline-flex items-center gap-2 px-3 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-[10px] font-bold uppercase">
-                        <span>●</span> অফিস মোড সক্রিয় • জিরো পেমেন্ট অটো-প্রিন্ট
-                    </div>
-                    <h2 class="text-lg sm:text-xl font-black text-white">
-                        অফিস মোডে কোনো পেমেন্ট অ্যাপ বা অ্যান্ড্রয়েড APK-র প্রয়োজন নেই
-                    </h2>
-                    <p class="text-xs sm:text-sm text-slate-300 leading-relaxed max-w-3xl">
-                        আপনার প্রতিষ্ঠানটি <strong>অফিস সেন্ট্রাল প্রিন্ট নেটওয়ার্কে</strong> পরিচালিত। এখানে কর্মীরা সরাসরি পেনড্রাইভ বা ক্যাবল ছাড়া বিনা মূল্যে প্রিন্ট দেন। তাই দোকানদারদের মতো কোনো <em>বিকাশ বা নগদ পেমেন্ট লিসেনার অ্যাপ</em>-এর দরকার নেই। শুধুমাত্র ওপরের <strong>PrintShebaAgent.exe</strong> সফটওয়্যারটি প্রিন্টারের সাথে যুক্ত পিসিতে চালু রাখলেই সব কর্মীর প্রিন্ট স্বয়ংক্রিয়ভাবে বের হবে।
-                    </p>
-                </div>
-            </div>
-        </div>
     @endif
 
     <!-- 3 STEP SETUP INSTRUCTIONS (WINDOWS AGENT) -->
