@@ -503,32 +503,45 @@ namespace PrintSheba
             {
                 using (var image = Image.FromFile(filePath))
                 {
-                    var pd = new PrintDocument();
-                    pd.PrinterSettings.PrinterName = printerName;
-                    pd.PrinterSettings.Copies = (short)Math.Max(1, copies);
+                    int totalCopies = Math.Max(1, copies);
+                    Log(string.Format("🖼️ ইমেজ প্রিন্ট হচ্ছে ➔ \"{0}\" (মোট কপি: {1})", printerName, totalCopies));
 
-                    if (isDuplex && pd.PrinterSettings.CanDuplex)
+                    for (int c = 0; c < totalCopies; c++)
                     {
-                        pd.PrinterSettings.Duplex = Duplex.Vertical;
+                        using (var pd = new PrintDocument())
+                        {
+                            pd.PrinterSettings.PrinterName = printerName;
+                            pd.PrinterSettings.Copies = 1;
+
+                            if (isDuplex && pd.PrinterSettings.CanDuplex)
+                            {
+                                pd.PrinterSettings.Duplex = Duplex.Vertical;
+                            }
+                            else
+                            {
+                                pd.PrinterSettings.Duplex = Duplex.Simplex;
+                            }
+
+                            pd.PrintPage += (s, ev) =>
+                            {
+                                Rectangle m = ev.MarginBounds;
+                                float ratio = Math.Min((float)m.Width / image.Width, (float)m.Height / image.Height);
+                                int w = (int)(image.Width * ratio);
+                                int h = (int)(image.Height * ratio);
+                                int x = m.Left + (m.Width - w) / 2;
+                                int y = m.Top + (m.Height - h) / 2;
+
+                                ev.Graphics.DrawImage(image, x, y, w, h);
+                            };
+
+                            pd.Print();
+                        }
+
+                        if (c < totalCopies - 1)
+                        {
+                            Thread.Sleep(300); // Spooler pause between copies
+                        }
                     }
-                    else
-                    {
-                        pd.PrinterSettings.Duplex = Duplex.Simplex;
-                    }
-
-                    pd.PrintPage += (s, ev) =>
-                    {
-                        Rectangle m = ev.MarginBounds;
-                        float ratio = Math.Min((float)m.Width / image.Width, (float)m.Height / image.Height);
-                        int w = (int)(image.Width * ratio);
-                        int h = (int)(image.Height * ratio);
-                        int x = m.Left + (m.Width - w) / 2;
-                        int y = m.Top + (m.Height - h) / 2;
-
-                        ev.Graphics.DrawImage(image, x, y, w, h);
-                    };
-
-                    pd.Print();
                     return true;
                 }
             }
@@ -542,11 +555,12 @@ namespace PrintSheba
         private bool PrintDocumentSilently(string filePath, string printerName, int copies, bool isDuplex = false)
         {
             string ext = Path.GetExtension(filePath).ToLowerInvariant();
+            int totalCopies = Math.Max(1, copies);
 
             // Word Documents: Use Microsoft Word COM Automation or Windows Native Print
             if (ext == ".doc" || ext == ".docx")
             {
-                if (PrintWordDocument(filePath, printerName, copies))
+                if (PrintWordDocument(filePath, printerName, totalCopies))
                 {
                     return true;
                 }
@@ -602,41 +616,56 @@ namespace PrintSheba
                     if (!string.IsNullOrEmpty(sumatraExe))
                     {
                         string duplexParam = isDuplex ? ",duplexlong" : ",simplex";
-                        string copiesParam = copies > 1 ? string.Format(",copies={0}", copies) : "";
-                        string args = string.Format("-silent -print-to \"{0}\" -print-settings \"fit{1}{2}\" \"{3}\"", printerName, duplexParam, copiesParam, filePath);
-                        Log(string.Format("🚀 সুমাত্রা ইঞ্জিন দিয়ে প্রিন্ট হচ্ছে (মোড: {0}, কপি: {1})...", isDuplex ? "২-সাইড (Duplex/ডুপ্লেক্স)" : "১-সাইড (Simplex)", copies));
+                        Log(string.Format("🚀 সুমাত্রা ইঞ্জিন দিয়ে প্রিন্ট হচ্ছে (মোড: {0}, মোট কপি: {1})...", isDuplex ? "২-সাইড (Duplex/ডুপ্লেক্স)" : "১-সাইড (Simplex)", totalCopies));
 
-                        var psi = new ProcessStartInfo
+                        bool allCopiesSuccess = true;
+                        // Sequential spooling per copy: guarantees 100% compatibility across all printer drivers (Canon LBP, HP, Epson, Brother)
+                        // and ensures natural collated sets without driver hardware limitations
+                        for (int c = 0; c < totalCopies; c++)
                         {
-                            FileName = sumatraExe,
-                            Arguments = args,
-                            CreateNoWindow = true,
-                            UseShellExecute = false,
-                            WindowStyle = ProcessWindowStyle.Hidden
-                        };
+                            string args = string.Format("-silent -print-to \"{0}\" -print-settings \"fit{1}\" \"{2}\"", printerName, duplexParam, filePath);
 
-                        using (var p = Process.Start(psi))
-                        {
-                            if (p != null)
+                            var psi = new ProcessStartInfo
                             {
-                                bool exited = p.WaitForExit(20000);
-                                if (exited)
+                                FileName = sumatraExe,
+                                Arguments = args,
+                                CreateNoWindow = true,
+                                UseShellExecute = false,
+                                WindowStyle = ProcessWindowStyle.Hidden
+                            };
+
+                            using (var p = Process.Start(psi))
+                            {
+                                if (p != null)
                                 {
-                                    if (p.ExitCode == 0) return true;
-                                    Log("⚠️ সুমাত্রা রিটার্ন কোড: " + p.ExitCode);
-                                }
-                                else
-                                {
-                                    try { p.Kill(); } catch { }
-                                    return true; // Spooled to Windows Print Spooler
+                                    bool exited = p.WaitForExit(30000);
+                                    if (exited)
+                                    {
+                                        if (p.ExitCode != 0)
+                                        {
+                                            Log("⚠️ সুমাত্রা রিটার্ন কোড: " + p.ExitCode);
+                                            allCopiesSuccess = false;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        try { p.Kill(); } catch { }
+                                    }
                                 }
                             }
+
+                            if (c < totalCopies - 1)
+                            {
+                                Thread.Sleep(400); // Allow Windows Spooler to cleanly register each copy
+                            }
                         }
+
+                        if (allCopiesSuccess) return true;
                     }
                 }
 
                 // Strategy 2: Fallback to Windows Shell PrintTo
-                for (int i = 0; i < copies; i++)
+                for (int i = 0; i < totalCopies; i++)
                 {
                     var psi = new ProcessStartInfo
                     {
@@ -655,7 +684,10 @@ namespace PrintSheba
                             p.WaitForExit(15000);
                         }
                     }
-                    Thread.Sleep(500);
+                    if (i < totalCopies - 1)
+                    {
+                        Thread.Sleep(500);
+                    }
                 }
                 return true;
             }
@@ -851,37 +883,47 @@ namespace PrintSheba
             }
         }
 
-        private void PerformTestPrint()
+        private void PerformTestPrint(int testCopies = 1)
         {
             string targetPrinter = GetTargetPrinter("bw");
-            Log("🖨️ টেস্ট পেজ পাঠানো হচ্ছে ➔ " + targetPrinter);
+            int totalCopies = Math.Max(1, testCopies);
+            Log(string.Format("🖨️ টেস্ট পেজ পাঠানো হচ্ছে ➔ \"{0}\" (মোট কপি: {1})", targetPrinter, totalCopies));
 
             try
             {
-                var pd = new PrintDocument();
-                pd.PrinterSettings.PrinterName = targetPrinter;
-                pd.PrintPage += (s, ev) =>
+                for (int c = 0; c < totalCopies; c++)
                 {
-                    Font fBrand = new Font("Segoe UI", 18, FontStyle.Bold);
-                    Font fTagline = new Font("Segoe UI", 10, FontStyle.Bold);
-                    Font fBody = new Font("Segoe UI", 10, FontStyle.Regular);
-                    Font fSmall = new Font("Segoe UI", 8.5F, FontStyle.Italic);
+                    var pd = new PrintDocument();
+                    pd.PrinterSettings.PrinterName = targetPrinter;
+                    int currentCopyNum = c + 1;
+                    pd.PrintPage += (s, ev) =>
+                    {
+                        Font fBrand = new Font("Segoe UI", 18, FontStyle.Bold);
+                        Font fTagline = new Font("Segoe UI", 10, FontStyle.Bold);
+                        Font fBody = new Font("Segoe UI", 10, FontStyle.Regular);
+                        Font fSmall = new Font("Segoe UI", 8.5F, FontStyle.Italic);
 
-                    ev.Graphics.DrawString("PrintSheba (প্রিন্ট সেবা) - অফিশিয়াল টেস্ট পেজ", fBrand, Brushes.Black, 50, 50);
-                    ev.Graphics.DrawString("স্মার্ট সেলফ-সার্ভিস প্রিন্ট অটোমেশন প্ল্যাটফর্ম", fTagline, Brushes.Gray, 50, 85);
-                    ev.Graphics.DrawLine(new Pen(Color.FromArgb(225, 29, 72), 2), 50, 110, 550, 110);
+                        ev.Graphics.DrawString("PrintSheba (প্রিন্ট সেবা) - অফিশিয়াল টেস্ট পেজ", fBrand, Brushes.Black, 50, 50);
+                        ev.Graphics.DrawString("স্মার্ট সেলফ-সার্ভিস প্রিন্ট অটোমেশন প্ল্যাটফর্ম", fTagline, Brushes.Gray, 50, 85);
+                        ev.Graphics.DrawLine(new Pen(Color.FromArgb(225, 29, 72), 2), 50, 110, 550, 110);
 
-                    ev.Graphics.DrawString("প্রিন্টার নাম: " + targetPrinter, fBody, Brushes.Black, 50, 130);
-                    ev.Graphics.DrawString("সংযোগ অবস্থা: সফলভাবে উইন্ডোজ স্পুলার ড্রাইভারে কানেক্টেড!", fBody, Brushes.DarkGreen, 50, 155);
-                    ev.Graphics.DrawString("তারিখ ও সময়: " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), fBody, Brushes.Black, 50, 180);
-                    ev.Graphics.DrawString("ক্লাউড সার্ভার: " + config.server_url, fBody, Brushes.Black, 50, 205);
+                        ev.Graphics.DrawString("প্রিন্টার নাম: " + targetPrinter, fBody, Brushes.Black, 50, 130);
+                        ev.Graphics.DrawString("সংযোগ অবস্থা: সফলভাবে উইন্ডোজ স্পুলার ড্রাইভারে কানেক্টেড!", fBody, Brushes.DarkGreen, 50, 155);
+                        ev.Graphics.DrawString(string.Format("কপি ট্র্যাকিং: কপি #{0} (মোট {1} কপি)", currentCopyNum, totalCopies), fBody, Brushes.Black, 50, 180);
+                        ev.Graphics.DrawString("তারিখ ও সময়: " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), fBody, Brushes.Black, 50, 205);
+                        ev.Graphics.DrawString("ক্লাউড সার্ভার: " + config.server_url, fBody, Brushes.Black, 50, 230);
 
-                    ev.Graphics.DrawString("ডেভেলপার: MR Developer (https://mrdeveloper.xyz) | হেল্পলাইন: 01644416378", fSmall, Brushes.DarkGray, 50, 250);
-                };
+                        ev.Graphics.DrawString("ডেভেলপার: MR Developer (https://mrdeveloper.xyz) | হেল্পলাইন: 01644416378", fSmall, Brushes.DarkGray, 50, 275);
+                    };
 
-                pd.Print();
-                Log("✅ টেস্ট প্রিন্ট সফলভাবে প্রিন্টারে পাঠানো হয়েছে!");
-                MessageBox.Show("টেস্ট পেজ সফলভাবে প্রিন্টারে স্পুল হয়েছে। ট্রে থেকে কাগজটি সংগ্রহ করুন।", "PrintSheba টেস্ট প্রিন্ট", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    pd.Print();
+                    if (c < totalCopies - 1)
+                    {
+                        Thread.Sleep(300);
+                    }
+                }
+                Log(string.Format("✅ টেস্ট প্রিন্ট সফলভাবে সম্পন্ন হয়েছে! ({0} কপি স্পুলড)", totalCopies));
+                MessageBox.Show(string.Format("টেস্ট পেজ সফলভাবে প্রিন্টারে স্পুল হয়েছে ({0} কপি)। ট্রে থেকে কাগজটি সংগ্রহ করুন।", totalCopies), "PrintSheba টেস্ট প্রিন্ট", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception ex)
             {
@@ -1343,7 +1385,8 @@ namespace PrintSheba
             // 5. SYSTEM TRAY MENU
             trayMenu = new ContextMenuStrip();
             trayMenu.Items.Add("ড্যাশবোর্ড ওপেন করুন", null, (s, e) => { ShowForm(); });
-            trayMenu.Items.Add("টেস্ট পেজ প্রিন্ট করুন", null, (s, e) => { PerformTestPrint(); });
+            trayMenu.Items.Add("টেস্ট পেজ প্রিন্ট করুন (১ কপি)", null, (s, e) => { PerformTestPrint(1); });
+            trayMenu.Items.Add("মাল্টি-কপি টেস্ট করুন (২ কপি)", null, (s, e) => { PerformTestPrint(2); });
             trayMenu.Items.Add("-");
             trayMenu.Items.Add("প্রোগ্রাম বন্ধ করুন (Exit)", null, (s, e) => { ExitApp(); });
 
