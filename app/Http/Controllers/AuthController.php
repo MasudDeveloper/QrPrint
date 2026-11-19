@@ -36,23 +36,46 @@ class AuthController extends Controller
         ])->onlyInput('email');
     }
 
-    public function showRegisterForm()
+    public function showRegisterForm(Request $request)
     {
         if (Auth::check()) {
             return $this->redirectBasedOnRole(Auth::user());
         }
-        return view('auth.register');
+        $selectedType = $request->query('type', 'shop');
+        if (!in_array($selectedType, ['shop', 'office'])) {
+            $selectedType = 'shop';
+        }
+        return view('auth.register', compact('selectedType'));
     }
 
     public function register(Request $request)
     {
-        $request->validate([
+        $accountType = $request->input('account_type', 'shop');
+        $isOffice = ($accountType === 'office');
+
+        $rules = [
             'name' => 'required|string|max:255',
-            'shop_name' => 'required|string|max:255',
             'phone' => 'required|string|max:20',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:6|confirmed',
+            'account_type' => 'nullable|string|in:shop,office',
+        ];
+
+        if ($isOffice) {
+            $rules['office_name'] = 'required_without:shop_name|string|max:255';
+        } else {
+            $rules['shop_name'] = 'required_without:office_name|string|max:255';
+        }
+
+        $request->validate($rules, [
+            'shop_name.required_without' => 'দোকানের নাম দেওয়া আবশ্যক।',
+            'office_name.required_without' => 'প্রতিষ্ঠানের নাম দেওয়া আবশ্যক।',
+            'email.unique' => 'এই ইমেইল দিয়ে ইতোমধ্যে একটি অ্যাকাউন্ট রয়েছে।',
         ]);
+
+        $displayName = $isOffice 
+            ? ($request->office_name ?: $request->shop_name) 
+            : ($request->shop_name ?: $request->office_name);
 
         $user = User::create([
             'name' => $request->name,
@@ -63,29 +86,34 @@ class AuthController extends Controller
             'status' => 'active',
         ]);
 
-        // Auto-create shop for owner with 24 Hours Free Demo (20 test prints)
+        // Auto-create shop / office entity
         $shop = Shop::create([
             'user_id' => $user->id,
-            'name' => $request->shop_name,
-            'slug' => Str::slug($request->shop_name) . '-' . Str::lower(Str::random(4)),
+            'name' => $displayName,
+            'slug' => Str::slug($displayName) . '-' . Str::lower(Str::random(4)),
             'phone' => $request->phone,
             'bkash_number' => $request->phone,
             'nagad_number' => $request->phone,
-            'rate_bw_single' => 3.00,
-            'rate_bw_double' => 5.00,
-            'rate_color_single' => 10.00,
-            'rate_color_double' => 18.00,
-            'rate_photo_passport' => 30.00,
+            'rate_bw_single' => $isOffice ? 0.00 : 3.00,
+            'rate_bw_double' => $isOffice ? 0.00 : 5.00,
+            'rate_color_single' => $isOffice ? 0.00 : 10.00,
+            'rate_color_double' => $isOffice ? 0.00 : 18.00,
+            'rate_photo_passport' => $isOffice ? 0.00 : 30.00,
             'api_token' => Str::random(40),
-            'subscription_plan' => 'free_trial',
-            'subscription_expires_at' => now()->addHours(24),
+            'subscription_plan' => $isOffice ? 'office_trial' : 'free_trial',
+            'subscription_expires_at' => $isOffice ? now()->addDays(7) : now()->addHours(24),
+            'is_office_mode' => $isOffice,
             'is_lifetime' => false,
             'is_active' => true,
         ]);
 
         Auth::login($user);
 
-        return redirect()->route('shop.dashboard')->with('success', 'স্বাগতম! আপনার দোকানের অ্যাকাউন্ট সফলভাবে তৈরি হয়েছে।');
+        $welcomeMsg = $isOffice
+            ? 'স্বাগতম! আপনার অফিসের সেন্ট্রাল প্রিন্ট নেটওয়ার্ক সফলভাবে চালু হয়েছে।'
+            : 'স্বাগতম! আপনার দোকানের অ্যাকাউন্ট সফলভাবে তৈরি হয়েছে।';
+
+        return redirect()->route('shop.dashboard')->with('success', $welcomeMsg);
     }
 
     public function logout(Request $request)

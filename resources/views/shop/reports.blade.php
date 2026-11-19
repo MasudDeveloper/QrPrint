@@ -9,10 +9,10 @@
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
             <h1 class="text-2xl font-black text-white flex items-center gap-2.5">
-                <span>📈 আয় ও প্রিন্ট অডিট রিপোর্ট</span>
+                <span>📈 {{ $shop->is_office_mode ? '🏢 অফিস প্রিন্ট ও পেপার ব্যবহার অডিট' : 'আয় ও প্রিন্ট অডিট রিপোর্ট' }}</span>
             </h1>
             <p class="text-xs sm:text-sm text-slate-400 mt-1">
-                {{ $periodLabel }} — দোকানদারদের জন্য দৈনিক, সাপ্তাহিক ও মাসিক আয়-ব্যয়ের পুঙ্খানুপুঙ্খ হিসাব
+                {{ $periodLabel }} — {{ $shop->is_office_mode ? 'অফিসের কর্মীদের পেপার ব্যবহার, রঙিন ও সাদাকালো প্রিন্টের পুঙ্খানুপুঙ্খ অডিট লগ' : 'দোকানদারদের জন্য দৈনিক, সাপ্তাহিক ও মাসিক আয়-ব্যয়ের পুঙ্খানুপুঙ্খ হিসাব' }}
             </p>
         </div>
 

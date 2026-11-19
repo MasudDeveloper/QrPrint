@@ -139,9 +139,13 @@ class Shop extends Model
         }
 
         return match ($this->subscription_plan) {
-            'monthly_starter' => 'মান্থলি স্টার্টার',
+            'monthly_starter' => 'মান্থলি স্টার্টার (দোকান)',
             'yearly_pro' => 'ইয়ারলি প্রো (১ বছর)',
-            'lifetime' => 'লাইফটাইম',
+            'lifetime' => 'লাইফটাইম (দোকান)',
+            'office_basic_monthly' => 'অফিস বেসিক (১ মাস)',
+            'office_basic_yearly' => 'অফিস বেসিক (১ বছর)',
+            'office_corporate_yearly' => 'কর্পোরেট প্রো (১ বছর)',
+            'office_trial' => 'অফিস ফ্রি ট্রায়াল (Corporate Trial)',
             default => 'ফ্রি ট্রায়াল (Free Trial)',
         };
     }

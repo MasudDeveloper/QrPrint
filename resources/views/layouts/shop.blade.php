@@ -81,9 +81,13 @@
                     <img src="{{ asset('logo.svg') }}" onerror="this.onerror=null;this.src='{{ asset('icon-192.png') }}';" alt="PrintSheba Logo" class="w-10 h-10 rounded-2xl shadow-lg shadow-rose-500/20 group-hover:scale-105 transition-transform duration-300">
                     <div>
                         <div class="flex items-center gap-1.5">
-                            <span class="font-black text-white font-en text-lg tracking-tight">Print<span class="text-rose-500">Sheba</span></span>
+                            <span class="font-black text-white font-en text-lg tracking-tight">Print<span class="{{ (isset($shop) && $shop->is_office_mode) ? 'text-indigo-400' : 'text-rose-500' }}">Sheba</span></span>
                         </div>
-                        <span class="text-[9px] uppercase tracking-widest px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-400 font-extrabold border border-rose-500/20">SHOP PARTNER</span>
+                        @if(isset($shop) && $shop->is_office_mode)
+                            <span class="text-[9px] uppercase tracking-widest px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 font-extrabold border border-indigo-500/30">OFFICE PARTNER</span>
+                        @else
+                            <span class="text-[9px] uppercase tracking-widest px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-400 font-extrabold border border-rose-500/20">SHOP PARTNER</span>
+                        @endif
                     </div>
                 </a>
             </div>
@@ -130,10 +134,15 @@
             <nav class="flex-1 px-4 py-2 space-y-1.5 overflow-y-auto">
                 <div class="text-[10px] font-bold tracking-wider text-slate-500 uppercase px-3 py-1">প্রধান মেনু</div>
 
+                @php
+                    $isOffice = isset($shop) && $shop->is_office_mode;
+                    $activeNavBg = $isOffice ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-600/25' : 'bg-gradient-to-r from-rose-500 to-rose-600 text-white shadow-lg shadow-rose-500/25';
+                @endphp
+
                 <a href="{{ route('shop.dashboard') }}" 
-                   class="flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-semibold transition-all duration-200 {{ request()->routeIs('shop.dashboard') ? 'bg-gradient-to-r from-rose-500 to-rose-600 text-white shadow-lg shadow-rose-500/25' : 'text-slate-300 hover:bg-slate-800/70 hover:text-white' }}">
+                   class="flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-semibold transition-all duration-200 {{ request()->routeIs('shop.dashboard') ? $activeNavBg : 'text-slate-300 hover:bg-slate-800/70 hover:text-white' }}">
                     <span class="text-lg">📊</span>
-                    <span>লাইভ কিউ ও আয়</span>
+                    <span>{{ $isOffice ? 'লাইভ কিউ (জিরো পেমেন্ট)' : 'লাইভ কিউ ও আয়' }}</span>
                 </a>
 
                 <a href="{{ route('shop.quick_print') }}" 
@@ -146,40 +155,40 @@
                 </a>
 
                 <a href="{{ route('shop.reports') }}" 
-                   class="flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-semibold transition-all duration-200 {{ request()->routeIs('shop.reports') ? 'bg-gradient-to-r from-rose-500 to-rose-600 text-white shadow-lg shadow-rose-500/25' : 'text-slate-300 hover:bg-slate-800/70 hover:text-white' }}">
+                   class="flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-semibold transition-all duration-200 {{ request()->routeIs('shop.reports') ? $activeNavBg : 'text-slate-300 hover:bg-slate-800/70 hover:text-white' }}">
                     <span class="text-lg">📈</span>
-                    <span>আয় ও অডিট রিপোর্ট</span>
+                    <span>{{ $isOffice ? 'কর্মী ও পেপার অডিট' : 'আয় ও অডিট রিপোর্ট' }}</span>
                 </a>
 
                 <a href="{{ route('shop.qr_poster') }}" 
-                   class="flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-semibold transition-all duration-200 {{ request()->routeIs('shop.qr_poster') ? 'bg-gradient-to-r from-rose-500 to-rose-600 text-white shadow-lg shadow-rose-500/25' : 'text-slate-300 hover:bg-slate-800/70 hover:text-white' }}">
+                   class="flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-semibold transition-all duration-200 {{ request()->routeIs('shop.qr_poster') ? $activeNavBg : 'text-slate-300 hover:bg-slate-800/70 hover:text-white' }}">
                     <span class="text-lg">🖼️</span>
-                    <span>কাউন্টার QR পোস্টার</span>
+                    <span>{{ $isOffice ? 'অফিস QR পোস্টার' : 'কাউন্টার QR পোস্টার' }}</span>
                 </a>
 
                 <a href="{{ route('shop.rates') }}" 
-                   class="flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-semibold transition-all duration-200 {{ request()->routeIs('shop.rates') ? 'bg-gradient-to-r from-rose-500 to-rose-600 text-white shadow-lg shadow-rose-500/25' : 'text-slate-300 hover:bg-slate-800/70 hover:text-white' }}">
-                    <span class="text-lg">💰</span>
-                    <span>রেট ও পেমেন্ট নম্বর</span>
+                   class="flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-semibold transition-all duration-200 {{ request()->routeIs('shop.rates') ? $activeNavBg : 'text-slate-300 hover:bg-slate-800/70 hover:text-white' }}">
+                    <span class="text-lg">{{ $isOffice ? '⚙️' : '💰' }}</span>
+                    <span>{{ $isOffice ? 'অফিস মোড সেটিংস' : 'রেট ও পেমেন্ট নম্বর' }}</span>
                 </a>
 
                 <a href="{{ route('shop.printers') }}" 
-                   class="flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-semibold transition-all duration-200 {{ request()->routeIs('shop.printers') ? 'bg-gradient-to-r from-rose-500 to-rose-600 text-white shadow-lg shadow-rose-500/25' : 'text-slate-300 hover:bg-slate-800/70 hover:text-white' }}">
+                   class="flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-semibold transition-all duration-200 {{ request()->routeIs('shop.printers') ? $activeNavBg : 'text-slate-300 hover:bg-slate-800/70 hover:text-white' }}">
                     <span class="text-lg">🖨️</span>
                     <span>প্রিন্টার সেটিংস</span>
                 </a>
 
                 <a href="{{ route('shop.agent_setup') }}" 
-                   class="flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-semibold transition-all duration-200 {{ request()->routeIs('shop.agent_setup') ? 'bg-gradient-to-r from-rose-500 to-rose-600 text-white shadow-lg shadow-rose-500/25' : 'text-slate-300 hover:bg-slate-800/70 hover:text-white' }}">
+                   class="flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-semibold transition-all duration-200 {{ request()->routeIs('shop.agent_setup') ? $activeNavBg : 'text-slate-300 hover:bg-slate-800/70 hover:text-white' }}">
                     <span class="text-lg">💻</span>
                     <span>উইন্ডোজ এজেন্ট (.EXE)</span>
                 </a>
 
                 <a href="{{ route('shop.subscription') }}" 
-                   class="flex items-center justify-between px-3.5 py-3 rounded-xl text-sm font-semibold transition-all duration-200 {{ request()->routeIs('shop.subscription') ? 'bg-gradient-to-r from-rose-500 to-rose-600 text-white shadow-lg shadow-rose-500/25' : 'text-slate-300 hover:bg-slate-800/70 hover:text-white' }}">
+                   class="flex items-center justify-between px-3.5 py-3 rounded-xl text-sm font-semibold transition-all duration-200 {{ request()->routeIs('shop.subscription') ? $activeNavBg : 'text-slate-300 hover:bg-slate-800/70 hover:text-white' }}">
                     <span class="flex items-center gap-3">
                         <span class="text-lg">💎</span>
-                        <span>প্যাকেজ ও বিলিং</span>
+                        <span>{{ $isOffice ? 'কর্পোরেট লাইসেন্স' : 'প্যাকেজ ও বিলিং' }}</span>
                     </span>
                     @if(isset($shop) && $shop->is_lifetime)
                         <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30">LIFETIME</span>
@@ -188,14 +197,16 @@
                     @endif
                 </a>
 
-                <div class="pt-4 text-[10px] font-bold tracking-wider text-slate-500 uppercase px-3 py-1">কাস্টমার পোর্টাল</div>
+                <div class="pt-4 text-[10px] font-bold tracking-wider text-slate-500 uppercase px-3 py-1">
+                    {{ $isOffice ? 'কর্মীদের পোর্টাল' : 'কাস্টমার পোর্টাল' }}
+                </div>
 
                 @if(isset($shop))
-                <a href="{{ route('customer.upload', $shop->slug) }}" target="_blank" 
-                   class="flex items-center justify-between px-3.5 py-3 rounded-xl text-sm font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20 transition-all">
+                <a href="{{ $isOffice ? route('customer.office_upload', $shop->slug) : route('customer.upload', $shop->slug) }}" target="_blank" 
+                   class="flex items-center justify-between px-3.5 py-3 rounded-xl text-sm font-semibold {{ $isOffice ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20 hover:bg-indigo-500/20' : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20' }} border transition-all">
                     <span class="flex items-center gap-3">
-                        <span class="text-lg">📱</span>
-                        <span>কাস্টমার স্ক্রিন দেখুন</span>
+                        <span class="text-lg">{{ $isOffice ? '🏢' : '📱' }}</span>
+                        <span>{{ $isOffice ? 'কর্মীদের স্ক্রিন দেখুন' : 'কাস্টমার স্ক্রিন দেখুন' }}</span>
                     </span>
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
                 </a>
@@ -230,12 +241,12 @@
             <header class="lg:hidden bg-slate-900 border-b border-slate-800 px-4 py-3 flex items-center justify-between sticky top-0 z-50">
                 <a href="{{ route('shop.dashboard') }}" class="flex items-center gap-2">
                     <img src="{{ asset('logo.svg') }}" onerror="this.onerror=null;this.src='{{ asset('icon-192.png') }}';" alt="PrintSheba Logo" class="w-8 h-8 rounded-xl shadow">
-                    <span class="font-black text-white font-en text-base">Print<span class="text-rose-500">Sheba</span></span>
+                    <span class="font-black text-white font-en text-base">Print<span class="{{ (isset($shop) && $shop->is_office_mode) ? 'text-indigo-400' : 'text-rose-500' }}">Sheba</span></span>
                 </a>
                 <div class="flex items-center gap-2">
                     @if(isset($shop))
-                    <a href="{{ route('customer.upload', $shop->slug) }}" target="_blank" class="px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-400 text-xs font-bold border border-emerald-500/30">
-                        📱 কাস্টমার পেজ
+                    <a href="{{ $shop->is_office_mode ? route('customer.office_upload', $shop->slug) : route('customer.upload', $shop->slug) }}" target="_blank" class="px-2.5 py-1 rounded-lg {{ $shop->is_office_mode ? 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30' : 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' }} text-xs font-bold border">
+                        {{ $shop->is_office_mode ? '🏢 অফিস পোর্টাল' : '📱 কাস্টমার পেজ' }}
                     </a>
                     @endif
                     <button id="mobileMenuToggle" class="p-2 rounded-xl text-slate-300 hover:bg-slate-800 focus:outline-none">
@@ -256,14 +267,17 @@
                             <button id="closeDrawer" class="text-slate-400 hover:text-white text-xl font-bold">&times;</button>
                         </div>
                         <nav class="mt-4 space-y-1.5">
-                            <a href="{{ route('shop.dashboard') }}" class="block px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('shop.dashboard') ? 'bg-rose-500 text-white' : 'text-slate-300 hover:bg-slate-800' }}">📊 লাইভ কিউ ও আয়</a>
-                            <a href="{{ route('shop.reports') }}" class="block px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('shop.reports') ? 'bg-rose-500 text-white' : 'text-slate-300 hover:bg-slate-800' }}">📈 আয় ও অডিট রিপোর্ট</a>
+                            @php
+                                $mActiveBg = (isset($shop) && $shop->is_office_mode) ? 'bg-indigo-600 text-white' : 'bg-rose-500 text-white';
+                            @endphp
+                            <a href="{{ route('shop.dashboard') }}" class="block px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('shop.dashboard') ? $mActiveBg : 'text-slate-300 hover:bg-slate-800' }}">📊 {{ (isset($shop) && $shop->is_office_mode) ? 'লাইভ কিউ (জিরো পেমেন্ট)' : 'লাইভ কিউ ও আয়' }}</a>
+                            <a href="{{ route('shop.reports') }}" class="block px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('shop.reports') ? $mActiveBg : 'text-slate-300 hover:bg-slate-800' }}">📈 {{ (isset($shop) && $shop->is_office_mode) ? 'কর্মী ও পেপার অডিট' : 'আয় ও অডিট রিপোর্ট' }}</a>
                             <a href="{{ route('shop.quick_print') }}" class="block px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('shop.quick_print') ? 'bg-emerald-500 text-white' : 'text-slate-300 hover:bg-slate-800' }}">⚡ ইনস্ট্যান্ট / শেয়ার প্রিন্ট</a>
-                            <a href="{{ route('shop.qr_poster') }}" class="block px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('shop.qr_poster') ? 'bg-rose-500 text-white' : 'text-slate-300 hover:bg-slate-800' }}">🖼️ কিউআর পোস্টার</a>
-                            <a href="{{ route('shop.rates') }}" class="block px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('shop.rates') ? 'bg-rose-500 text-white' : 'text-slate-300 hover:bg-slate-800' }}">💰 রেট ও পেমেন্ট নম্বর</a>
-                            <a href="{{ route('shop.printers') }}" class="block px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('shop.printers') ? 'bg-rose-500 text-white' : 'text-slate-300 hover:bg-slate-800' }}">🖨️ প্রিন্টার সেটিংস</a>
-                            <a href="{{ route('shop.agent_setup') }}" class="block px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('shop.agent_setup') ? 'bg-rose-500 text-white' : 'text-slate-300 hover:bg-slate-800' }}">💻 উইন্ডোজ সফটওয়্যার</a>
-                            <a href="{{ route('shop.subscription') }}" class="block px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('shop.subscription') ? 'bg-rose-500 text-white' : 'text-slate-300 hover:bg-slate-800' }}">💎 প্যাকেজ ও বিলিং</a>
+                            <a href="{{ route('shop.qr_poster') }}" class="block px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('shop.qr_poster') ? $mActiveBg : 'text-slate-300 hover:bg-slate-800' }}">🖼️ {{ (isset($shop) && $shop->is_office_mode) ? 'অফিস QR পোস্টার' : 'কিউআর পোস্টার' }}</a>
+                            <a href="{{ route('shop.rates') }}" class="block px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('shop.rates') ? $mActiveBg : 'text-slate-300 hover:bg-slate-800' }}">{{ (isset($shop) && $shop->is_office_mode) ? '⚙️ অফিস মোড সেটিংস' : '💰 রেট ও পেমেন্ট নম্বর' }}</a>
+                            <a href="{{ route('shop.printers') }}" class="block px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('shop.printers') ? $mActiveBg : 'text-slate-300 hover:bg-slate-800' }}">🖨️ প্রিন্টার সেটিংস</a>
+                            <a href="{{ route('shop.agent_setup') }}" class="block px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('shop.agent_setup') ? $mActiveBg : 'text-slate-300 hover:bg-slate-800' }}">💻 উইন্ডোজ সফটওয়্যার</a>
+                            <a href="{{ route('shop.subscription') }}" class="block px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('shop.subscription') ? $mActiveBg : 'text-slate-300 hover:bg-slate-800' }}">💎 {{ (isset($shop) && $shop->is_office_mode) ? 'কর্পোরেট লাইসেন্স' : 'প্যাকেজ ও বিলিং' }}</a>
                         </nav>
                     </div>
                     <form action="{{ route('logout') }}" method="POST" class="pt-4 border-t border-slate-800">

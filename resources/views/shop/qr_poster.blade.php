@@ -32,11 +32,13 @@
     <div class="flex items-center justify-between bg-slate-900/90 p-5 rounded-3xl border border-slate-800 shadow-xl print:hidden">
         <div>
             <h1 class="text-lg font-bold text-white flex items-center gap-2">
-                <span>🖨️ কাউন্টার কিউআর কোড পোস্টার</span>
+                <span>{{ $shop->is_office_mode ? '🏢 অফিস সেন্ট্রাল কিউআর কোড পোস্টার' : '🖨️ কাউন্টার কিউআর কোড পোস্টার' }}</span>
             </h1>
-            <p class="text-xs text-slate-400">পোস্টারটি এক ক্লিকে প্রিন্ট করে আপনার দোকানের দেওয়ালে বা কাঁচের কাউন্টারে সাঁটিয়ে দিন</p>
+            <p class="text-xs text-slate-400">
+                {{ $shop->is_office_mode ? 'পোস্টারটি প্রিন্ট করে অফিসের প্রিন্টারের পাশে বা দেয়ালে সাঁটিয়ে দিন, কর্মীরা সহজে প্রিন্ট করতে পারবে' : 'পোস্টারটি এক ক্লিকে প্রিন্ট করে আপনার দোকানের দেওয়ালে বা কাঁচের কাউন্টারে সাঁটিয়ে দিন' }}
+            </p>
         </div>
-        <button onclick="window.print()" class="px-6 py-3 rounded-2xl bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white font-bold text-xs shadow-lg shadow-rose-500/25 transition-all flex items-center gap-2 cursor-pointer">
+        <button onclick="window.print()" class="px-6 py-3 rounded-2xl bg-gradient-to-r {{ $shop->is_office_mode ? 'from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 shadow-indigo-600/25' : 'from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 shadow-rose-500/25' }} text-white font-bold text-xs shadow-lg transition-all flex items-center gap-2 cursor-pointer">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
             <span>পোস্টার প্রিন্ট করুন</span>
         </button>
@@ -49,7 +51,7 @@
         <div class="flex items-center justify-center gap-2.5">
             <img src="{{ asset('logo.svg') }}" alt="PrintSheba" class="w-8 h-8 rounded-lg">
             <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-950 text-white text-xs font-bold uppercase tracking-wider">
-                <span>⚡ স্মার্ট সেলফ-সার্ভিস প্রিন্ট কাউন্টার</span>
+                <span>{{ $shop->is_office_mode ? '🏢 অফিস সেন্ট্রাল প্রিন্ট নেটওয়ার্ক' : '⚡ স্মার্ট সেলফ-সার্ভিস প্রিন্ট কাউন্টার' }}</span>
             </div>
         </div>
 
@@ -58,8 +60,8 @@
             <h2 class="text-3xl sm:text-5xl font-black text-slate-950 tracking-tight">
                 {{ $shop->name }}
             </h2>
-            <p class="text-base sm:text-lg font-bold text-rose-600">
-                হোয়াটসঅ্যাপ বা পেনড্রাইভ ছাড়াই মোবাইল থেকে সরাসরি প্রিন্ট করুন
+            <p class="text-base sm:text-lg font-bold {{ $shop->is_office_mode ? 'text-indigo-600' : 'text-rose-600' }}">
+                {{ $shop->is_office_mode ? 'কর্মীদের জন্য পেনড্রাইভ ও ক্যাবল ছাড়াই মোবাইল ও ল্যাপটপ থেকে সরাসরি প্রিন্ট' : 'হোয়াটসঅ্যাপ বা পেনড্রাইভ ছাড়াই মোবাইল থেকে সরাসরি প্রিন্ট করুন' }}
             </p>
         </div>
 
@@ -67,7 +69,7 @@
         <div class="w-full max-w-sm mx-auto p-6 bg-slate-50 rounded-3xl border-2 border-dashed border-slate-300 flex flex-col items-center">
             <!-- QR Code using reliable API -->
             <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data={{ urlencode($printUrl) }}&color=0f172a" 
-                 alt="Shop QR Code" 
+                 alt="QR Code" 
                  class="w-56 h-56 rounded-2xl shadow-md border-4 border-white">
             
             <div class="mt-4 px-3.5 py-2 rounded-xl bg-white border border-slate-200/90 shadow-xs w-full text-center">
@@ -83,22 +85,22 @@
         <!-- 4 Steps Visual Guide -->
         <div class="grid grid-cols-4 gap-3 pt-2">
             <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200">
-                <span class="w-6 h-6 rounded-full bg-rose-500 text-white font-bold text-xs flex items-center justify-center mx-auto mb-1">১</span>
+                <span class="w-6 h-6 rounded-full {{ $shop->is_office_mode ? 'bg-indigo-600' : 'bg-rose-500' }} text-white font-bold text-xs flex items-center justify-center mx-auto mb-1">১</span>
                 <span class="text-xs font-black text-slate-900 block">QR স্ক্যান</span>
                 <span class="text-[10px] text-slate-500">ক্যামেরা অন করুন</span>
             </div>
             <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200">
                 <span class="w-6 h-6 rounded-full bg-purple-600 text-white font-bold text-xs flex items-center justify-center mx-auto mb-1">২</span>
                 <span class="text-xs font-black text-slate-900 block">ফাইল দিন</span>
-                <span class="text-[10px] text-slate-500">PDF বা ছবি</span>
+                <span class="text-[10px] text-slate-500">PDF বা ডক</span>
             </div>
             <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200">
-                <span class="w-6 h-6 rounded-full bg-pink-500 text-white font-bold text-xs flex items-center justify-center mx-auto mb-1">৩</span>
-                <span class="text-xs font-black text-slate-900 block">পেমেন্ট</span>
-                <span class="text-[10px] text-slate-500">বিকাশ / নগদ</span>
+                <span class="w-6 h-6 rounded-full {{ $shop->is_office_mode ? 'bg-emerald-600' : 'bg-pink-500' }} text-white font-bold text-xs flex items-center justify-center mx-auto mb-1">৩</span>
+                <span class="text-xs font-black text-slate-900 block">{{ $shop->is_office_mode ? 'জিরো পেমেন্ট' : 'পেমেন্ট' }}</span>
+                <span class="text-[10px] text-slate-500">{{ $shop->is_office_mode ? '১০০% ফ্রি' : 'বিকাশ / নগদ' }}</span>
             </div>
             <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200">
-                <span class="w-6 h-6 rounded-full bg-emerald-500 text-white font-bold text-xs flex items-center justify-center mx-auto mb-1">৪</span>
+                <span class="w-6 h-6 rounded-full bg-teal-600 text-white font-bold text-xs flex items-center justify-center mx-auto mb-1">৪</span>
                 <span class="text-xs font-black text-slate-900 block">অটো প্রিন্ট</span>
                 <span class="text-[10px] text-slate-500">নিমিষেই বের হবে</span>
             </div>

@@ -53,7 +53,14 @@
                                 {{ $sub->created_at->format('d M, Y h:i A') }}
                             </td>
                             <td class="px-6 py-4 font-bold text-white">
-                                <div class="text-sm">{{ $sub->shop->name ?? 'দোকান নেই' }}</div>
+                                <div class="flex items-center gap-1.5">
+                                    <span class="text-sm">{{ $sub->shop->name ?? 'প্রতিষ্ঠান নেই' }}</span>
+                                    @if(isset($sub->shop) && $sub->shop->is_office_mode)
+                                        <span class="px-1.5 py-0.5 rounded text-[8px] font-black bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">🏢 অফিস</span>
+                                    @else
+                                        <span class="px-1.5 py-0.5 rounded text-[8px] font-black bg-rose-500/10 text-rose-400 border border-rose-500/20">🏬 দোকান</span>
+                                    @endif
+                                </div>
                                 <div class="text-[10px] text-slate-400 font-mono">{{ $sub->shop->phone ?? '' }}</div>
                             </td>
                             <td class="px-6 py-4">

@@ -114,7 +114,7 @@ class ShopController extends Controller
     public function qrPoster()
     {
         $shop = $this->getShop();
-        $printUrl = url('/print/' . $shop->slug);
+        $printUrl = $shop->is_office_mode ? url('/office/' . $shop->slug) : url('/print/' . $shop->slug);
         return view('shop.qr_poster', compact('shop', 'printUrl'));
     }
 
@@ -591,7 +591,8 @@ class ShopController extends Controller
     public function subscription(Request $request)
     {
         $shop = $this->getShop();
-        $preselectedPlan = $request->query('plan', 'yearly_pro');
+        $defaultPlan = $shop->is_office_mode ? 'office_basic_yearly' : 'yearly_pro';
+        $preselectedPlan = $request->query('plan', $defaultPlan);
         $adminBkash = Setting::get('admin_bkash_number', '01644416378');
         $adminNagad = Setting::get('admin_nagad_number', '01644416378');
         $paymentInstructions = Setting::get('admin_payment_instructions', 'বিকাশ বা নগদ সেন্ড মানি করে নিচে আপনার Transaction ID ও সেন্ডার নাম্বার দিন।');
@@ -616,16 +617,19 @@ class ShopController extends Controller
         $shop = $this->getShop();
 
         $request->validate([
-            'plan' => 'required|string|in:monthly_starter,yearly_pro,lifetime',
+            'plan' => 'required|string|in:monthly_starter,yearly_pro,lifetime,office_basic_monthly,office_basic_yearly,office_corporate_yearly',
             'payment_method' => 'required|string|in:bkash,nagad',
             'sender_number' => 'required|string|max:20',
             'transaction_id' => 'required|string|max:50',
         ]);
 
         $plans = [
-            'monthly_starter' => ['name' => 'মান্থলি স্টার্টার', 'amount' => 99.00],
-            'yearly_pro' => ['name' => 'ইয়ারলি প্রো (১ বছর)', 'amount' => 999.00],
+            'monthly_starter' => ['name' => 'মান্থলি স্টার্টার (দোকান)', 'amount' => 99.00],
+            'yearly_pro' => ['name' => 'ইয়ারলি প্রো (১ বছর - দোকান)', 'amount' => 999.00],
             'lifetime' => ['name' => 'লাইফটাইম আনলিমিটেড (প্রথম ৫০ শপ)', 'amount' => 3999.00],
+            'office_basic_monthly' => ['name' => 'অফিস বেসিক (১ মাস)', 'amount' => 499.00],
+            'office_basic_yearly' => ['name' => 'অফিস বেসিক (১ বছর)', 'amount' => 4500.00],
+            'office_corporate_yearly' => ['name' => 'কর্পোরেট প্রো (১ বছর - মাল্টি-প্রিন্টার)', 'amount' => 8999.00],
         ];
 
         $selectedPlan = $plans[$request->plan];

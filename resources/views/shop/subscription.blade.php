@@ -1,26 +1,32 @@
 @extends('layouts.shop')
 
-@section('title', 'সাবস্ক্রিপশন ও প্যাকেজ প্ল্যান – ' . $shop->name)
+@section('title', ($shop->is_office_mode ? 'কর্পোরেট প্যাকেজ ও লাইসেন্স' : 'সাবস্ক্রিপশন ও প্যাকেজ প্ল্যান') . ' – ' . $shop->name)
 
 @section('content')
 <div class="space-y-8 max-w-6xl mx-auto">
     
     <!-- Top Banner -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gradient-to-r from-slate-900 via-slate-950 to-slate-900 p-6 sm:p-8 rounded-3xl text-white border border-slate-800 shadow-2xl relative overflow-hidden">
-        <div class="absolute -top-24 -left-24 w-72 h-72 bg-rose-500/10 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gradient-to-r {{ $shop->is_office_mode ? 'from-slate-900 via-indigo-950 to-slate-900 border-indigo-900/60' : 'from-slate-900 via-slate-950 to-slate-900 border-slate-800' }} p-6 sm:p-8 rounded-3xl text-white border shadow-2xl relative overflow-hidden">
+        <div class="absolute -top-24 -left-24 w-72 h-72 {{ $shop->is_office_mode ? 'bg-indigo-500/10' : 'bg-rose-500/10' }} rounded-full blur-3xl pointer-events-none"></div>
         <div class="space-y-2 z-10">
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/15 text-rose-400 text-xs font-bold border border-rose-500/30">
-                <span class="w-2 h-2 rounded-full bg-rose-400 animate-pulse"></span>
-                <span>দোকানদার প্যাকেজ ও লাইসেন্স পোর্টাল</span>
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full {{ $shop->is_office_mode ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30' : 'bg-rose-500/15 text-rose-400 border border-rose-500/30' }} text-xs font-bold">
+                <span class="w-2 h-2 rounded-full {{ $shop->is_office_mode ? 'bg-indigo-400' : 'bg-rose-400' }} animate-pulse"></span>
+                <span>{{ $shop->is_office_mode ? '🏢 অফিস ও কর্পোরেট লাইসেন্স পোর্টাল' : '🏪 দোকানদার প্যাকেজ ও লাইসেন্স পোর্টাল' }}</span>
             </div>
-            <h1 class="text-2xl sm:text-3xl font-black">প্যাকেজ প্ল্যান ও বিলিং</h1>
-            <p class="text-xs sm:text-sm text-slate-400">আপনার সফটওয়্যার লাইসেন্সের মেয়াদ চেক করুন এবং বিকাশ/নগদের মাধ্যমে সহজেই রিনিউ বা আপগ্রেড করুন</p>
+            <h1 class="text-2xl sm:text-3xl font-black">
+                {{ $shop->is_office_mode ? 'কর্পোরেট প্যাকেজ ও সেন্ট্রাল লাইসেন্স' : 'প্যাকেজ প্ল্যান ও বিলিং' }}
+            </h1>
+            <p class="text-xs sm:text-sm text-slate-400">
+                {{ $shop->is_office_mode 
+                    ? 'আপনার অফিস প্রিন্ট সার্ভার লাইসেন্সের মেয়াদ চেক করুন এবং বিকাশ/নগদের মাধ্যমে সহজে রিনিউ বা কর্পোরেট প্ল্যানে আপগ্রেড করুন' 
+                    : 'আপনার সফটওয়্যার লাইসেন্সের মেয়াদ চেক করুন এবং বিকাশ/নগদের মাধ্যমে সহজেই রিনিউ বা আপগ্রেড করুন' }}
+            </p>
         </div>
 
         <!-- Current Active Plan Card on Header -->
         <div class="p-4 rounded-2xl bg-slate-900/90 border border-slate-800 text-left sm:text-right shrink-0 z-10 space-y-1">
             <span class="text-[10px] text-slate-400 uppercase tracking-wider block font-bold">বর্তমান প্যাকেজ:</span>
-            <div class="text-lg font-black text-rose-400">{{ $shop->plan_label }}</div>
+            <div class="text-lg font-black {{ $shop->is_office_mode ? 'text-indigo-400' : 'text-rose-400' }}">{{ $shop->plan_label }}</div>
             
             @if($shop->is_lifetime)
                 <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300 text-[10px] font-bold border border-purple-500/30">
@@ -59,7 +65,9 @@
             <span class="text-2xl mt-0.5">⚠️</span>
             <div>
                 <span class="font-black text-white text-base block mb-0.5">আপনার সাবস্ক্রিপশনের মেয়াদ শেষ হয়েছে!</span>
-                কাস্টমার কিউ ও স্বয়ংক্রিয় প্রিন্ট সার্ভিস নির্বিঘ্ন রাখতে অনুগ্রহ করে নিচের যেকোনো একটি প্যাকেজ বেছে নিয়ে বিকাশ বা নগদে পেমেন্ট করুন।
+                {{ $shop->is_office_mode 
+                    ? 'কর্মীদের নিরবচ্ছিন্ন জিরো-পেমেন্ট প্রিন্টিং বজায় রাখতে নিচের যেকোনো একটি কর্পোরেট প্যাকেজ বেছে নিয়ে পেমেন্ট করুন।' 
+                    : 'কাস্টমার কিউ ও স্বয়ংক্রিয় প্রিন্ট সার্ভিস নির্বিঘ্ন রাখতে অনুগ্রহ করে নিচের যেকোনো একটি প্যাকেজ বেছে নিয়ে বিকাশ বা নগদে পেমেন্ট করুন।' }}
             </div>
         </div>
     @endif
@@ -67,76 +75,144 @@
     <!-- 3 PRICING TIERS SELECTION -->
     <div class="space-y-4">
         <div>
-            <h2 class="text-xl font-black text-white">প্যাকেজ বেছে নিন</h2>
+            <h2 class="text-xl font-black text-white">
+                {{ $shop->is_office_mode ? 'কর্পোরেট প্যাকেজ বেছে নিন' : 'প্যাকেজ বেছে নিন' }}
+            </h2>
             <p class="text-xs text-slate-400">যেকোনো একটি প্যাকেজে ক্লিক করে নিচে পেমেন্টের তথ্য দিয়ে রিকোয়েস্ট পাঠান</p>
         </div>
 
         <div class="grid md:grid-cols-3 gap-6">
             
-            <!-- Plan 1: Monthly Starter -->
-            <label class="relative bg-slate-900/80 p-6 rounded-3xl border-2 cursor-pointer transition-all hover:border-slate-600 block plan-card" id="card_monthly">
-                <input type="radio" name="plan_choice" value="monthly_starter" class="hidden plan-radio" {{ $preselectedPlan === 'monthly_starter' ? 'checked' : '' }}>
-                <div class="flex items-center justify-between pb-3 border-b border-slate-800">
-                    <span class="text-sm font-bold text-white">মান্থলি স্টার্টার</span>
-                    <span class="plan-check w-5 h-5 rounded-full border-2 border-slate-600 flex items-center justify-center text-[10px] text-white"></span>
-                </div>
-                <div class="my-4">
-                    <span class="text-3xl font-black text-white font-en">৳ ৯৯</span>
-                    <span class="text-xs text-slate-400">/ ১ মাস</span>
-                </div>
-                <ul class="space-y-2 text-xs text-slate-300">
-                    <li class="flex items-center gap-2"><span class="text-rose-500 font-bold">✓</span> আনলিমিটেড প্রিন্ট কিউ</li>
-                    <li class="flex items-center gap-2"><span class="text-rose-500 font-bold">✓</span> বিকাশ ও নগদ পেমেন্ট ম্যাচিং</li>
-                    <li class="flex items-center gap-2"><span class="text-rose-500 font-bold">✓</span> ২ প্রিন্টার কানেক্ট (B&W + কালার)</li>
-                </ul>
-            </label>
+            @if($shop->is_office_mode)
+                <!-- OFFICE PLAN 1: Basic Monthly -->
+                <label class="relative bg-slate-900/80 p-6 rounded-3xl border-2 cursor-pointer transition-all hover:border-indigo-600 block plan-card" id="card_office_monthly">
+                    <input type="radio" name="plan_choice" value="office_basic_monthly" class="hidden plan-radio" {{ $preselectedPlan === 'office_basic_monthly' ? 'checked' : '' }}>
+                    <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+                        <span class="text-sm font-bold text-white">অফিস বেসিক (১ মাস)</span>
+                        <span class="plan-check w-5 h-5 rounded-full border-2 border-slate-600 flex items-center justify-center text-[10px] text-white"></span>
+                    </div>
+                    <div class="my-4">
+                        <span class="text-3xl font-black text-white font-en">৳ ৪৯৯</span>
+                        <span class="text-xs text-slate-400">/ ১ মাস</span>
+                    </div>
+                    <ul class="space-y-2 text-xs text-slate-300">
+                        <li class="flex items-center gap-2"><span class="text-indigo-400 font-bold">✓</span> কর্মীদের জন্য জিরো-পেমেন্ট ডাইরেক্ট প্রিন্ট</li>
+                        <li class="flex items-center gap-2"><span class="text-indigo-400 font-bold">✓</span> ১টি ডেডিকেটেড প্রিন্টার কানেকশন</li>
+                        <li class="flex items-center gap-2"><span class="text-indigo-400 font-bold">✓</span> সিকিউর অটো-ফাইল ডিলিট পলিসি</li>
+                        <li class="flex items-center gap-2"><span class="text-indigo-400 font-bold">✓</span> পেপার ও প্রিন্ট ব্যবহার মাসিক অডিট</li>
+                    </ul>
+                </label>
 
-            <!-- Plan 2: Yearly Pro (Recommended) -->
-            <label class="relative bg-slate-900/90 p-6 rounded-3xl border-2 cursor-pointer transition-all block plan-card relative shadow-xl shadow-rose-500/10" id="card_yearly">
-                <div class="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full bg-gradient-to-r from-rose-500 to-pink-500 text-white text-[10px] font-black uppercase tracking-wider shadow">
-                    সবচেয়ে জনপ্রিয় (Best Value)
-                </div>
-                <input type="radio" name="plan_choice" value="yearly_pro" class="hidden plan-radio" {{ ($preselectedPlan === 'yearly_pro' || !$preselectedPlan) ? 'checked' : '' }}>
-                <div class="flex items-center justify-between pb-3 border-b border-slate-800">
-                    <span class="text-sm font-bold text-white">ইয়ারলি প্রো</span>
-                    <span class="plan-check w-5 h-5 rounded-full border-2 border-slate-600 flex items-center justify-center text-[10px] text-white"></span>
-                </div>
-                <div class="my-4">
-                    <span class="text-3xl font-black text-rose-400 font-en">৳ ৯৯৯</span>
-                    <span class="text-xs text-slate-400">/ ১ বছর (১২ মাস)</span>
-                </div>
-                <ul class="space-y-2 text-xs text-slate-300">
-                    <li class="flex items-center gap-2"><span class="text-rose-500 font-bold">✓</span> আনলিমিটেড প্রিন্ট কিউ</li>
-                    <li class="flex items-center gap-2"><span class="text-rose-500 font-bold">✓</span> ৪x৬ পাসপোর্ট সাইজ ফটো মেকার</li>
-                    <li class="flex items-center gap-2"><span class="text-rose-500 font-bold">✓</span> ৫টি প্রিন্টার পর্যন্ত কানেকশন</li>
-                    <li class="flex items-center gap-2"><span class="text-rose-500 font-bold">✓</span> ফোন ও AnyDesk প্রায়োরিটি সাপোর্ট</li>
-                </ul>
-            </label>
+                <!-- OFFICE PLAN 2: Basic Yearly (Recommended) -->
+                <label class="relative bg-slate-900/90 p-6 rounded-3xl border-2 cursor-pointer transition-all block plan-card relative shadow-xl shadow-indigo-500/10" id="card_office_yearly">
+                    <div class="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full bg-gradient-to-r from-indigo-500 to-blue-500 text-white text-[10px] font-black uppercase tracking-wider shadow">
+                        ★ সবচেয়ে জনপ্রিয় (Best Corporate Value)
+                    </div>
+                    <input type="radio" name="plan_choice" value="office_basic_yearly" class="hidden plan-radio" {{ ($preselectedPlan === 'office_basic_yearly' || !$preselectedPlan) ? 'checked' : '' }}>
+                    <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+                        <span class="text-sm font-bold text-white">অফিস বেসিক (১ বছর)</span>
+                        <span class="plan-check w-5 h-5 rounded-full border-2 border-slate-600 flex items-center justify-center text-[10px] text-white"></span>
+                    </div>
+                    <div class="my-4">
+                        <span class="text-3xl font-black text-indigo-400 font-en">৳ ৪,৫০০</span>
+                        <span class="text-xs text-slate-400">/ ১ বছর (২ মাস ফ্রি)</span>
+                    </div>
+                    <ul class="space-y-2 text-xs text-slate-300">
+                        <li class="flex items-center gap-2"><span class="text-indigo-400 font-bold">✓</span> আনলিমিটেড কর্মী ও মোবাইল প্রিন্ট</li>
+                        <li class="flex items-center gap-2"><span class="text-indigo-400 font-bold">✓</span> অফিস QR পোস্টার ও স্টাফ রেফারেন্স</li>
+                        <li class="flex items-center gap-2"><span class="text-indigo-400 font-bold">✓</span> ২ মাস সমপরিমাণ বাৎসরিক ডিসকাউন্ট</li>
+                        <li class="flex items-center gap-2"><span class="text-indigo-400 font-bold">✓</span> ফোন ও AnyDesk প্রায়োরিটি রিমোট সাপোর্ট</li>
+                    </ul>
+                </label>
 
-            <!-- Plan 3: Lifetime -->
-            <label class="relative bg-slate-900/80 p-6 rounded-3xl border-2 cursor-pointer transition-all hover:border-slate-600 block plan-card overflow-hidden" id="card_lifetime">
-                <div class="absolute top-0 right-0 px-3 py-1 bg-gradient-to-l from-purple-600 to-indigo-600 text-white text-[9px] font-black rounded-bl-xl tracking-wide uppercase">
-                    ⚡ লিমিটেড অফার
-                </div>
-                <input type="radio" name="plan_choice" value="lifetime" class="hidden plan-radio" {{ $preselectedPlan === 'lifetime' ? 'checked' : '' }}>
-                <div class="flex items-center justify-between pb-3 border-b border-slate-800">
-                    <span class="text-sm font-bold text-purple-300">👑 লাইফটাইম আনলিমিটেড</span>
-                    <span class="plan-check w-5 h-5 rounded-full border-2 border-slate-600 flex items-center justify-center text-[10px] text-white"></span>
-                </div>
-                <div class="mt-2.5 inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-300 text-[10px] font-bold">
-                    <span>🔥 শুধুমাত্র প্রথম ৫০টি দোকানের জন্য</span>
-                </div>
-                <div class="my-4">
-                    <span class="text-3xl font-black text-purple-400 font-en">৳ ৩,৯৯৯</span>
-                    <span class="text-xs text-slate-400">/ এককালীন আজীবন</span>
-                </div>
-                <ul class="space-y-2 text-xs text-slate-300">
-                    <li class="flex items-center gap-2"><span class="text-purple-400 font-bold">✓</span> কখনো কোনো রিনিউয়াল ফি নেই</li>
-                    <li class="flex items-center gap-2"><span class="text-purple-400 font-bold">✓</span> আজীবন সব নতুন ফিচার ফ্রি</li>
-                    <li class="flex items-center gap-2"><span class="text-purple-400 font-bold">✓</span> আনলিমিটেড প্রিন্টার ও পিসি সাপোর্ট</li>
-                    <li class="flex items-center gap-2"><span class="text-purple-400 font-bold">✓</span> ভিআইপি ডাইরেক্ট ফোন সাপোর্ট</li>
-                </ul>
-            </label>
+                <!-- OFFICE PLAN 3: Corporate Pro -->
+                <label class="relative bg-slate-900/80 p-6 rounded-3xl border-2 cursor-pointer transition-all hover:border-indigo-600 block plan-card overflow-hidden" id="card_office_pro">
+                    <div class="absolute top-0 right-0 px-3 py-1 bg-gradient-to-l from-indigo-600 to-cyan-600 text-white text-[9px] font-black rounded-bl-xl tracking-wide uppercase">
+                        🏢 মাল্টি-প্রিন্টার
+                    </div>
+                    <input type="radio" name="plan_choice" value="office_corporate_yearly" class="hidden plan-radio" {{ $preselectedPlan === 'office_corporate_yearly' ? 'checked' : '' }}>
+                    <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+                        <span class="text-sm font-bold text-cyan-300">কর্পোরেট প্রো (১ বছর)</span>
+                        <span class="plan-check w-5 h-5 rounded-full border-2 border-slate-600 flex items-center justify-center text-[10px] text-white"></span>
+                    </div>
+                    <div class="my-4">
+                        <span class="text-3xl font-black text-cyan-400 font-en">৳ ৮,৯৯৯</span>
+                        <span class="text-xs text-slate-400">/ ১ বছর (মাল্টি-ডিপার্টমেন্ট)</span>
+                    </div>
+                    <ul class="space-y-2 text-xs text-slate-300">
+                        <li class="flex items-center gap-2"><span class="text-cyan-400 font-bold">✓</span> আনলিমিটেড প্রিন্টার কানেকশন (HR, Accounts ইত্যাদি)</li>
+                        <li class="flex items-center gap-2"><span class="text-cyan-400 font-bold">✓</span> একাধিক ডিপার্টমেন্ট ও ব্রাঞ্চ ইউজার কিউ</li>
+                        <li class="flex items-center gap-2"><span class="text-cyan-400 font-bold">✓</span> অ্যাডভান্সড পেপার অপচয় ও স্টাফ লগিং</li>
+                        <li class="flex items-center gap-2"><span class="text-cyan-400 font-bold">✓</span> ডেডিকেটেড একাউন্ট ম্যানেজার ও ২৪/৭ সাপোর্ট</li>
+                    </ul>
+                </label>
+
+            @else
+                <!-- SHOP PLAN 1: Monthly Starter -->
+                <label class="relative bg-slate-900/80 p-6 rounded-3xl border-2 cursor-pointer transition-all hover:border-slate-600 block plan-card" id="card_monthly">
+                    <input type="radio" name="plan_choice" value="monthly_starter" class="hidden plan-radio" {{ $preselectedPlan === 'monthly_starter' ? 'checked' : '' }}>
+                    <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+                        <span class="text-sm font-bold text-white">মান্থলি স্টার্টার</span>
+                        <span class="plan-check w-5 h-5 rounded-full border-2 border-slate-600 flex items-center justify-center text-[10px] text-white"></span>
+                    </div>
+                    <div class="my-4">
+                        <span class="text-3xl font-black text-white font-en">৳ ৯৯</span>
+                        <span class="text-xs text-slate-400">/ ১ মাস</span>
+                    </div>
+                    <ul class="space-y-2 text-xs text-slate-300">
+                        <li class="flex items-center gap-2"><span class="text-rose-500 font-bold">✓</span> আনলিমিটেড প্রিন্ট কিউ</li>
+                        <li class="flex items-center gap-2"><span class="text-rose-500 font-bold">✓</span> বিকাশ ও নগদ পেমেন্ট ম্যাচিং</li>
+                        <li class="flex items-center gap-2"><span class="text-rose-500 font-bold">✓</span> ২ প্রিন্টার কানেক্ট (B&W + কালার)</li>
+                    </ul>
+                </label>
+
+                <!-- SHOP PLAN 2: Yearly Pro (Recommended) -->
+                <label class="relative bg-slate-900/90 p-6 rounded-3xl border-2 cursor-pointer transition-all block plan-card relative shadow-xl shadow-rose-500/10" id="card_yearly">
+                    <div class="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full bg-gradient-to-r from-rose-500 to-pink-500 text-white text-[10px] font-black uppercase tracking-wider shadow">
+                        সবচেয়ে জনপ্রিয় (Best Value)
+                    </div>
+                    <input type="radio" name="plan_choice" value="yearly_pro" class="hidden plan-radio" {{ ($preselectedPlan === 'yearly_pro' || !$preselectedPlan) ? 'checked' : '' }}>
+                    <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+                        <span class="text-sm font-bold text-white">ইয়ারলি প্রো</span>
+                        <span class="plan-check w-5 h-5 rounded-full border-2 border-slate-600 flex items-center justify-center text-[10px] text-white"></span>
+                    </div>
+                    <div class="my-4">
+                        <span class="text-3xl font-black text-rose-400 font-en">৳ ৯৯৯</span>
+                        <span class="text-xs text-slate-400">/ ১ বছর (১২ মাস)</span>
+                    </div>
+                    <ul class="space-y-2 text-xs text-slate-300">
+                        <li class="flex items-center gap-2"><span class="text-rose-500 font-bold">✓</span> আনলিমিটেড প্রিন্ট কিউ</li>
+                        <li class="flex items-center gap-2"><span class="text-rose-500 font-bold">✓</span> ৪x৬ পাসপোর্ট সাইজ ফটো মেকার</li>
+                        <li class="flex items-center gap-2"><span class="text-rose-500 font-bold">✓</span> ৫টি প্রিন্টার পর্যন্ত কানেকশন</li>
+                        <li class="flex items-center gap-2"><span class="text-rose-500 font-bold">✓</span> ফোন ও AnyDesk প্রায়োরিটি সাপোর্ট</li>
+                    </ul>
+                </label>
+
+                <!-- SHOP PLAN 3: Lifetime -->
+                <label class="relative bg-slate-900/80 p-6 rounded-3xl border-2 cursor-pointer transition-all hover:border-slate-600 block plan-card overflow-hidden" id="card_lifetime">
+                    <div class="absolute top-0 right-0 px-3 py-1 bg-gradient-to-l from-purple-600 to-indigo-600 text-white text-[9px] font-black rounded-bl-xl tracking-wide uppercase">
+                        ⚡ লিমিটেড অফার
+                    </div>
+                    <input type="radio" name="plan_choice" value="lifetime" class="hidden plan-radio" {{ $preselectedPlan === 'lifetime' ? 'checked' : '' }}>
+                    <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+                        <span class="text-sm font-bold text-purple-300">👑 লাইফটাইম আনলিমিটেড</span>
+                        <span class="plan-check w-5 h-5 rounded-full border-2 border-slate-600 flex items-center justify-center text-[10px] text-white"></span>
+                    </div>
+                    <div class="mt-2.5 inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-300 text-[10px] font-bold">
+                        <span>🔥 শুধুমাত্র প্রথম ৫০টি দোকানের জন্য</span>
+                    </div>
+                    <div class="my-4">
+                        <span class="text-3xl font-black text-purple-400 font-en">৳ ৩,৯৯৯</span>
+                        <span class="text-xs text-slate-400">/ এককালীন আজীবন</span>
+                    </div>
+                    <ul class="space-y-2 text-xs text-slate-300">
+                        <li class="flex items-center gap-2"><span class="text-purple-400 font-bold">✓</span> কখনো কোনো রিনিউয়াল ফি নেই</li>
+                        <li class="flex items-center gap-2"><span class="text-purple-400 font-bold">✓</span> আজীবন সব নতুন ফিচার ফ্রি</li>
+                        <li class="flex items-center gap-2"><span class="text-purple-400 font-bold">✓</span> আনলিমিটেড প্রিন্টার ও পিসি সাপোর্ট</li>
+                        <li class="flex items-center gap-2"><span class="text-purple-400 font-bold">✓</span> ভিআইপি ডাইরেক্ট ফোন সাপোর্ট</li>
+                    </ul>
+                </label>
+            @endif
 
         </div>
     </div>
@@ -161,7 +237,7 @@
                     <span class="text-[10px] uppercase font-bold text-pink-400 block tracking-wider">বিকাশ (bKash) Send Money:</span>
                     <div class="text-lg font-black text-white font-mono tracking-wider" id="bkashNumText">{{ $adminBkash }}</div>
                 </div>
-                <button type="button" onclick="navigator.clipboard.writeText('{{ $adminBkash }}'); alert('বিকাশ নম্বর কপি হয়েছে: {{ $adminBkash }}');" class="px-3 py-1.5 rounded-xl bg-pink-500 hover:bg-pink-600 text-white text-xs font-bold transition-all shadow">
+                <button type="button" onclick="navigator.clipboard.writeText('{{ $adminBkash }}'); alert('বিকাশ নম্বর কপি হয়েছে: {{ $adminBkash }}');" class="px-3 py-1.5 rounded-xl bg-pink-500 hover:bg-pink-600 text-white text-xs font-bold transition-all shadow cursor-pointer">
                     কপি করুন
                 </button>
             </div>
@@ -172,7 +248,7 @@
                     <span class="text-[10px] uppercase font-bold text-amber-400 block tracking-wider">নগদ (Nagad) Send Money:</span>
                     <div class="text-lg font-black text-white font-mono tracking-wider" id="nagadNumText">{{ $adminNagad }}</div>
                 </div>
-                <button type="button" onclick="navigator.clipboard.writeText('{{ $adminNagad }}'); alert('নগদ নম্বর কপি হয়েছে: {{ $adminNagad }}');" class="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold transition-all shadow">
+                <button type="button" onclick="navigator.clipboard.writeText('{{ $adminNagad }}'); alert('নগদ নম্বর কপি হয়েছে: {{ $adminNagad }}');" class="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold transition-all shadow cursor-pointer">
                     কপি করুন
                 </button>
             </div>
@@ -203,12 +279,14 @@
 
             <form action="{{ route('shop.subscription.purchase') }}" method="POST" class="space-y-4">
                 @csrf
-                <input type="hidden" name="plan" id="form_plan_input" value="{{ $preselectedPlan ?: 'yearly_pro' }}">
+                <input type="hidden" name="plan" id="form_plan_input" value="{{ $preselectedPlan ?: ($shop->is_office_mode ? 'office_basic_yearly' : 'yearly_pro') }}">
 
                 <!-- Selected Plan Display Indicator -->
                 <div class="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-between">
                     <span class="text-xs text-slate-400">নির্বাচিত প্যাকেজ:</span>
-                    <span id="selectedPlanDisplay" class="text-xs font-black text-rose-400">ইয়ারলি প্রো (৳ ৯৯৯)</span>
+                    <span id="selectedPlanDisplay" class="text-xs font-black {{ $shop->is_office_mode ? 'text-indigo-400' : 'text-rose-400' }}">
+                        {{ $shop->is_office_mode ? 'অফিস বেসিক (৳ ৪,৫০০ / ১ বছর)' : 'ইয়ারলি প্রো (৳ ৯৯৯)' }}
+                    </span>
                 </div>
 
                 <!-- Payment Method Radio -->
@@ -240,8 +318,8 @@
                         class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-sm font-mono uppercase text-white focus:outline-none focus:border-rose-500 tracking-wider">
                 </div>
 
-                <button type="submit" class="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white font-black text-sm shadow-xl shadow-rose-500/25 transition-all hover:scale-[1.01] flex items-center justify-center gap-2 cursor-pointer">
-                    <span>🚀 অ্যাক্টিভেশনের অনুরোধ পাঠান</span>
+                <button type="submit" class="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r {{ $shop->is_office_mode ? 'from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 shadow-indigo-600/25' : 'from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 shadow-rose-500/25' }} text-white font-black text-sm shadow-xl transition-all hover:scale-[1.01] flex items-center justify-center gap-2 cursor-pointer">
+                    <span>🚀 {{ $shop->is_office_mode ? 'কর্পোরেট লাইসেন্স অ্যাক্টিভেশনের অনুরোধ পাঠান' : 'অ্যাক্টিভেশনের অনুরোধ পাঠান' }}</span>
                 </button>
             </form>
         </div>
@@ -275,7 +353,7 @@
                             <td class="px-6 py-4 font-en font-bold text-emerald-400">৳ {{ number_format($sub->amount, 0) }}</td>
                             <td class="px-6 py-4 uppercase font-bold text-slate-300">{{ $sub->payment_method }}</td>
                             <td class="px-6 py-4">
-                                <div class="font-mono font-bold text-rose-400">{{ $sub->transaction_id ?? 'N/A' }}</div>
+                                <div class="font-mono font-bold {{ $shop->is_office_mode ? 'text-indigo-400' : 'text-rose-400' }}">{{ $sub->transaction_id ?? 'N/A' }}</div>
                                 <div class="text-[10px] text-slate-500 font-mono">{{ $sub->sender_number }}</div>
                             </td>
                             <td class="px-6 py-4">
@@ -315,24 +393,31 @@
     const planNames = {
         'monthly_starter': 'মান্থলি স্টার্টার (৳ ৯৯)',
         'yearly_pro': 'ইয়ারলি প্রো (৳ ৯৯৯)',
-        'lifetime': 'লাইফটাইম আনলিমিটেড (৳ ৩,৯৯৯)'
+        'lifetime': 'লাইফটাইম আনলিমিটেড (৳ ৩,৯৯৯)',
+        'office_basic_monthly': 'অফিস বেসিক (৳ ৪৯৯ / ১ মাস)',
+        'office_basic_yearly': 'অফিস বেসিক (৳ ৪,৫০০ / ১ বছর)',
+        'office_corporate_yearly': 'কর্পোরেট প্রো (৳ ৮,৯৯৯ / ১ বছর)'
     };
+
+    const isOffice = {{ $shop->is_office_mode ? 'true' : 'false' }};
+    const activeBorderClass = isOffice ? 'border-indigo-500' : 'border-rose-500';
+    const activeBgClass = isOffice ? 'bg-indigo-600' : 'bg-rose-500';
 
     function updateCardStyles() {
         planInputs.forEach(input => {
             const card = input.closest('.plan-card');
             const check = card.querySelector('.plan-check');
             if (input.checked) {
-                card.classList.add('border-rose-500', 'bg-slate-900');
+                card.classList.add(activeBorderClass, 'bg-slate-900');
                 card.classList.remove('border-slate-800', 'border-transparent');
-                check.classList.add('bg-rose-500', 'border-rose-500');
+                check.classList.add(activeBgClass, activeBorderClass);
                 check.innerText = '✓';
                 formPlanInput.value = input.value;
                 selectedPlanDisplay.innerText = planNames[input.value] || input.value;
             } else {
-                card.classList.remove('border-rose-500');
+                card.classList.remove(activeBorderClass);
                 card.classList.add('border-slate-800');
-                check.classList.remove('bg-rose-500', 'border-rose-500');
+                check.classList.remove(activeBgClass, activeBorderClass);
                 check.innerText = '';
             }
         });

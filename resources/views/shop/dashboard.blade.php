@@ -25,21 +25,23 @@
             <h1 class="text-2xl sm:text-3xl font-black tracking-tight text-white flex items-center gap-2">
                 <span>{{ $shop->name }}</span>
             </h1>
-            <p class="text-xs sm:text-sm text-slate-400 max-w-xl">কাস্টমার সেলফ-সার্ভিস প্রিন্ট কিউ, ডিজিটাল পেমেন্ট ও লাইভ আয় বিবরণী ড্যাশবোর্ড</p>
+            <p class="text-xs sm:text-sm text-slate-400 max-w-xl">
+                {{ $shop->is_office_mode ? 'অফিস কর্মীদের সেলফ-সার্ভিস প্রিন্ট কিউ, জিরো-পেমেন্ট ও পেপার ব্যবহার ট্র্যাকিং ড্যাশবোর্ড' : 'কাস্টমার সেলফ-সার্ভিস প্রিন্ট কিউ, ডিজিটাল পেমেন্ট ও লাইভ আয় বিবরণী ড্যাশবোর্ড' }}
+            </p>
             
             <div class="flex flex-wrap items-center gap-3 pt-2">
                 <a href="{{ route('shop.quick_print') }}" class="px-4 py-2.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold text-xs shadow-lg shadow-emerald-500/25 transition-all flex items-center gap-2">
                     <span>⚡ সরাসরি ফাইল প্রিন্ট</span>
                     <span class="text-[9px] font-black px-1.5 py-0.5 rounded-md bg-black/20">১-ট্যাপ</span>
                 </a>
-                <a href="{{ route('shop.qr_poster') }}" class="px-4 py-2.5 rounded-2xl bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white font-bold text-xs shadow-lg shadow-rose-500/25 transition-all flex items-center gap-2">
-                    <span>🖨️ কাউন্টার QR পোস্টার</span>
+                <a href="{{ route('shop.qr_poster') }}" class="px-4 py-2.5 rounded-2xl bg-gradient-to-r {{ $shop->is_office_mode ? 'from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 shadow-indigo-600/25' : 'from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 shadow-rose-500/25' }} text-white font-bold text-xs shadow-lg transition-all flex items-center gap-2">
+                    <span>{{ $shop->is_office_mode ? '🏢 অফিস QR পোস্টার' : '🖨️ কাউন্টার QR পোস্টার' }}</span>
                 </a>
                 <a href="{{ route('shop.agent_setup') }}" class="px-4 py-2.5 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold text-xs transition-all flex items-center gap-1.5">
                     <span>💻 উইন্ডোজ এজেন্ট (.EXE)</span>
                 </a>
-                <a href="{{ route('customer.upload', $shop->slug) }}" target="_blank" class="px-4 py-2.5 rounded-2xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 font-bold text-xs border border-emerald-500/30 transition-all flex items-center gap-1.5">
-                    <span>কাস্টমার স্ক্রিন দেখুন</span>
+                <a href="{{ $shop->is_office_mode ? route('customer.office_upload', $shop->slug) : route('customer.upload', $shop->slug) }}" target="_blank" class="px-4 py-2.5 rounded-2xl {{ $shop->is_office_mode ? 'bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-300 border-indigo-500/30' : 'bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border-emerald-500/30' }} font-bold text-xs border transition-all flex items-center gap-1.5">
+                    <span>{{ $shop->is_office_mode ? '🏢 কর্মীদের স্ক্রিন দেখুন' : '📱 কাস্টমার স্ক্রিন দেখুন' }}</span>
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
                 </a>
             </div>
@@ -98,15 +100,24 @@
     <!-- 3 Metrics Cards -->
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
         
-        <!-- Today's Earnings -->
+        <!-- Today's Earnings or Office Prints -->
         <div class="bg-slate-900/80 p-6 rounded-3xl border border-slate-800 shadow-sm flex flex-col justify-between hover:border-slate-700 transition-all">
             <div class="flex items-center justify-between">
-                <span class="text-xs font-bold text-slate-400">আজকের মোট আয় (Today)</span>
-                <span class="w-9 h-9 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-sm">৳</span>
+                <span class="text-xs font-bold text-slate-400">
+                    {{ $shop->is_office_mode ? 'আজকের অফিস প্রিন্ট (Today)' : 'আজকের মোট আয় (Today)' }}
+                </span>
+                <span class="w-9 h-9 rounded-2xl {{ $shop->is_office_mode ? 'bg-indigo-500/10 border-indigo-500/20 text-indigo-400' : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' }} border flex items-center justify-center font-bold text-sm">
+                    {{ $shop->is_office_mode ? '🏢' : '৳' }}
+                </span>
             </div>
             <div class="mt-4">
-                <span id="metricTodayEarnings" class="text-3xl font-black text-emerald-400 font-en">৳ {{ number_format($todayEarnings, 2) }}</span>
-                <span class="text-[11px] text-slate-400 block font-bold mt-1">১০০% আপনার নিজস্ব বিকাশ/নগদে</span>
+                @if($shop->is_office_mode)
+                    <span id="metricTodayOfficePrints" class="text-3xl font-black text-indigo-400 font-en">{{ $todayPrintsCount }} টি</span>
+                    <span class="text-[11px] text-slate-400 block font-bold mt-1">জিরো পেমেন্ট অটো-প্রিন্ট মোড</span>
+                @else
+                    <span id="metricTodayEarnings" class="text-3xl font-black text-emerald-400 font-en">৳ {{ number_format($todayEarnings, 2) }}</span>
+                    <span class="text-[11px] text-slate-400 block font-bold mt-1">১০০% আপনার নিজস্ব বিকাশ/নগদে</span>
+                @endif
             </div>
         </div>
 

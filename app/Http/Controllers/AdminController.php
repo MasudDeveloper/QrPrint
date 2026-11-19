@@ -258,8 +258,8 @@ class AdminController extends Controller
         if ($request->action_type === 'set_plan') {
             $plan = $request->plan;
             $days = match($plan) {
-                'monthly_starter' => 30,
-                'yearly_pro' => 365,
+                'monthly_starter', 'office_basic_monthly' => 30,
+                'yearly_pro', 'office_basic_yearly', 'office_corporate_yearly' => 365,
                 default => 30,
             };
 
@@ -347,8 +347,8 @@ class AdminController extends Controller
             ]);
         } else {
             $days = match($subscription->plan) {
-                'monthly_starter' => 30,
-                'yearly_pro' => 365,
+                'monthly_starter', 'office_basic_monthly' => 30,
+                'yearly_pro', 'office_basic_yearly', 'office_corporate_yearly' => 365,
                 default => 30,
             };
 

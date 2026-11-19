@@ -53,6 +53,9 @@ Route::post('/contact', function (\Illuminate\Http\Request $request) {
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
+Route::get('/register/office', function () {
+    return redirect()->route('register', ['type' => 'office']);
+})->name('register.office');
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 

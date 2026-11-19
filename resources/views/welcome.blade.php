@@ -930,17 +930,30 @@
     <!-- PRICING TIERS: Exact BDT Rates -->
     <section id="pricing" class="py-20 bg-white border-t border-slate-200">
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center max-w-2xl mx-auto mb-14 space-y-2">
+            <div class="text-center max-w-2xl mx-auto mb-10 space-y-2">
                 <span class="text-xs font-bold text-rose-500 uppercase tracking-wider">💰 সাশ্রয়ী প্যাকেজ</span>
-                <h2 class="text-3xl font-black text-slate-900">
+                <h2 class="text-3xl font-black text-slate-900" id="pricingTitle">
                     আপনার দোকানের জন্য প্ল্যান বেছে নিন
                 </h2>
-                <p class="text-sm text-slate-500">
-                    কোনো প্রতি-প্রিন্ট কমিশন নেই। কাস্টমারের সম্পূর্ণ টাকা আপনার ওয়ালেটে।
+                <p class="text-sm text-slate-500" id="pricingSubtitle">
+                    কোনো প্রতি-প্রিন্ট কমিশন নেই। কাস্টমারের সম্পূর্ণ টাকা আপনার নিজস্ব ওয়ালেটে।
                 </p>
             </div>
 
-            <div class="grid md:grid-cols-4 gap-6 items-stretch">
+            <!-- Tab Switcher: Dokan vs Office -->
+            <div class="flex justify-center mb-10">
+                <div class="inline-flex p-1.5 rounded-2xl bg-slate-100 border border-slate-200 gap-1 shadow-inner">
+                    <button type="button" onclick="togglePricingTab('shop')" id="tab_pricing_shop" class="px-5 py-2.5 rounded-xl font-bold text-xs transition-all flex items-center gap-2 cursor-pointer bg-white text-slate-900 shadow-sm border border-slate-200">
+                        <span>🏬</span> <span>দোকানদার প্যাকেজ (Shop)</span>
+                    </button>
+                    <button type="button" onclick="togglePricingTab('office')" id="tab_pricing_office" class="px-5 py-2.5 rounded-xl font-bold text-xs transition-all flex items-center gap-2 cursor-pointer text-slate-600 hover:text-slate-900">
+                        <span>🏢</span> <span>অফিস ও কর্পোরেট (Office)</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- SHOP PRICING GRID -->
+            <div id="shopPricingGrid" class="grid md:grid-cols-4 gap-6 items-stretch">
                 <!-- Free Demo -->
                 <div class="bg-white p-7 rounded-3xl border border-slate-200/90 shadow-sm hover:shadow-xl hover:border-slate-300 transition-all duration-300 flex flex-col justify-between group">
                     <div>
@@ -970,7 +983,7 @@
                             </li>
                         </ul>
                     </div>
-                    <a href="{{ auth()->check() ? route('shop.dashboard') : route('register') }}" class="mt-8 w-full py-3 text-xs font-bold bg-slate-50 hover:bg-slate-900 text-slate-700 hover:text-white rounded-2xl border border-slate-200 hover:border-slate-900 transition-all text-center block shadow-sm">
+                    <a href="{{ auth()->check() ? route('shop.dashboard') : route('register', ['type' => 'shop']) }}" class="mt-8 w-full py-3 text-xs font-bold bg-slate-50 hover:bg-slate-900 text-slate-700 hover:text-white rounded-2xl border border-slate-200 hover:border-slate-900 transition-all text-center block shadow-sm">
                         ফ্রি ট্রায়াল শুরু করুন
                     </a>
                 </div>
@@ -1008,7 +1021,7 @@
                             </li>
                         </ul>
                     </div>
-                    <a href="{{ auth()->check() ? route('shop.subscription', ['plan' => 'monthly_starter']) : route('register') }}" class="mt-8 w-full py-3 text-xs font-bold bg-slate-900 hover:bg-slate-800 text-white rounded-2xl transition-all text-center block shadow-md">
+                    <a href="{{ auth()->check() ? route('shop.subscription', ['plan' => 'monthly_starter']) : route('register', ['type' => 'shop']) }}" class="mt-8 w-full py-3 text-xs font-bold bg-slate-900 hover:bg-slate-800 text-white rounded-2xl transition-all text-center block shadow-md">
                         প্যাকেজ একটিভ করুন
                     </a>
                 </div>
@@ -1053,7 +1066,7 @@
                             </li>
                         </ul>
                     </div>
-                    <a href="{{ auth()->check() ? route('shop.subscription', ['plan' => 'yearly_pro']) : route('register') }}" class="mt-8 w-full py-3.5 text-xs font-black bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white rounded-2xl transition-all shadow-lg shadow-rose-500/30 text-center block hover:scale-105">
+                    <a href="{{ auth()->check() ? route('shop.subscription', ['plan' => 'yearly_pro']) : route('register', ['type' => 'shop']) }}" class="mt-8 w-full py-3.5 text-xs font-black bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white rounded-2xl transition-all shadow-lg shadow-rose-500/30 text-center block hover:scale-105">
                         প্রো প্ল্যান নিন
                     </a>
                 </div>
@@ -1099,11 +1112,167 @@
                             </li>
                         </ul>
                     </div>
-                    <a href="{{ auth()->check() ? route('shop.subscription', ['plan' => 'lifetime']) : route('register') }}" class="mt-8 w-full py-3 text-xs font-bold bg-purple-700 hover:bg-purple-800 text-white rounded-2xl transition-all text-center block shadow-md">
+                    <a href="{{ auth()->check() ? route('shop.subscription', ['plan' => 'lifetime']) : route('register', ['type' => 'shop']) }}" class="mt-8 w-full py-3 text-xs font-bold bg-purple-700 hover:bg-purple-800 text-white rounded-2xl transition-all text-center block shadow-md">
                         লাইফটাইম লাইসেন্স নিন
                     </a>
                 </div>
             </div>
+
+            <!-- OFFICE PRICING GRID (Initially Hidden) -->
+            <div id="officePricingGrid" class="hidden grid md:grid-cols-3 gap-6 items-stretch">
+                <!-- Office Plan 1: Free Trial -->
+                <div class="bg-white p-7 rounded-3xl border border-slate-200/90 shadow-sm hover:shadow-xl hover:border-slate-300 transition-all duration-300 flex flex-col justify-between group">
+                    <div>
+                        <div class="inline-block px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 font-bold text-[11px] mb-3">
+                            🏢 অফিস ডেমো
+                        </div>
+                        <h3 class="text-lg font-black text-slate-900">অফিস ট্রায়াল</h3>
+                        <p class="text-xs text-slate-500 mt-1">অফিসের সেন্ট্রাল প্রিন্ট টেস্ট করতে</p>
+
+                        <div class="my-5 pb-5 border-b border-slate-100">
+                            <span class="text-4xl font-black text-slate-900 font-en">৳ ০</span>
+                            <span class="text-xs text-slate-400 font-medium ml-1">/ ৭ দিন</span>
+                        </div>
+
+                        <ul class="space-y-3 text-xs text-slate-600 font-medium">
+                            <li class="flex items-center gap-2.5">
+                                <span class="w-4 h-4 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-[10px] font-bold shrink-0">✓</span>
+                                <span>৫০টি ফ্রি টেস্ট প্রিন্ট</span>
+                            </li>
+                            <li class="flex items-center gap-2.5">
+                                <span class="w-4 h-4 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-[10px] font-bold shrink-0">✓</span>
+                                <span>জিরো-পেমেন্ট ডাইরেক্ট অটো-প্রিন্ট</span>
+                            </li>
+                            <li class="flex items-center gap-2.5">
+                                <span class="w-4 h-4 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-[10px] font-bold shrink-0">✓</span>
+                                <span>অফিস QR পোস্টার ও স্টাফ রেফারেন্স</span>
+                            </li>
+                            <li class="flex items-center gap-2.5">
+                                <span class="w-4 h-4 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-[10px] font-bold shrink-0">✓</span>
+                                <span>উইন্ডোজ এজেন্ট সফটওয়্যার</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <a href="{{ auth()->check() ? route('shop.dashboard') : route('register', ['type' => 'office']) }}" class="mt-8 w-full py-3 text-xs font-bold bg-indigo-50 hover:bg-indigo-900 text-indigo-700 hover:text-white rounded-2xl border border-indigo-200 hover:border-indigo-900 transition-all text-center block shadow-sm">
+                        ফ্রি অফিস ডেমো শুরু করুন
+                    </a>
+                </div>
+
+                <!-- Office Plan 2: Basic Yearly (Featured) -->
+                <div class="bg-gradient-to-b from-white via-indigo-50/20 to-white p-7 rounded-3xl border-2 border-indigo-600 relative flex flex-col justify-between shadow-2xl shadow-indigo-600/15 scale-105 z-10">
+                    <div class="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-gradient-to-r from-indigo-600 to-blue-600 text-white text-[10px] font-black uppercase tracking-wider shadow-md">
+                        ★ সবচেয়ে জনপ্রিয় কর্পোরেট প্ল্যান
+                    </div>
+                    <div>
+                        <div class="inline-block px-3 py-1 rounded-full bg-indigo-100 text-indigo-700 font-bold text-[11px] mb-3 mt-1">
+                            🏢 অফিস বেসিক
+                        </div>
+                        <h3 class="text-xl font-black text-slate-900">অফিস বেসিক (১ বছর)</h3>
+                        <p class="text-xs text-slate-500 mt-1">মাঝারি অফিস ও টিমের জন্য (১০-৫০ কর্মী)</p>
+
+                        <div class="my-5 pb-5 border-b border-indigo-100">
+                            <span class="text-4xl font-black text-indigo-600 font-en">৳ ৪,৫০০</span>
+                            <span class="text-xs text-indigo-400 font-semibold ml-1">/ ১ বছর (বা ৳৪৯৯/মাস)</span>
+                        </div>
+
+                        <ul class="space-y-3 text-xs text-slate-700 font-semibold">
+                            <li class="flex items-center gap-2.5">
+                                <span class="w-4 h-4 rounded-full bg-indigo-600 text-white flex items-center justify-center text-[10px] font-bold shrink-0">✓</span>
+                                <span>কর্মীদের আনলিমিটেড জিরো-পেমেন্ট প্রিন্ট</span>
+                            </li>
+                            <li class="flex items-center gap-2.5">
+                                <span class="w-4 h-4 rounded-full bg-indigo-600 text-white flex items-center justify-center text-[10px] font-bold shrink-0">✓</span>
+                                <span>১টি ডেডিকেটেড নেটওয়ার্ক/ইউএসবি প্রিন্টার</span>
+                            </li>
+                            <li class="flex items-center gap-2.5">
+                                <span class="w-4 h-4 rounded-full bg-indigo-600 text-white flex items-center justify-center text-[10px] font-bold shrink-0">✓</span>
+                                <span>পেপার ব্যবহার ও কালার অডিট লগ</span>
+                            </li>
+                            <li class="flex items-center gap-2.5">
+                                <span class="w-4 h-4 rounded-full bg-indigo-600 text-white flex items-center justify-center text-[10px] font-bold shrink-0">✓</span>
+                                <span>সিকিউর অটো-ফাইল ডিলিট পলিসি</span>
+                            </li>
+                            <li class="flex items-center gap-2.5">
+                                <span class="w-4 h-4 rounded-full bg-indigo-600 text-white flex items-center justify-center text-[10px] font-bold shrink-0">✓</span>
+                                <span>ফোন ও রিমোট প্রায়োরিটি সাপোর্ট</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <a href="{{ auth()->check() ? route('shop.subscription', ['plan' => 'office_basic_yearly']) : route('register', ['type' => 'office']) }}" class="mt-8 w-full py-3.5 text-xs font-black bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white rounded-2xl transition-all shadow-lg shadow-indigo-600/30 text-center block hover:scale-105">
+                        অফিস বেসিক শুরু করুন
+                    </a>
+                </div>
+
+                <!-- Office Plan 3: Corporate Pro (Multi-Printer) -->
+                <div class="bg-white p-7 rounded-3xl border border-cyan-200 shadow-sm hover:shadow-xl hover:border-cyan-300 transition-all duration-300 flex flex-col justify-between group relative overflow-hidden">
+                    <div class="absolute top-0 right-0 px-3 py-1 bg-gradient-to-l from-indigo-600 to-cyan-600 text-white text-[9px] font-black rounded-bl-xl tracking-wide uppercase">
+                        🚀 মাল্টি-প্রিন্টার
+                    </div>
+                    <div>
+                        <div class="inline-block px-3 py-1 rounded-full bg-cyan-100 text-cyan-800 font-bold text-[11px] mb-3">
+                            🏢 কর্পোরেট স্যুট
+                        </div>
+                        <h3 class="text-lg font-black text-slate-900">কর্পোরেট প্রো</h3>
+                        <p class="text-xs text-slate-500 mt-1">বড় প্রতিষ্ঠান ও মাল্টি-ডিপার্টমেন্টের জন্য</p>
+
+                        <div class="my-5 pb-5 border-b border-slate-100">
+                            <span class="text-4xl font-black text-cyan-700 font-en">৳ ৮,৯৯৯</span>
+                            <span class="text-xs text-slate-400 font-medium ml-1">/ ১ বছর</span>
+                        </div>
+
+                        <ul class="space-y-3 text-xs text-slate-600 font-medium">
+                            <li class="flex items-center gap-2.5">
+                                <span class="w-4 h-4 rounded-full bg-cyan-100 text-cyan-700 flex items-center justify-center text-[10px] font-bold shrink-0">✓</span>
+                                <span>মাল্টি-প্রিন্টার (HR, Accounts, General আলাদা)</span>
+                            </li>
+                            <li class="flex items-center gap-2.5">
+                                <span class="w-4 h-4 rounded-full bg-cyan-100 text-cyan-700 flex items-center justify-center text-[10px] font-bold shrink-0">✓</span>
+                                <span>আনলিমিটেড কর্মী, ডিপার্টমেন্ট ও কিউ</span>
+                            </li>
+                            <li class="flex items-center gap-2.5">
+                                <span class="w-4 h-4 rounded-full bg-cyan-100 text-cyan-700 flex items-center justify-center text-[10px] font-bold shrink-0">✓</span>
+                                <span>কর্মীভিত্তিক পেপার অপচয় মনিটরিং</span>
+                            </li>
+                            <li class="flex items-center gap-2.5">
+                                <span class="w-4 h-4 rounded-full bg-cyan-100 text-cyan-700 flex items-center justify-center text-[10px] font-bold shrink-0">✓</span>
+                                <span>ডেডিকেটেড একাউন্ট ম্যানেজার ও ২৪/৭ ভিআইপি সাপোর্ট</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <a href="{{ auth()->check() ? route('shop.subscription', ['plan' => 'office_corporate_yearly']) : route('register', ['type' => 'office']) }}" class="mt-8 w-full py-3 text-xs font-bold bg-cyan-700 hover:bg-cyan-800 text-white rounded-2xl transition-all text-center block shadow-md">
+                        কর্পোরেট প্রো লাইসেন্স নিন
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        function togglePricingTab(type) {
+            const tabShop = document.getElementById('tab_pricing_shop');
+            const tabOffice = document.getElementById('tab_pricing_office');
+            const shopGrid = document.getElementById('shopPricingGrid');
+            const officeGrid = document.getElementById('officePricingGrid');
+            const title = document.getElementById('pricingTitle');
+            const subtitle = document.getElementById('pricingSubtitle');
+
+            if (type === 'office') {
+                tabOffice.className = "px-5 py-2.5 rounded-xl font-bold text-xs transition-all flex items-center gap-2 cursor-pointer bg-white text-indigo-900 shadow-sm border border-indigo-200";
+                tabShop.className = "px-5 py-2.5 rounded-xl font-bold text-xs transition-all flex items-center gap-2 cursor-pointer text-slate-500 hover:text-slate-900";
+                shopGrid.classList.add('hidden');
+                officeGrid.classList.remove('hidden');
+                title.textContent = "আপনার অফিস ও কর্পোরেট প্রতিষ্ঠানের জন্য প্ল্যান";
+                subtitle.textContent = "কর্মীদের নিরবচ্ছিন্ন জিরো-পেমেন্ট সেন্ট্রাল প্রিন্টিং ও পেপার ব্যবহার অডিট সমাধান।";
+            } else {
+                tabShop.className = "px-5 py-2.5 rounded-xl font-bold text-xs transition-all flex items-center gap-2 cursor-pointer bg-white text-slate-900 shadow-sm border border-slate-200";
+                tabOffice.className = "px-5 py-2.5 rounded-xl font-bold text-xs transition-all flex items-center gap-2 cursor-pointer text-slate-500 hover:text-slate-900";
+                officeGrid.classList.add('hidden');
+                shopGrid.classList.remove('hidden');
+                title.textContent = "আপনার দোকানের জন্য প্ল্যান বেছে নিন";
+                subtitle.textContent = "কোনো প্রতি-প্রিন্ট কমিশন নেই। কাস্টমারের সম্পূর্ণ টাকা আপনার নিজস্ব ওয়ালেটে।";
+            }
+        }
+    </script>
         </div>
     </section>
 

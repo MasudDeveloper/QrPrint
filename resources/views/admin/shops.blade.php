@@ -44,9 +44,16 @@
                         <tr class="hover:bg-slate-800/40 transition-colors">
                             <!-- Shop Name & Direct Link -->
                             <td class="px-6 py-4 font-bold text-white">
-                                <div class="text-sm font-black">{{ $shop->name }}</div>
-                                <a href="{{ route('customer.upload', $shop->slug) }}" target="_blank" class="text-rose-400 hover:underline font-mono text-[10px] flex items-center gap-1 mt-0.5">
-                                    <span>/print/{{ $shop->slug }}</span>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-sm font-black">{{ $shop->name }}</span>
+                                    @if($shop->is_office_mode)
+                                        <span class="px-2 py-0.5 rounded text-[9px] font-black bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">🏢 অফিস</span>
+                                    @else
+                                        <span class="px-2 py-0.5 rounded text-[9px] font-black bg-rose-500/10 text-rose-400 border border-rose-500/20">🏬 দোকান</span>
+                                    @endif
+                                </div>
+                                <a href="{{ $shop->is_office_mode ? route('customer.office_upload', $shop->slug) : route('customer.upload', $shop->slug) }}" target="_blank" class="{{ $shop->is_office_mode ? 'text-indigo-400' : 'text-rose-400' }} hover:underline font-mono text-[10px] flex items-center gap-1 mt-0.5">
+                                    <span>{{ $shop->is_office_mode ? '/office/' . $shop->slug : '/print/' . $shop->slug }}</span>
                                     <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
                                 </a>
                             </td>
@@ -181,8 +188,15 @@
             <div id="field_plan" class="space-y-1.5 hidden">
                 <label class="block text-xs font-bold text-slate-300">প্যাকেজ নির্বাচন করুন:</label>
                 <select name="plan" class="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white focus:outline-none focus:border-rose-500">
-                    <option value="monthly_starter">মান্থলি স্টার্টার (+৩০ দিন)</option>
-                    <option value="yearly_pro">ইয়ারলি প্রো (+৩৬৫ দিন)</option>
+                    <optgroup label="দোকানদার প্যাকেজ">
+                        <option value="monthly_starter">মান্থলি স্টার্টার (+৩০ দিন)</option>
+                        <option value="yearly_pro">ইয়ারলি প্রো (+৩৬৫ দিন)</option>
+                    </optgroup>
+                    <optgroup label="অফিস ও কর্পোরেট প্যাকেজ">
+                        <option value="office_basic_monthly">অফিস বেসিক (+৩০ দিন)</option>
+                        <option value="office_basic_yearly">অফিস বেসিক ইয়ারলি (+৩৬৫ দিন)</option>
+                        <option value="office_corporate_yearly">কর্পোরেট প্রো (+৩৬৫ দিন)</option>
+                    </optgroup>
                 </select>
             </div>
 
