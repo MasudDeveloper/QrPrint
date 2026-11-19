@@ -84,7 +84,28 @@ class AdminController extends Controller
         $adminNagad = Setting::get('admin_nagad_number', '01644416378');
         $paymentInstructions = Setting::get('admin_payment_instructions', 'বিকাশ বা নগদ সেন্ড মানি করে নিচের বক্সে আপনার Transaction ID ও সেন্ডার নাম্বারটি দিন।');
 
-        return view('admin.settings', compact('videoUrl', 'videoTitle', 'hotline', 'email', 'developerUrl', 'adminBkash', 'adminNagad', 'paymentInstructions'));
+        // bKash Merchant PGW Settings
+        $bkashEnabled = (bool) Setting::get('bkash_pgw_enabled', false);
+        $bkashSandbox = (bool) Setting::get('bkash_pgw_sandbox', true);
+        $bkashAppKey = Setting::get('bkash_pgw_app_key', '');
+        $bkashAppSecret = Setting::get('bkash_pgw_app_secret', '');
+        $bkashUsername = Setting::get('bkash_pgw_username', '');
+        $bkashPassword = Setting::get('bkash_pgw_password', '');
+
+        // SMTP Mail Settings
+        $mailHost = Setting::get('mail_host', env('MAIL_HOST', 'smtp.gmail.com'));
+        $mailPort = Setting::get('mail_port', env('MAIL_PORT', '587'));
+        $mailUsername = Setting::get('mail_username', env('MAIL_USERNAME', ''));
+        $mailPassword = Setting::get('mail_password', env('MAIL_PASSWORD', ''));
+        $mailEncryption = Setting::get('mail_encryption', env('MAIL_ENCRYPTION', 'tls'));
+        $mailFromAddress = Setting::get('mail_from_address', env('MAIL_FROM_ADDRESS', 'noreply@printsheba.com'));
+        $mailFromName = Setting::get('mail_from_name', env('MAIL_FROM_NAME', 'PrintSheba'));
+
+        return view('admin.settings', compact(
+            'videoUrl', 'videoTitle', 'hotline', 'email', 'developerUrl', 'adminBkash', 'adminNagad', 'paymentInstructions',
+            'bkashEnabled', 'bkashSandbox', 'bkashAppKey', 'bkashAppSecret', 'bkashUsername', 'bkashPassword',
+            'mailHost', 'mailPort', 'mailUsername', 'mailPassword', 'mailEncryption', 'mailFromAddress', 'mailFromName'
+        ));
     }
 
     public function updateSettings(Request $request)
@@ -97,6 +118,17 @@ class AdminController extends Controller
             'admin_bkash_number' => 'nullable|string|max:30',
             'admin_nagad_number' => 'nullable|string|max:30',
             'admin_payment_instructions' => 'nullable|string|max:500',
+            'bkash_pgw_app_key' => 'nullable|string|max:100',
+            'bkash_pgw_app_secret' => 'nullable|string|max:100',
+            'bkash_pgw_username' => 'nullable|string|max:100',
+            'bkash_pgw_password' => 'nullable|string|max:100',
+            'mail_host' => 'nullable|string|max:100',
+            'mail_port' => 'nullable|string|max:10',
+            'mail_username' => 'nullable|string|max:100',
+            'mail_password' => 'nullable|string|max:100',
+            'mail_encryption' => 'nullable|string|max:10',
+            'mail_from_address' => 'nullable|string|email|max:100',
+            'mail_from_name' => 'nullable|string|max:100',
         ]);
 
         Setting::set('homepage_video_url', $request->homepage_video_url ?? '');
@@ -107,7 +139,69 @@ class AdminController extends Controller
         Setting::set('admin_nagad_number', $request->admin_nagad_number ?? '01644416378');
         Setting::set('admin_payment_instructions', $request->admin_payment_instructions ?? '');
 
-        return back()->with('success', 'হোমপেজ ভিডিও, পেমেন্ট অ্যাকাউন্ট ও গ্লোবাল সেটিংস সফলভাবে আপডেট করা হয়েছে!');
+        // bKash Merchant Settings
+        Setting::set('bkash_pgw_enabled', $request->boolean('bkash_pgw_enabled'));
+        Setting::set('bkash_pgw_sandbox', $request->boolean('bkash_pgw_sandbox'));
+        Setting::set('bkash_pgw_app_key', $request->bkash_pgw_app_key ?? '');
+        Setting::set('bkash_pgw_app_secret', $request->bkash_pgw_app_secret ?? '');
+        Setting::set('bkash_pgw_username', $request->bkash_pgw_username ?? '');
+        Setting::set('bkash_pgw_password', $request->bkash_pgw_password ?? '');
+
+        // SMTP Settings
+        Setting::set('mail_host', $request->mail_host ?? '');
+        Setting::set('mail_port', $request->mail_port ?? '587');
+        Setting::set('mail_username', $request->mail_username ?? '');
+        Setting::set('mail_password', $request->mail_password ?? '');
+        Setting::set('mail_encryption', $request->mail_encryption ?? 'tls');
+        Setting::set('mail_from_address', $request->mail_from_address ?? 'noreply@printsheba.com');
+        Setting::set('mail_from_name', $request->mail_from_name ?? 'PrintSheba');
+
+        return back()->with('success', 'সকল গ্লোবাল সেটিংস (ভিডিও, পেমেন্ট, বিকাশ গেটওয়ে ও ইমেইল SMTP) সফলভাবে আপডেট করা হয়েছে!');
+    }
+
+    public function sendTestEmail(Request $request)
+    {
+        $request->validate([
+            'test_email' => 'required|email|max:100',
+        ]);
+
+        $targetEmail = $request->input('test_email');
+
+        $mailHost = Setting::get('mail_host', env('MAIL_HOST'));
+        $mailPort = Setting::get('mail_port', env('MAIL_PORT'));
+        $mailUsername = Setting::get('mail_username', env('MAIL_USERNAME'));
+        $mailPassword = Setting::get('mail_password', env('MAIL_PASSWORD'));
+        $mailEncryption = Setting::get('mail_encryption', env('MAIL_ENCRYPTION', 'tls'));
+        $fromAddress = Setting::get('mail_from_address', env('MAIL_FROM_ADDRESS', 'noreply@printsheba.com'));
+        $fromName = Setting::get('mail_from_name', env('MAIL_FROM_NAME', 'PrintSheba'));
+
+        if (empty($mailHost) || empty($mailUsername)) {
+            return back()->with('error', 'প্রথমে SMTP হোস্ট এবং ইউজারনেম সংরক্ষণ করুন।');
+        }
+
+        // Dynamically apply SMTP runtime configuration
+        config([
+            'mail.default' => 'smtp',
+            'mail.mailers.smtp.host' => $mailHost,
+            'mail.mailers.smtp.port' => (int) $mailPort,
+            'mail.mailers.smtp.username' => $mailUsername,
+            'mail.mailers.smtp.password' => $mailPassword,
+            'mail.mailers.smtp.encryption' => $mailEncryption,
+            'mail.from.address' => $fromAddress,
+            'mail.from.name' => $fromName,
+        ]);
+
+        try {
+            \Illuminate\Support\Facades\Mail::raw("অভিনন্দন! আপনার PrintSheba SMTP ইমেইল কনফিগারেশন সফলভাবে কাজ করছে।\n\nতারিখ: " . now()->format('d M, Y h:i A') . "\nসার্ভার: " . url('/'), function ($message) use ($targetEmail, $fromAddress, $fromName) {
+                $message->to($targetEmail)
+                    ->from($fromAddress, $fromName)
+                    ->subject('PrintSheba – SMTP টেস্ট ইমেইল ভেরিফিকেশন');
+            });
+
+            return back()->with('success', "✅ টেস্ট ইমেইল সফলভাবে পাঠানো হয়েছে: {$targetEmail}");
+        } catch (\Throwable $e) {
+            return back()->with('error', '❌ ইমেইল পাঠাতে ব্যর্থ: ' . $e->getMessage());
+        }
     }
 
     public function shops()

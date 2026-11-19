@@ -1000,4 +1000,187 @@ class ShopController extends Controller
 
         return redirect()->route('shop.quick_print')->with('info', 'ফাইলটি মুছে ফেলা হয়েছে। নতুন ফাইল বেছে নিন।');
     }
+
+    /**
+     * Reports View (Daily, Weekly, Monthly, Custom)
+     */
+    public function reports(Request $request)
+    {
+        $shop = $this->getShop();
+        $period = $request->input('period', 'today');
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+
+        $query = PrintJob::where('shop_id', $shop->id);
+
+        if ($period === 'today') {
+            $query->whereDate('created_at', today());
+            $periodLabel = 'আজকের রিপোর্ট (' . today()->format('d M, Y') . ')';
+        } elseif ($period === 'yesterday') {
+            $query->whereDate('created_at', today()->subDay());
+            $periodLabel = 'গতকালের রিপোর্ট (' . today()->subDay()->format('d M, Y') . ')';
+        } elseif ($period === 'this_week') {
+            $query->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()]);
+            $periodLabel = 'এই সপ্তাহের রিপোর্ট';
+        } elseif ($period === 'this_month') {
+            $query->whereMonth('created_at', now()->month)->whereYear('created_at', now()->year);
+            $periodLabel = 'এই মাসের রিপোর্ট (' . now()->format('F Y') . ')';
+        } elseif ($period === 'last_month') {
+            $query->whereMonth('created_at', now()->subMonth()->month)->whereYear('created_at', now()->subMonth()->year);
+            $periodLabel = 'গত মাসের রিপোর্ট (' . now()->subMonth()->format('F Y') . ')';
+        } elseif ($period === 'custom' && $startDate && $endDate) {
+            $query->whereDate('created_at', '>=', $startDate)->whereDate('created_at', '<=', $endDate);
+            $periodLabel = 'তারিখ: ' . $startDate . ' থেকে ' . $endDate;
+        } else {
+            $query->whereDate('created_at', today());
+            $periodLabel = 'আজকের রিপোর্ট';
+        }
+
+        $allPeriodJobs = (clone $query)->get();
+
+        $metrics = [
+            'total_jobs' => $allPeriodJobs->count(),
+            'total_revenue' => $allPeriodJobs->where('payment_status', 'paid')->sum('total_amount'),
+            'cash_revenue' => $allPeriodJobs->where('payment_status', 'paid')->where('payment_method', 'cash')->sum('total_amount'),
+            'digital_revenue' => $allPeriodJobs->where('payment_status', 'paid')->whereIn('payment_method', ['bkash', 'nagad'])->sum('total_amount'),
+            'total_pages_printed' => $allPeriodJobs->where('print_status', 'printed')->sum(fn($j) => $j->total_pages * $j->copies),
+            'printed_jobs' => $allPeriodJobs->where('print_status', 'printed')->count(),
+            'cancelled_jobs' => $allPeriodJobs->where('print_status', 'cancelled')->count(),
+            'bw_jobs' => $allPeriodJobs->where('color_mode', 'bw')->count(),
+            'color_jobs' => $allPeriodJobs->where('color_mode', 'color')->count(),
+        ];
+
+        $jobs = $query->latest()->paginate(25)->withQueryString();
+
+        return view('shop.reports', compact('shop', 'jobs', 'metrics', 'period', 'startDate', 'endDate', 'periodLabel'));
+    }
+
+    /**
+     * Export Report to Excel/CSV with UTF-8 BOM
+     */
+    public function exportReportCsv(Request $request)
+    {
+        $shop = $this->getShop();
+        $period = $request->input('period', 'today');
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+
+        $query = PrintJob::where('shop_id', $shop->id);
+
+        if ($period === 'today') {
+            $query->whereDate('created_at', today());
+        } elseif ($period === 'yesterday') {
+            $query->whereDate('created_at', today()->subDay());
+        } elseif ($period === 'this_week') {
+            $query->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()]);
+        } elseif ($period === 'this_month') {
+            $query->whereMonth('created_at', now()->month)->whereYear('created_at', now()->year);
+        } elseif ($period === 'last_month') {
+            $query->whereMonth('created_at', now()->subMonth()->month)->whereYear('created_at', now()->subMonth()->year);
+        } elseif ($period === 'custom' && $startDate && $endDate) {
+            $query->whereDate('created_at', '>=', $startDate)->whereDate('created_at', '<=', $endDate);
+        }
+
+        $jobs = $query->latest()->get();
+        $fileName = 'PrintSheba-Report-' . Str::slug($shop->name) . '-' . date('Y-m-d') . '.csv';
+
+        $callback = function () use ($jobs, $shop) {
+            $file = fopen('php://output', 'w');
+            // Write UTF-8 BOM so Microsoft Excel renders Bengali characters correctly
+            fputs($file, "\xEF\xBB\xBF");
+
+            // Header Row
+            fputcsv($file, [
+                'টোকেন নং (Token)',
+                'তারিখ ও সময় (Date & Time)',
+                'গ্রাহক / রেফারেন্স (Customer / Ref)',
+                'ফাইল নাম (File Name)',
+                'পেজ সংখ্যা (Pages)',
+                'কপি (Copies)',
+                'মোট পেজ (Total Sheets)',
+                'মোড (Color/BW)',
+                'ডুপ্লেক্স (Duplex)',
+                'পেমেন্ট মেথড (Method)',
+                'ট্রানজেকশন আইডি (TrxID)',
+                'টাকার পরিমাণ (Amount Tk)',
+                'পেমেন্ট অবস্থা (Payment Status)',
+                'প্রিন্ট অবস্থা (Print Status)'
+            ]);
+
+            foreach ($jobs as $job) {
+                fputcsv($file, [
+                    $job->job_token,
+                    $job->created_at->format('d/m/Y h:i A'),
+                    $job->pickup_reference ?: ($job->customer_name ?: 'কাস্টমার'),
+                    $job->original_name ?: $job->file_name,
+                    $job->total_pages,
+                    $job->copies,
+                    $job->total_pages * $job->copies,
+                    $job->color_mode === 'color' ? 'কালার' : 'সাদাকালো',
+                    $job->is_duplex ? 'উভয় পাশ (Duplex)' : 'এক পাশ',
+                    strtoupper($job->payment_method),
+                    $job->payment_trx_id ?: '-',
+                    number_format($job->total_amount, 2),
+                    $job->payment_status === 'paid' ? 'পরিশোধিত (PAID)' : 'অপেক্ষমান (PENDING)',
+                    $job->print_status === 'printed' ? 'প্রিন্ট সম্পন্ন' : ($job->print_status === 'cancelled' ? 'বাতিল' : 'কিউতে আছে')
+                ]);
+            }
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => "attachment; filename=\"{$fileName}\"",
+        ]);
+    }
+
+    /**
+     * Print-friendly Printable Summary Report
+     */
+    public function printReport(Request $request)
+    {
+        $shop = $this->getShop();
+        $period = $request->input('period', 'today');
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+
+        $query = PrintJob::where('shop_id', $shop->id);
+
+        if ($period === 'today') {
+            $query->whereDate('created_at', today());
+            $periodLabel = 'আজকের অডিট রিপোর্ট (' . today()->format('d M, Y') . ')';
+        } elseif ($period === 'yesterday') {
+            $query->whereDate('created_at', today()->subDay());
+            $periodLabel = 'গতকালের অডিট রিপোর্ট (' . today()->subDay()->format('d M, Y') . ')';
+        } elseif ($period === 'this_week') {
+            $query->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()]);
+            $periodLabel = 'এই সপ্তাহের অডিট রিপোর্ট';
+        } elseif ($period === 'this_month') {
+            $query->whereMonth('created_at', now()->month)->whereYear('created_at', now()->year);
+            $periodLabel = 'এই মাসের অডিট রিপোর্ট (' . now()->format('F Y') . ')';
+        } elseif ($period === 'last_month') {
+            $query->whereMonth('created_at', now()->subMonth()->month)->whereYear('created_at', now()->subMonth()->year);
+            $periodLabel = 'গত মাসের অডিট রিপোর্ট (' . now()->subMonth()->format('F Y') . ')';
+        } elseif ($period === 'custom' && $startDate && $endDate) {
+            $query->whereDate('created_at', '>=', $startDate)->whereDate('created_at', '<=', $endDate);
+            $periodLabel = 'তারিখ: ' . $startDate . ' থেকে ' . $endDate;
+        } else {
+            $query->whereDate('created_at', today());
+            $periodLabel = 'আজকের অডিট রিপোর্ট';
+        }
+
+        $jobs = $query->latest()->get();
+
+        $metrics = [
+            'total_jobs' => $jobs->count(),
+            'total_revenue' => $jobs->where('payment_status', 'paid')->sum('total_amount'),
+            'cash_revenue' => $jobs->where('payment_status', 'paid')->where('payment_method', 'cash')->sum('total_amount'),
+            'digital_revenue' => $jobs->where('payment_status', 'paid')->whereIn('payment_method', ['bkash', 'nagad'])->sum('total_amount'),
+            'total_pages_printed' => $jobs->where('print_status', 'printed')->sum(fn($j) => $j->total_pages * $j->copies),
+            'printed_jobs' => $jobs->where('print_status', 'printed')->count(),
+            'cancelled_jobs' => $jobs->where('print_status', 'cancelled')->count(),
+        ];
+
+        return view('shop.report_print', compact('shop', 'jobs', 'metrics', 'periodLabel'));
+    }
 }

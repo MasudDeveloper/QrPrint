@@ -164,6 +164,23 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Interactive Document Preview Card -->
+                <div id="previewCard" class="hidden rounded-2xl bg-slate-900 border border-slate-800 p-3.5 space-y-2">
+                    <div class="flex items-center justify-between text-xs pb-2 border-b border-slate-800">
+                        <span class="font-bold text-slate-200 flex items-center gap-1.5">
+                            <span>👁️</span> <span>ডকুমেন্ট প্রিভিউ (১ম পেজ)</span>
+                        </span>
+                        <span id="previewPageIndicator" class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 font-bold border border-slate-700"></span>
+                    </div>
+                    <div class="flex justify-center items-center bg-slate-950 rounded-xl p-2 min-h-[140px] max-h-[300px] overflow-hidden">
+                        <div id="previewSpinner" class="hidden text-xs text-slate-400 flex items-center gap-2">
+                            <span class="animate-spin text-base">⏳</span> প্রিভিউ তৈরি হচ্ছে...
+                        </div>
+                        <canvas id="pdfPreviewCanvas" class="hidden max-h-[280px] w-auto rounded-lg shadow-md border border-slate-800"></canvas>
+                        <img id="imagePreviewImg" class="hidden max-h-[280px] w-auto rounded-lg shadow-md object-contain" alt="File Preview">
+                    </div>
+                </div>
             </div>
 
             <!-- STEP 2: PRINT PREFERENCES -->
@@ -203,11 +220,14 @@
                     </div>
                 @endif
 
+                <!-- Hidden Full Document Page Count -->
+                <input type="hidden" id="docTotalPages" name="doc_total_pages" value="1">
+
                 <!-- Page count & copies -->
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <div class="flex items-center justify-between mb-1">
-                            <label class="block text-xs font-bold text-slate-700">মোট পেজ:</label>
+                            <label class="block text-xs font-bold text-slate-700">প্রিন্ট পেজ:</label>
                             <span class="text-[9px] text-emerald-600 font-bold" id="autoCountNotice"></span>
                         </div>
                         <input type="number" id="totalPages" name="total_pages" value="1" min="1" max="500" required 
@@ -217,6 +237,33 @@
                         <label class="block text-xs font-bold text-slate-700 mb-1">কপি সংখ্যা (Copies):</label>
                         <input type="number" id="copies" name="copies" value="1" min="1" max="100" required 
                             class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm font-bold text-center rate-trigger">
+                    </div>
+                </div>
+
+                <!-- Custom Page Range Selection Option -->
+                <div id="pageRangeSelectorContainer" class="pt-2 border-t border-slate-100 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <label class="text-xs font-bold text-slate-700">পেজ নির্বাচন:</label>
+                        <span id="rangeBadge" class="hidden text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800"></span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 text-xs">
+                        <label class="flex items-center gap-2 p-2.5 rounded-xl border border-slate-200 cursor-pointer has-[:checked]:border-slate-900 has-[:checked]:bg-slate-50 transition-all">
+                            <input type="radio" name="page_choice" value="all" checked class="accent-slate-900" onchange="togglePageChoice(false)">
+                            <span class="font-bold text-slate-800">সব পেজ (All)</span>
+                        </label>
+                        <label class="flex items-center gap-2 p-2.5 rounded-xl border border-slate-200 cursor-pointer has-[:checked]:border-rose-500 has-[:checked]:bg-rose-50/40 transition-all">
+                            <input type="radio" name="page_choice" value="custom" class="accent-rose-500" onchange="togglePageChoice(true)">
+                            <span class="font-bold text-slate-800">কাস্টম পেজ রেঞ্জ</span>
+                        </label>
+                    </div>
+
+                    <div id="customRangeBox" class="hidden pt-1.5 space-y-1.5">
+                        <input type="text" id="pageRangeInput" name="page_range" placeholder="উদাঃ 1-5, 8, 11-14" 
+                            class="w-full px-3.5 py-2.5 rounded-xl border border-rose-300 bg-rose-50/20 text-xs font-mono font-bold text-slate-900 focus:outline-none focus:border-rose-500"
+                            oninput="handleCustomRangeInput()">
+                        <span class="text-[10px] text-slate-500 block leading-tight">
+                            💡 নির্দিষ্ট পেজ কমা (,) ও ড্যাশ (-) দিয়ে লিখুন। যেমন: <b>১-৩, ৫, ৮</b> লিখলে মোট ৫টি পেজ প্রিন্ট হবে।
+                        </span>
                     </div>
                 </div>
 
@@ -360,7 +407,69 @@
             el.addEventListener('change', calculateBill);
         });
 
-        // File upload UI change & Automatic Page Counting
+        // Page Range Mode Handler
+        let detectedDocPages = 1;
+
+        function togglePageChoice(isCustom) {
+            const rangeBox = document.getElementById('customRangeBox');
+            const rangeInput = document.getElementById('pageRangeInput');
+            const rangeBadge = document.getElementById('rangeBadge');
+            const totalPagesInput = document.getElementById('totalPages');
+
+            if (isCustom) {
+                rangeBox.classList.remove('hidden');
+                handleCustomRangeInput();
+            } else {
+                rangeBox.classList.add('hidden');
+                rangeInput.value = '';
+                rangeBadge.classList.add('hidden');
+                totalPagesInput.value = detectedDocPages;
+                calculateBill();
+            }
+        }
+
+        function handleCustomRangeInput() {
+            const val = document.getElementById('pageRangeInput').value.trim();
+            const rangeBadge = document.getElementById('rangeBadge');
+            const totalPagesInput = document.getElementById('totalPages');
+
+            if (!val) {
+                totalPagesInput.value = detectedDocPages;
+                rangeBadge.classList.add('hidden');
+                calculateBill();
+                return;
+            }
+
+            // Parse range: e.g. "1-5, 8, 10-12"
+            const parts = val.split(',');
+            const pageSet = new Set();
+            for (let part of parts) {
+                part = part.trim();
+                if (part.includes('-')) {
+                    const sub = part.split('-');
+                    if (sub.length === 2) {
+                        const start = Math.max(1, parseInt(sub[0]) || 0);
+                        const end = Math.min(detectedDocPages, parseInt(sub[1]) || 0);
+                        if (start <= end) {
+                            for (let i = start; i <= end; i++) pageSet.add(i);
+                        }
+                    }
+                } else {
+                    const p = parseInt(part);
+                    if (p >= 1 && p <= detectedDocPages) {
+                        pageSet.add(p);
+                    }
+                }
+            }
+
+            const count = pageSet.size > 0 ? pageSet.size : 1;
+            totalPagesInput.value = count;
+            rangeBadge.classList.remove('hidden');
+            rangeBadge.innerText = `নির্বাচিত মোট ${count} পেজ`;
+            calculateBill();
+        }
+
+        // File upload UI change, Document Preview & Automatic Page Counting
         const fileInput = document.getElementById('documentInput');
         fileInput.addEventListener('change', async (e) => {
             const file = e.target.files[0];
@@ -370,7 +479,18 @@
                 document.getElementById('fileNameText').innerText = file.name;
                 document.getElementById('fileSizeText').innerText = (file.size / (1024 * 1024)).toFixed(2) + ' MB';
 
-                // Check if file is PDF for client-side auto counting
+                const previewCard = document.getElementById('previewCard');
+                const previewSpinner = document.getElementById('previewSpinner');
+                const previewCanvas = document.getElementById('pdfPreviewCanvas');
+                const previewImg = document.getElementById('imagePreviewImg');
+                const pageIndicator = document.getElementById('previewPageIndicator');
+
+                previewCard.classList.remove('hidden');
+                previewSpinner.classList.remove('hidden');
+                previewCanvas.classList.add('hidden');
+                previewImg.classList.add('hidden');
+
+                // Check if file is PDF for preview & page count
                 if (file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')) {
                     try {
                         const fileReader = new FileReader();
@@ -378,22 +498,71 @@
                             const typedarray = new Uint8Array(this.result);
                             const pdf = await pdfjsLib.getDocument(typedarray).promise;
                             const numPages = pdf.numPages;
+                            detectedDocPages = numPages;
+                            document.getElementById('docTotalPages').value = numPages;
+
                             if (numPages > 0) {
                                 document.getElementById('totalPages').value = numPages;
                                 document.getElementById('pageDetectBadge').classList.remove('hidden');
                                 document.getElementById('detectedPagesText').innerText = `স্বয়ংক্রিয়ভাবে মোট ${numPages} পেজ ডিটেক্ট হয়েছে`;
-                                document.getElementById('autoCountNotice').innerText = `(অটো-কাউন্ট: ${numPages})`;
+                                document.getElementById('autoCountNotice').innerText = `(মোট ${numPages} পেজ)`;
+                                pageIndicator.innerText = `মোট ${numPages} পেজ`;
                                 calculateBill();
+                            }
+
+                            // Render Page 1 to canvas
+                            try {
+                                const page = await pdf.getPage(1);
+                                const viewport = page.getViewport({ scale: 1.0 });
+                                const desiredWidth = 280;
+                                const scale = desiredWidth / viewport.width;
+                                const scaledViewport = page.getViewport({ scale: scale });
+
+                                previewCanvas.width = scaledViewport.width;
+                                previewCanvas.height = scaledViewport.height;
+
+                                const renderContext = {
+                                    canvasContext: previewCanvas.getContext('2d'),
+                                    viewport: scaledViewport
+                                };
+                                await page.render(renderContext).promise;
+
+                                previewSpinner.classList.add('hidden');
+                                previewCanvas.classList.remove('hidden');
+                            } catch (renderErr) {
+                                previewSpinner.innerText = '✓ PDF ফাইল প্রস্তুত (প্রিভিউ এভেইলেবল নয়)';
                             }
                         };
                         fileReader.readAsArrayBuffer(file);
                     } catch (err) {
                         console.log('PDF Page count fallback:', err);
+                        previewSpinner.innerText = '✓ ফাইল আপলোড সম্পন্ন';
                     }
-                } else {
-                    // For single image or others default to 1
+                } else if (file.type.startsWith('image/')) {
+                    // Image preview
+                    detectedDocPages = 1;
+                    document.getElementById('docTotalPages').value = 1;
+                    document.getElementById('totalPages').value = 1;
                     document.getElementById('pageDetectBadge').classList.add('hidden');
                     document.getElementById('autoCountNotice').innerText = '';
+                    pageIndicator.innerText = '১ পেজ (ছবি)';
+
+                    const imgReader = new FileReader();
+                    imgReader.onload = function(evt) {
+                        previewImg.src = evt.target.result;
+                        previewSpinner.classList.add('hidden');
+                        previewImg.classList.remove('hidden');
+                    };
+                    imgReader.readAsDataURL(file);
+                    calculateBill();
+                } else {
+                    // Word or other documents
+                    detectedDocPages = 1;
+                    document.getElementById('pageDetectBadge').classList.add('hidden');
+                    document.getElementById('autoCountNotice').innerText = '';
+                    pageIndicator.innerText = 'ডকুমেন্ট ফাইল';
+                    previewSpinner.innerText = '📄 ওয়ার্ড ডকুমেন্ট প্রস্তুত';
+                    calculateBill();
                 }
             }
         });

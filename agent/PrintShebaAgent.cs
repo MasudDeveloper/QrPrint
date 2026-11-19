@@ -51,6 +51,7 @@ namespace PrintSheba
         public string paper_size { get; set; }
         public string customer_name { get; set; }
         public string pickup_reference { get; set; }
+        public string page_range { get; set; }
         public bool is_office_job { get; set; }
     }
 
@@ -494,7 +495,7 @@ namespace PrintSheba
             }
 
             // B. PDF / Documents: Windows hidden shell print
-            return PrintDocumentSilently(filePath, printerName, job.copies, isDuplex);
+            return PrintDocumentSilently(filePath, printerName, job.copies, isDuplex, job.page_range);
         }
 
         private bool PrintImageNatively(string filePath, string printerName, int copies, bool isDuplex = false)
@@ -552,7 +553,7 @@ namespace PrintSheba
             }
         }
 
-        private bool PrintDocumentSilently(string filePath, string printerName, int copies, bool isDuplex = false)
+        private bool PrintDocumentSilently(string filePath, string printerName, int copies, bool isDuplex = false, string pageRange = null)
         {
             string ext = Path.GetExtension(filePath).ToLowerInvariant();
             int totalCopies = Math.Max(1, copies);
@@ -616,14 +617,16 @@ namespace PrintSheba
                     if (!string.IsNullOrEmpty(sumatraExe))
                     {
                         string duplexParam = isDuplex ? ",duplexlong" : ",simplex";
-                        Log(string.Format("🚀 সুমাত্রা ইঞ্জিন দিয়ে প্রিন্ট হচ্ছে (মোড: {0}, মোট কপি: {1})...", isDuplex ? "২-সাইড (Duplex/ডুপ্লেক্স)" : "১-সাইড (Simplex)", totalCopies));
+                        string rangeParam = !string.IsNullOrEmpty(pageRange) ? pageRange.Trim() + "," : "";
+                        string rangeLog = !string.IsNullOrEmpty(pageRange) ? string.Format(", পেজ রেঞ্জ: {0}", pageRange.Trim()) : "";
+                        Log(string.Format("🚀 সুমাত্রা ইঞ্জিন দিয়ে প্রিন্ট হচ্ছে (মোড: {0}{1}, মোট কপি: {2})...", isDuplex ? "২-সাইড (Duplex)" : "১-সাইড (Simplex)", rangeLog, totalCopies));
 
                         bool allCopiesSuccess = true;
                         // Sequential spooling per copy: guarantees 100% compatibility across all printer drivers (Canon LBP, HP, Epson, Brother)
                         // and ensures natural collated sets without driver hardware limitations
                         for (int c = 0; c < totalCopies; c++)
                         {
-                            string args = string.Format("-silent -print-to \"{0}\" -print-settings \"fit{1}\" \"{2}\"", printerName, duplexParam, filePath);
+                            string args = string.Format("-silent -print-to \"{0}\" -print-settings \"{1}fit{2}\" \"{3}\"", printerName, rangeParam, duplexParam, filePath);
 
                             var psi = new ProcessStartInfo
                             {

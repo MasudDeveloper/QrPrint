@@ -128,6 +128,25 @@
                 </div>
             </div>
 
+            <!-- bKash Direct Online Payment Button (If Unpaid & bKash PGW is enabled) -->
+            @if($job->payment_status !== 'paid' && $job->print_status !== 'cancelled' && \App\Services\BkashPgwService::isEnabled())
+                <div class="p-4 rounded-2xl bg-gradient-to-r from-pink-50 to-rose-50 border border-pink-200 text-left space-y-2">
+                    <div class="flex items-center justify-between text-xs font-bold text-pink-900">
+                        <span class="flex items-center gap-1.5">
+                            <span>📱</span> <span>বিকাশ সরাসরি অটো পেমেন্ট</span>
+                        </span>
+                        <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-pink-100 text-pink-800 font-black">INSTANT</span>
+                    </div>
+                    <p class="text-[11px] text-pink-700 leading-tight">
+                        পিন কোড দিয়ে পেমেন্ট করুন, পেমেন্ট হওয়ামাত্র স্বয়ংক্রিয়ভাবে প্রিন্ট শুরু হয়ে যাবে।
+                    </p>
+                    <a href="{{ route('payment.bkash.checkout', $job->job_token) }}" 
+                       class="inline-flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-[#D12053] hover:bg-[#b01b46] text-white font-black text-xs shadow-md shadow-pink-600/20 transition-all active:scale-95">
+                        <span>বিকাশ দিয়ে ৳{{ number_format($job->total_amount, 2) }} পে করুন →</span>
+                    </a>
+                </div>
+            @endif
+
             <!-- Back or New Print button -->
             <div class="pt-2">
                 <a href="{{ $job->is_office_job ? route('customer.office_upload', $job->shop->slug) : route('customer.upload', $job->shop->slug) }}" class="inline-block w-full py-3.5 rounded-2xl bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white font-bold text-xs shadow-lg shadow-rose-500/20 transition-all">

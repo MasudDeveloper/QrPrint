@@ -107,8 +107,40 @@ class NidPdfService
             return $srcPath;
         }
 
+        // 1. Correct mobile camera EXIF orientation if JPEG
+        if (in_array($mime, ['image/jpeg', 'image/jpg']) && function_exists('exif_read_data')) {
+            try {
+                $exif = @exif_read_data($srcPath);
+                if (!empty($exif['Orientation'])) {
+                    $rotated = match ((int) $exif['Orientation']) {
+                        3 => imagerotate($srcImage, 180, 0),
+                        6 => imagerotate($srcImage, -90, 0),
+                        8 => imagerotate($srcImage, 90, 0),
+                        default => null,
+                    };
+                    if ($rotated) {
+                        imagedestroy($srcImage);
+                        $srcImage = $rotated;
+                    }
+                }
+            } catch (\Throwable $e) {
+                // Ignore EXIF read failures safely
+            }
+        }
+
         $origW = imagesx($srcImage);
         $origH = imagesy($srcImage);
+
+        // 2. Auto-rotate portrait card photo to landscape (Standard ID-1 cards are 85.6mm x 54mm landscape)
+        if ($origW < $origH) {
+            $rotated = imagerotate($srcImage, -90, 0);
+            if ($rotated) {
+                imagedestroy($srcImage);
+                $srcImage = $rotated;
+                $origW = imagesx($srcImage);
+                $origH = imagesy($srcImage);
+            }
+        }
 
         // Ensure target resolution: 1012 x 638 (approx 300 DPI for standard ID-1 card)
         $targetW = 1012;

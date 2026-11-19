@@ -11,6 +11,42 @@ use Illuminate\Support\Str;
 
 class CustomerPrintController extends Controller
 {
+    /**
+     * Parse human-entered page range string (e.g. "1-5, 8, 11-14") and count unique valid pages.
+     */
+    public static function parsePageRangeCount(string $range, int $maxPages = 9999): int
+    {
+        $range = trim($range);
+        if (empty($range)) {
+            return $maxPages;
+        }
+
+        $pages = [];
+        $parts = explode(',', $range);
+        foreach ($parts as $part) {
+            $part = trim($part);
+            if (str_contains($part, '-')) {
+                $sub = explode('-', $part);
+                if (count($sub) === 2) {
+                    $start = max(1, (int)trim($sub[0]));
+                    $end = min($maxPages, (int)trim($sub[1]));
+                    if ($start <= $end) {
+                        for ($i = $start; $i <= $end; $i++) {
+                            $pages[$i] = true;
+                        }
+                    }
+                }
+            } else {
+                $p = (int)$part;
+                if ($p >= 1 && $p <= $maxPages) {
+                    $pages[$p] = true;
+                }
+            }
+        }
+
+        return count($pages) > 0 ? count($pages) : 1;
+    }
+
     public function showUploadPage($slug)
     {
         $shop = Shop::where('slug', $slug)->firstOrFail();
@@ -50,6 +86,7 @@ class CustomerPrintController extends Controller
         $mime = $file->getClientMimeType();
 
         // Detect pages: if user sent page count, take it; if PDF, parse page count as server-side verification
+        $rawDocPages = (int) ($request->input('doc_total_pages', $request->input('total_pages', 1)));
         $totalPages = (int) ($request->input('total_pages', 1));
         if (strtolower($extension) === 'pdf') {
             try {
@@ -59,11 +96,22 @@ class CustomerPrintController extends Controller
                 if (preg_match_all("/\/Type\s*\/Page\b/", $content, $matches)) {
                     $detectedPages = count($matches[0]);
                     if ($detectedPages > 0) {
+                        $rawDocPages = $detectedPages;
                         $totalPages = $detectedPages;
                     }
                 }
             } catch (\Exception $e) {
                 // Keep user input or default
+            }
+        }
+        if ($rawDocPages < 1) $rawDocPages = 1;
+
+        // Process custom page_range if provided (e.g. "1-5, 8")
+        $pageRange = trim($request->input('page_range', ''));
+        if (!empty($pageRange)) {
+            $rangeCount = self::parsePageRangeCount($pageRange, $rawDocPages);
+            if ($rangeCount > 0) {
+                $totalPages = $rangeCount;
             }
         }
         if ($totalPages < 1) $totalPages = 1;
@@ -407,6 +455,7 @@ class CustomerPrintController extends Controller
         $originalName = $file->getClientOriginalName();
         $extension = $file->getClientOriginalExtension();
 
+        $rawDocPages = (int) ($request->input('doc_total_pages', $request->input('total_pages', 1)));
         $totalPages = (int) ($request->input('total_pages', 1));
         if (strtolower($extension) === 'pdf') {
             try {
@@ -415,10 +464,21 @@ class CustomerPrintController extends Controller
                 if (preg_match_all("/\/Type\s*\/Page\b/", $content, $matches)) {
                     $detectedPages = count($matches[0]);
                     if ($detectedPages > 0) {
+                        $rawDocPages = $detectedPages;
                         $totalPages = $detectedPages;
                     }
                 }
             } catch (\Exception $e) {}
+        }
+        if ($rawDocPages < 1) $rawDocPages = 1;
+
+        // Process custom page_range if provided (e.g. "1-5, 8")
+        $pageRange = trim($request->input('page_range', ''));
+        if (!empty($pageRange)) {
+            $rangeCount = self::parsePageRangeCount($pageRange, $rawDocPages);
+            if ($rangeCount > 0) {
+                $totalPages = $rangeCount;
+            }
         }
         if ($totalPages < 1) $totalPages = 1;
 

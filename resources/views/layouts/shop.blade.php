@@ -145,6 +145,12 @@
                     <span class="text-[9px] font-black px-1.5 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">NEW</span>
                 </a>
 
+                <a href="{{ route('shop.reports') }}" 
+                   class="flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-semibold transition-all duration-200 {{ request()->routeIs('shop.reports') ? 'bg-gradient-to-r from-rose-500 to-rose-600 text-white shadow-lg shadow-rose-500/25' : 'text-slate-300 hover:bg-slate-800/70 hover:text-white' }}">
+                    <span class="text-lg">📈</span>
+                    <span>আয় ও অডিট রিপোর্ট</span>
+                </a>
+
                 <a href="{{ route('shop.qr_poster') }}" 
                    class="flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-semibold transition-all duration-200 {{ request()->routeIs('shop.qr_poster') ? 'bg-gradient-to-r from-rose-500 to-rose-600 text-white shadow-lg shadow-rose-500/25' : 'text-slate-300 hover:bg-slate-800/70 hover:text-white' }}">
                     <span class="text-lg">🖼️</span>
@@ -251,6 +257,7 @@
                         </div>
                         <nav class="mt-4 space-y-1.5">
                             <a href="{{ route('shop.dashboard') }}" class="block px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('shop.dashboard') ? 'bg-rose-500 text-white' : 'text-slate-300 hover:bg-slate-800' }}">📊 লাইভ কিউ ও আয়</a>
+                            <a href="{{ route('shop.reports') }}" class="block px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('shop.reports') ? 'bg-rose-500 text-white' : 'text-slate-300 hover:bg-slate-800' }}">📈 আয় ও অডিট রিপোর্ট</a>
                             <a href="{{ route('shop.quick_print') }}" class="block px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('shop.quick_print') ? 'bg-emerald-500 text-white' : 'text-slate-300 hover:bg-slate-800' }}">⚡ ইনস্ট্যান্ট / শেয়ার প্রিন্ট</a>
                             <a href="{{ route('shop.qr_poster') }}" class="block px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('shop.qr_poster') ? 'bg-rose-500 text-white' : 'text-slate-300 hover:bg-slate-800' }}">🖼️ কিউআর পোস্টার</a>
                             <a href="{{ route('shop.rates') }}" class="block px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('shop.rates') ? 'bg-rose-500 text-white' : 'text-slate-300 hover:bg-slate-800' }}">💰 রেট ও পেমেন্ট নম্বর</a>

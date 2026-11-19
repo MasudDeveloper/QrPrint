@@ -72,6 +72,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::get('/live-status', [AdminController::class, 'liveStatus'])->name('live_status');
     Route::get('/settings', [AdminController::class, 'settings'])->name('settings');
     Route::post('/settings', [AdminController::class, 'updateSettings'])->name('settings.update');
+    Route::post('/settings/test-email', [AdminController::class, 'sendTestEmail'])->name('settings.test_email');
     Route::get('/shops', [AdminController::class, 'shops'])->name('shops');
     Route::post('/shops/{shop}/toggle', [AdminController::class, 'toggleShopStatus'])->name('shops.toggle');
     Route::post('/shops/{shop}/plan', [AdminController::class, 'updateShopPlan'])->name('shops.plan');
@@ -130,6 +131,11 @@ Route::middleware(['auth'])->prefix('shop')->name('shop.')->group(function () {
     Route::get('/quick-print/preview/{filename}', [ShopController::class, 'previewTempFile'])->name('quick_print.preview');
     Route::post('/quick-print/submit', [ShopController::class, 'submitQuickPrint'])->name('quick_print.submit');
     Route::post('/quick-print/delete-temp', [ShopController::class, 'deleteTempShareFile'])->name('quick_print.delete_temp');
+
+    // Earnings & Transaction Reports (PDF / Excel / CSV Export)
+    Route::get('/reports', [ShopController::class, 'reports'])->name('reports');
+    Route::get('/reports/export', [ShopController::class, 'exportReportCsv'])->name('reports.export');
+    Route::get('/reports/print', [ShopController::class, 'printReport'])->name('reports.print');
 });
 
 // PWA Web Share Target Public Handler (exempt from CSRF, redirects to authenticated quick-print)
@@ -156,6 +162,10 @@ Route::post('/office/{slug}/nid', [CustomerPrintController::class, 'submitOffice
 
 Route::get('/print/status/{jobToken}', [CustomerPrintController::class, 'jobStatus'])->name('customer.status');
 Route::get('/api/customer/status/{jobToken}', [CustomerPrintController::class, 'apiJobStatus']);
+
+// bKash Merchant Checkout API Routes
+Route::get('/payment/bkash/checkout/{jobToken}', [\App\Http\Controllers\PaymentController::class, 'initiateBkash'])->name('payment.bkash.checkout');
+Route::get('/payment/bkash/callback/{jobToken}', [\App\Http\Controllers\PaymentController::class, 'bkashCallback'])->name('payment.bkash.callback');
 
 // AI Document Auto-Crop & Perspective Detection Routes
 Route::post('/api/ai/auto-crop-document', [CustomerPrintController::class, 'autoCropDocument'])->name('api.ai.auto_crop');
