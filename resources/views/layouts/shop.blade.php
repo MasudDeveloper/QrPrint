@@ -240,7 +240,7 @@
                     </div>
                     <form action="{{ route('logout') }}" method="POST">
                         @csrf
-                        <button type="submit" title="লগআউট" class="p-2 rounded-xl text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors">
+                        <button type="submit" title="লগআউট" aria-label="সিস্টেম থেকে লগআউট করুন" class="p-2.5 rounded-xl text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
                         </button>
                     </form>
@@ -258,11 +258,11 @@
                 </a>
                 <div class="flex items-center gap-2">
                     @if(isset($shop))
-                    <a href="{{ $shop->is_office_mode ? route('customer.office_upload', $shop->slug) : route('customer.upload', $shop->slug) }}" target="_blank" class="px-2.5 py-1 rounded-lg {{ $shop->is_office_mode ? 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30' : 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' }} text-xs font-bold border">
+                    <a href="{{ $shop->is_office_mode ? route('customer.office_upload', $shop->slug) : route('customer.upload', $shop->slug) }}" target="_blank" class="px-3 py-2 rounded-lg {{ $shop->is_office_mode ? 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30' : 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' }} text-xs font-bold border min-h-[44px] flex items-center justify-center">
                         {{ $shop->is_office_mode ? '🏢 অফিস পোর্টাল' : '📱 কাস্টমার পেজ' }}
                     </a>
                     @endif
-                    <button id="mobileMenuToggle" class="p-2 rounded-xl text-slate-300 hover:bg-slate-800 focus:outline-none">
+                    <button id="mobileMenuToggle" aria-label="মোবাইল নেভিগেশন মেনু খুলুন" class="p-2.5 rounded-xl text-slate-300 hover:bg-slate-800 focus:outline-none min-h-[44px] min-w-[44px] flex items-center justify-center">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
                     </button>
                 </div>
@@ -277,7 +277,7 @@
                                 <img src="{{ asset('logo.svg') }}" onerror="this.onerror=null;this.src='{{ asset('icon-192.png') }}';" alt="Logo" class="w-8 h-8 rounded-xl">
                                 <span class="font-black text-white font-en text-lg">Print<span class="text-rose-500">Sheba</span></span>
                             </div>
-                            <button id="closeDrawer" class="text-slate-400 hover:text-white text-xl font-bold">&times;</button>
+                            <button id="closeDrawer" aria-label="মেনু ড্রয়ার বন্ধ করুন" class="text-slate-400 hover:text-white text-xl font-bold p-2 min-h-[44px] min-w-[44px] flex items-center justify-center">&times;</button>
                         </div>
                         <nav class="mt-4 space-y-1.5">
                             @php
@@ -304,6 +304,21 @@
 
             <!-- Page Content Container -->
             <main class="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto bg-slate-950">
+                @if(isset($shop) && !$shop->is_lifetime && !$shop->isSubscriptionActive() && !request()->routeIs('shop.subscription'))
+                    <div class="mb-6 p-4 rounded-2xl bg-gradient-to-r from-rose-600/30 via-rose-500/20 to-rose-600/30 border border-rose-500/60 text-white flex flex-col sm:flex-row items-center justify-between gap-3 shadow-xl backdrop-blur-sm">
+                        <div class="flex items-center gap-3">
+                            <span class="w-10 h-10 rounded-xl bg-rose-500/30 text-rose-300 flex items-center justify-center text-xl shrink-0">⚠️</span>
+                            <div>
+                                <h4 class="text-sm font-black text-rose-300">আপনার সফটওয়্যার সাবস্ক্রিপশনের মেয়াদ শেষ হয়েছে!</h4>
+                                <p class="text-xs text-slate-300 mt-0.5">কাস্টমার প্রিন্ট পোর্টাল এবং ব্যাকগ্রাউন্ড অটো-প্রিন্ট সাময়িকভাবে স্থগিত রয়েছে। আনলিমিটেড সার্ভিস সচল রাখতে এখনই প্যাকেজ রিনিউ করুন।</p>
+                            </div>
+                        </div>
+                        <a href="{{ route('shop.subscription') }}" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white font-bold text-xs shadow-md shrink-0 transition-transform hover:scale-105">
+                            প্যাকেজ রিনিউ করুন →
+                        </a>
+                    </div>
+                @endif
+
                 @if(session('impersonator_id'))
                     <!-- Super Admin Impersonation Notice Bar -->
                     <div class="mb-6 p-4 rounded-2xl bg-gradient-to-r from-amber-500/20 via-rose-500/20 to-amber-500/20 border-2 border-amber-500/50 text-white flex flex-col sm:flex-row items-center justify-between gap-3 shadow-xl">

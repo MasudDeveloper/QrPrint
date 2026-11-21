@@ -67,32 +67,32 @@
             <form action="{{ route('login') }}" method="POST" class="space-y-4">
                 @csrf
                 <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1.5">ইমেইল ঠিকানা</label>
-                    <input type="email" name="email" value="{{ old('email') }}" required autofocus
+                    <label for="email" class="block text-xs font-bold text-slate-700 mb-1.5">ইমেইল ঠিকানা</label>
+                    <input type="email" id="email" name="email" value="{{ old('email') }}" required autofocus autocomplete="email"
                         class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20 transition-all"
                         placeholder="yourname@gmail.com">
                 </div>
 
                 <div>
                     <div class="flex items-center justify-between mb-1.5">
-                        <label class="block text-xs font-bold text-slate-700">পাসওয়ার্ড</label>
-                        <a href="{{ route('password.request') }}" class="text-[11px] font-bold text-rose-600 hover:underline">
+                        <label for="password" class="block text-xs font-bold text-slate-700">পাসওয়ার্ড</label>
+                        <a href="{{ route('password.request') }}" class="text-xs font-bold text-rose-600 hover:underline">
                             পাসওয়ার্ড ভুলে গেছেন?
                         </a>
                     </div>
-                    <input type="password" name="password" required 
+                    <input type="password" id="password" name="password" required autocomplete="current-password"
                         class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20 transition-all"
                         placeholder="আপনার গোপন পাসওয়ার্ড দিন">
                 </div>
 
                 <div class="flex items-center justify-between text-xs pt-1">
-                    <label class="flex items-center gap-2 cursor-pointer text-slate-600">
-                        <input type="checkbox" name="remember" class="rounded accent-rose-500">
-                        <span>মনে রাখুন</span>
+                    <label for="remember" class="flex items-center gap-2 cursor-pointer text-slate-600 min-h-[44px]">
+                        <input type="checkbox" id="remember" name="remember" class="rounded accent-rose-500 w-4 h-4">
+                        <span>মনে রাখুন (Remember Me)</span>
                     </label>
                 </div>
 
-                <button type="submit" class="w-full py-3.5 px-6 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-bold text-sm shadow-lg shadow-rose-500/25 transition-all hover:scale-[1.01]">
+                <button type="submit" class="w-full min-h-[48px] py-3.5 px-6 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-bold text-sm shadow-lg shadow-rose-500/25 transition-all hover:scale-[1.01] flex items-center justify-center">
                     লগইন করুন →
                 </button>
             </form>

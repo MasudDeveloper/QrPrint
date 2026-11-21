@@ -20,6 +20,13 @@ class SmsListenerController extends Controller
 
         $shop->update(['last_app_heartbeat_at' => now()]);
 
+        if (!$shop->is_active || !$shop->isSubscriptionActive()) {
+            return response()->json([
+                'status' => 'subscription_expired',
+                'message' => 'Shop subscription has expired.',
+            ], 403);
+        }
+
         $trxId = strtoupper(trim($request->input('trx_id', '')));
         $amount = (float) $request->input('amount', 0);
         $sender = $request->input('sender_phone', '');
@@ -120,6 +127,13 @@ class SmsListenerController extends Controller
         }
 
         $shop->update(['last_app_heartbeat_at' => now()]);
+
+        if (!$shop->is_active || !$shop->isSubscriptionActive()) {
+            return response()->json([
+                'status' => 'subscription_expired',
+                'message' => 'Shop subscription has expired.',
+            ], 403);
+        }
 
         return response()->json([
             'status' => 'ok',

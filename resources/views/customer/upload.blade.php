@@ -3,7 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $shop->name }} – সেলফ-সার্ভিস প্রিন্ট পোর্টাল</title>
+    <title>{{ $shop->name }} – সেলফ-সার্ভিস প্রিন্ট পোর্টাল | PrintSheba</title>
+    <meta name="description" content="{{ $shop->name }} - ডিজিটাল সেলফ-সার্ভিস প্রিন্ট কাউন্টার। ফাইল আপলোড করুন এবং বিকাশ/নগদে বা ক্যাশে স্বয়ংক্রিয় প্রিন্ট নিন।">
+    <link rel="canonical" href="{{ url('/print/' . $shop->slug) }}">
+
+    <!-- Open Graph for Social/WhatsApp sharing -->
+    <meta property="og:type" content="business.business">
+    <meta property="og:title" content="{{ $shop->name }} – সেলফ-সার্ভিস প্রিন্ট কাউন্টার">
+    <meta property="og:description" content="মোবাইল থেকে সরাসরি ফাইল পাঠিয়ে মুহূর্তেই প্রিন্ট নিন {{ $shop->name }}-এ।">
+    <meta property="og:url" content="{{ url('/print/' . $shop->slug) }}">
+    <meta property="og:image" content="{{ asset('icon-512.png') }}">
+
+    <!-- Schema.org LocalBusiness Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@@context": "https://schema.org",
+      "@@type": "LocalBusiness",
+      "name": "{{ $shop->name }}",
+      "url": "{{ url('/print/' . $shop->slug) }}",
+      "telephone": "{{ $shop->phone }}",
+      "priceRange": "৳১ - ৳২০",
+      "description": "{{ $shop->name }} - ডিজিটাল সেলফ-সার্ভিস ক্লাউড প্রিন্ট সেবা।"
+    }
+    </script>
     <link rel="icon" type="image/svg+xml" href="{{ asset('logo.svg') }}">
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>

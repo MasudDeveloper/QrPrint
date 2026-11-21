@@ -7,6 +7,48 @@
     <title>PrintSheba (প্রিন্ট সেবা) – সাইবার ক্যাফে ও প্রিন্ট শপের অটো প্রিন্ট সফটওয়্যার</title>
     <meta name="description" content="সাইবার ক্যাফে ও কম্পিউটার দোকানের জন্য: কাস্টমার QR স্ক্যান করে ফাইল পাঠাবে, পেমেন্ট করবে, প্রিন্ট নিজে বের হবে। WhatsApp বা পেনড্রাইভ ছাড়াই দ্রুত প্রিন্ট।">
 
+    <!-- Canonical & SEO Meta -->
+    <link rel="canonical" href="{{ url('/') }}">
+    <meta name="keywords" content="PrintSheba, প্রিন্ট সেবা, সাইবার ক্যাফে সফটওয়্যার, অটো প্রিন্ট, QR প্রিন্ট, কম্পিউটার দোকান অটোমেশন, ডিজিটাল ফটোকপি">
+    <meta name="author" content="MR Developer">
+
+    <!-- Open Graph / Facebook / WhatsApp -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ url('/') }}">
+    <meta property="og:title" content="PrintSheba (প্রিন্ট সেবা) – সাইবার ক্যাফে ও প্রিন্ট শপের অটো প্রিন্ট সফটওয়্যার">
+    <meta property="og:description" content="কাস্টমার QR স্ক্যান করে ফাইল পাঠাবে, বিকাশ/নগদে পেমেন্ট করবে এবং প্রিন্ট নিজে নিজে বের হবে। পেনড্রাইভ বা হোয়াটসঅ্যাপ ছাড়াই নিরাপদ প্রিন্ট।">
+    <meta property="og:image" content="{{ asset('icon-512.png') }}">
+    <meta property="og:image:width" content="512">
+    <meta property="og:image:height" content="512">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="PrintSheba (প্রিন্ট সেবা) – সাইবার ক্যাফে অটো প্রিন্ট সফটওয়্যার">
+    <meta name="twitter:description" content="কাস্টমার QR স্ক্যান করে ফাইল পাঠাবে, পেমেন্ট করবে, প্রিন্ট নিজে নিজে বের হবে।">
+    <meta name="twitter:image" content="{{ asset('icon-512.png') }}">
+
+    <!-- Structured Data: SoftwareApplication & Organization -->
+    <script type="application/ld+json">
+    {
+      "@@context": "https://schema.org",
+      "@@type": "SoftwareApplication",
+      "name": "PrintSheba",
+      "operatingSystem": "Windows, Web, Android",
+      "applicationCategory": "BusinessApplication",
+      "offers": {
+        "@@type": "Offer",
+        "price": "0",
+        "priceCurrency": "BDT"
+      },
+      "description": "সাইবার ক্যাফে ও প্রিন্টিং দোকানের জন্য স্বয়ংক্রিয় ক্লাউড প্রিন্ট ও পেমেন্ট ম্যানেজমেন্ট প্ল্যাটফর্ম।",
+      "author": {
+        "@@type": "Organization",
+        "name": "MR Developer",
+        "url": "https://mrdeveloper.xyz"
+      }
+    }
+    </script>
+
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

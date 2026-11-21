@@ -46,6 +46,9 @@
                     <li><a href="{{ url('/#calculator') }}" class="hover:text-rose-400 transition-colors">আয়ের ক্যালকুলেটর</a></li>
                     <li><a href="{{ url('/#pricing') }}" class="hover:text-rose-400 transition-colors">প্যাকেজ ও রেট</a></li>
                     <li><a href="{{ route('faq') }}" class="hover:text-rose-400 transition-colors">প্রশ্নোত্তর (FAQ)</a></li>
+                    <li><a href="{{ route('privacy_policy') }}" class="hover:text-rose-400 transition-colors">গোপনীয়তা নীতি (Privacy)</a></li>
+                    <li><a href="{{ route('terms') }}" class="hover:text-rose-400 transition-colors">শর্তাবলি (Terms)</a></li>
+                    <li><a href="{{ route('refund_policy') }}" class="hover:text-rose-400 transition-colors">রিফান্ড নীতি (Refund)</a></li>
                     <li><a href="{{ route('login') }}" class="hover:text-rose-400 transition-colors font-bold text-slate-300">দোকানদার লগইন</a></li>
                 </ul>
             </div>

@@ -30,6 +30,15 @@ class AgentController extends Controller
 
         $shop->update(['last_agent_heartbeat_at' => now()]);
 
+        // Check if shop subscription has expired
+        if (!$shop->is_active || !$shop->isSubscriptionActive()) {
+            return response()->json([
+                'status' => 'subscription_expired',
+                'message' => 'দোকানের সাবস্ক্রিপশন মেয়াদোত্তীর্ণ। সরাসরি স্বয়ংক্রিয় প্রিন্ট পেতে প্যাকেজ রিনিউ করুন।',
+                'jobs' => [],
+            ], 403);
+        }
+
         // Auto-heal orphaned or stuck spooling jobs older than 5 minutes (re-queue them safely)
         PrintJob::where('shop_id', $shop->id)
             ->where('print_status', 'spooling')

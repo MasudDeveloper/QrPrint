@@ -32,6 +32,64 @@ Route::get('/faq', function () {
     return view('faq');
 })->name('faq');
 
+Route::get('/privacy-policy', function () {
+    return view('pages.privacy');
+})->name('privacy_policy');
+
+Route::get('/terms', function () {
+    return view('pages.terms');
+})->name('terms');
+
+Route::get('/refund-policy', function () {
+    return view('pages.refund');
+})->name('refund_policy');
+
+Route::get('/sitemap.xml', function () {
+    $baseUrl = config('app.url', url('/'));
+    $now = now()->toAtomString();
+
+    $staticRoutes = [
+        ['loc' => $baseUrl . '/', 'priority' => '1.0', 'changefreq' => 'weekly'],
+        ['loc' => $baseUrl . '/features', 'priority' => '0.9', 'changefreq' => 'monthly'],
+        ['loc' => $baseUrl . '/how-it-works', 'priority' => '0.8', 'changefreq' => 'monthly'],
+        ['loc' => $baseUrl . '/faq', 'priority' => '0.8', 'changefreq' => 'monthly'],
+        ['loc' => $baseUrl . '/contact', 'priority' => '0.7', 'changefreq' => 'monthly'],
+        ['loc' => $baseUrl . '/register', 'priority' => '0.9', 'changefreq' => 'monthly'],
+        ['loc' => $baseUrl . '/login', 'priority' => '0.6', 'changefreq' => 'monthly'],
+        ['loc' => $baseUrl . '/privacy-policy', 'priority' => '0.5', 'changefreq' => 'yearly'],
+        ['loc' => $baseUrl . '/terms', 'priority' => '0.5', 'changefreq' => 'yearly'],
+        ['loc' => $baseUrl . '/refund-policy', 'priority' => '0.5', 'changefreq' => 'yearly'],
+    ];
+
+    $xml = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
+    $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
+
+    foreach ($staticRoutes as $r) {
+        $xml .= "  <url>\n";
+        $xml .= "    <loc>{$r['loc']}</loc>\n";
+        $xml .= "    <lastmod>{$now}</lastmod>\n";
+        $xml .= "    <changefreq>{$r['changefreq']}</changefreq>\n";
+        $xml .= "    <priority>{$r['priority']}</priority>\n";
+        $xml .= "  </url>\n";
+    }
+
+    $shops = \App\Models\Shop::where('is_active', true)->select('slug', 'updated_at')->get();
+    foreach ($shops as $s) {
+        $loc = $baseUrl . '/print/' . $s->slug;
+        $mod = $s->updated_at ? $s->updated_at->toAtomString() : $now;
+        $xml .= "  <url>\n";
+        $xml .= "    <loc>{$loc}</loc>\n";
+        $xml .= "    <lastmod>{$mod}</lastmod>\n";
+        $xml .= "    <changefreq>daily</changefreq>\n";
+        $xml .= "    <priority>0.7</priority>\n";
+        $xml .= "  </url>\n";
+    }
+
+    $xml .= '</urlset>';
+
+    return response($xml, 200, ['Content-Type' => 'application/xml']);
+})->name('sitemap');
+
 Route::get('/contact', function () {
     return view('contact');
 })->name('contact');
@@ -54,12 +112,12 @@ Route::post('/contact', function (\Illuminate\Http\Request $request) {
 |--------------------------------------------------------------------------
 */
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [AuthController::class, 'login']);
+Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:10,1');
 Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
 Route::get('/register/office', function () {
     return redirect()->route('register', ['type' => 'office']);
 })->name('register.office');
-Route::post('/register', [AuthController::class, 'register']);
+Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:10,1');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // Password Reset Routes

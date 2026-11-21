@@ -73,14 +73,14 @@
 
                 <div class="grid sm:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1.5" id="nameLabel">আপনার নাম</label>
-                        <input type="text" name="name" value="{{ old('name') }}" required 
+                        <label for="userNameInput" class="block text-xs font-bold text-slate-700 mb-1.5" id="nameLabel">আপনার নাম</label>
+                        <input type="text" id="userNameInput" name="name" value="{{ old('name') }}" required autocomplete="name"
                             class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20"
                             placeholder="মো: আরিফুল ইসলাম">
                     </div>
 
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1.5" id="establishmentLabel">দোকানের নাম</label>
+                        <label for="establishmentInput" class="block text-xs font-bold text-slate-700 mb-1.5" id="establishmentLabel">দোকানের নাম</label>
                         <input type="text" name="shop_name" id="establishmentInput" value="{{ old('shop_name', old('office_name')) }}" required 
                             class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20"
                             placeholder="যেমন: রহিম কম্পিউটার্স & ফটোকপি">
@@ -89,15 +89,15 @@
 
                 <div class="grid sm:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1.5" id="phoneLabel">মোবাইল / বিকাশ নম্বর</label>
-                        <input type="tel" name="phone" value="{{ old('phone') }}" required 
+                        <label for="userPhoneInput" class="block text-xs font-bold text-slate-700 mb-1.5" id="phoneLabel">মোবাইল / বিকাশ নম্বর</label>
+                        <input type="tel" id="userPhoneInput" name="phone" value="{{ old('phone') }}" required autocomplete="tel"
                             class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20"
                             placeholder="017XXXXXXXX">
                     </div>
 
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1.5">ইমেইল ঠিকানা</label>
-                        <input type="email" name="email" value="{{ old('email') }}" required 
+                        <label for="userEmailInput" class="block text-xs font-bold text-slate-700 mb-1.5">ইমেইল ঠিকানা</label>
+                        <input type="email" id="userEmailInput" name="email" value="{{ old('email') }}" required autocomplete="email"
                             class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20"
                             placeholder="admin@example.com">
                     </div>
@@ -105,21 +105,21 @@
 
                 <div class="grid sm:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1.5">পাসওয়ার্ড</label>
-                        <input type="password" name="password" required 
+                        <label for="userPasswordInput" class="block text-xs font-bold text-slate-700 mb-1.5">পাসওয়ার্ড</label>
+                        <input type="password" id="userPasswordInput" name="password" required autocomplete="new-password"
                             class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20"
                             placeholder="কমপক্ষে ৬ অক্ষর">
                     </div>
 
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1.5">পাসওয়ার্ড নিশ্চিত করুন</label>
-                        <input type="password" name="password_confirmation" required 
+                        <label for="userPasswordConfirmInput" class="block text-xs font-bold text-slate-700 mb-1.5">পাসওয়ার্ড নিশ্চিত করুন</label>
+                        <input type="password" id="userPasswordConfirmInput" name="password_confirmation" required autocomplete="new-password"
                             class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20"
                             placeholder="পুনরায় পাসওয়ার্ড লিখুন">
                     </div>
                 </div>
 
-                <button type="submit" id="submitButton" class="w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white font-bold text-sm shadow-lg shadow-rose-500/25 transition-all hover:scale-[1.01] mt-2 cursor-pointer">
+                <button type="submit" id="submitButton" class="w-full min-h-[48px] py-3.5 px-6 rounded-xl bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white font-bold text-sm shadow-lg shadow-rose-500/25 transition-all hover:scale-[1.01] mt-2 cursor-pointer flex items-center justify-center">
                     দোকান চালু করুন (ফ্রি ট্রায়াল) →
                 </button>
             </form>

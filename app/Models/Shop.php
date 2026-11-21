@@ -113,8 +113,8 @@ class Shop extends Model
         }
 
         if (!$this->subscription_expires_at) {
-            // Default free trial logic or newly registered shop: 30 days trial from created_at
-            return $this->created_at ? $this->created_at->addDays(30)->isFuture() : true;
+            // Default free trial logic or newly registered shop: 24 hours from created_at
+            return $this->created_at ? $this->created_at->addHours(24)->isFuture() : false;
         }
 
         return $this->subscription_expires_at->isFuture();
@@ -129,12 +129,55 @@ class Shop extends Model
             return null; // Unlimited
         }
 
-        $expiresAt = $this->subscription_expires_at ?? ($this->created_at ? $this->created_at->addDays(30) : null);
-        if (!$expiresAt) {
+        $expiresAt = $this->subscription_expires_at ?? ($this->created_at ? $this->created_at->addHours(24) : null);
+        if (!$expiresAt || $expiresAt->isPast()) {
             return 0;
         }
 
-        return max(0, (int) now()->diffInDays($expiresAt, false));
+        $hours = (int) now()->diffInHours($expiresAt, false);
+        return max(1, (int) ceil($hours / 24));
+    }
+
+    /**
+     * Get human-friendly Bengali time remaining label
+     * Example: "২৩ ঘণ্টা বাকি", "৫ দিন বাকি", "আজীবন (লাইফটাইম)", "মেয়াদ উত্তীর্ণ"
+     */
+    public function getTimeRemainingLabelAttribute(): string
+    {
+        if ($this->is_lifetime) {
+            return 'আজীবন (আনলিমিটেড)';
+        }
+
+        $expiresAt = $this->subscription_expires_at ?? ($this->created_at ? $this->created_at->addHours(24) : null);
+        if (!$expiresAt || $expiresAt->isPast()) {
+            return 'মেয়াদ উত্তীর্ণ (Expired)';
+        }
+
+        $hours = (int) now()->diffInHours($expiresAt, false);
+        if ($hours < 24) {
+            $h = max(1, $hours);
+            return \App\Helpers\BanglaHelper::bnNumber($h) . ' ঘণ্টা বাকি';
+        }
+
+        $days = (int) ceil($hours / 24);
+        return \App\Helpers\BanglaHelper::bnNumber($days) . ' দিন বাকি';
+    }
+
+    /**
+     * Get Bengali formatted expiration date
+     * Example: "২৬ অক্টোবর, ২০২৬"
+     */
+    public function getFormattedExpiresAtAttribute(): string
+    {
+        if ($this->is_lifetime) {
+            return 'আজীবন লাইসেন্স';
+        }
+
+        if (!$this->subscription_expires_at) {
+            return 'নির্ধারিত নেই';
+        }
+
+        return \App\Helpers\BanglaHelper::bnDate($this->subscription_expires_at);
     }
 
     /**

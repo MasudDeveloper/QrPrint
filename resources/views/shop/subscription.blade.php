@@ -40,14 +40,14 @@
                 <div class="flex items-center sm:justify-end gap-1.5 pt-1">
                     @if($isActive)
                         <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-                        <span class="text-xs font-bold text-emerald-400">মেয়াদ বাকি: {{ $daysRemaining }} দিন</span>
+                        <span class="text-xs font-bold text-emerald-400">{{ $shop->time_remaining_label }}</span>
                     @else
                         <span class="w-2 h-2 rounded-full bg-rose-500"></span>
                         <span class="text-xs font-bold text-rose-400">মেয়াদ উত্তীর্ণ (Expired)</span>
                     @endif
                 </div>
-                <div class="text-[10px] text-slate-500">
-                    মেয়াদ শেষ: {{ $shop->subscription_expires_at ? $shop->subscription_expires_at->format('d M, Y') : ($shop->created_at ? $shop->created_at->addDays(30)->format('d M, Y') : 'N/A') }}
+                <div class="text-[11px] text-slate-400">
+                    মেয়াদ শেষ: <span class="font-bold text-slate-300">{{ $shop->formatted_expires_at }}</span>
                 </div>
             @endif
         </div>

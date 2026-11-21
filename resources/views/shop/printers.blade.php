@@ -45,16 +45,16 @@
     <div class="grid lg:grid-cols-3 gap-8">
         
         <!-- Left 2 Cols: Printer List -->
-        <div class="lg:col-span-2 space-y-4">
+        <div class="lg:col-span-2 space-y-4 min-w-0">
             @forelse($printers as $printer)
-                <div class="bg-slate-900/80 p-6 rounded-3xl border border-slate-800 shadow-sm flex items-center justify-between gap-4 transition hover:border-slate-700">
-                    <div class="flex items-center gap-4">
-                        <div class="w-14 h-14 rounded-2xl {{ $printer->status === 'online' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-slate-800 text-slate-500' }} flex items-center justify-center font-bold text-2xl shrink-0">
+                <div class="bg-slate-900/80 p-4 sm:p-6 rounded-3xl border border-slate-800 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition hover:border-slate-700 min-w-0">
+                    <div class="flex items-start sm:items-center gap-3 sm:gap-4 min-w-0">
+                        <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl {{ $printer->status === 'online' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-slate-800 text-slate-500' }} flex items-center justify-center font-bold text-xl sm:text-2xl shrink-0">
                             🖨️
                         </div>
-                        <div>
-                            <div class="flex items-center gap-2">
-                                <h3 class="text-base font-bold text-white">{{ $printer->name }}</h3>
+                        <div class="min-w-0 flex-1">
+                            <div class="flex flex-wrap items-center gap-2">
+                                <h3 class="text-sm sm:text-base font-bold text-white truncate">{{ $printer->name }}</h3>
                                 @if($printer->is_default)
                                     <span class="px-2 py-0.5 rounded-md bg-rose-500/20 text-rose-400 border border-rose-500/30 text-[10px] font-bold">ডিফল্ট প্রিন্টার</span>
                                 @endif
@@ -62,26 +62,26 @@
                                     <span class="px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-bold">অটো-সিঙ্কড</span>
                                 @endif
                             </div>
-                            <div class="text-xs text-slate-400 mt-1">
+                            <div class="text-xs text-slate-400 mt-1 break-all">
                                 সিস্টেম ড্রাইভার নাম: <span class="font-mono text-slate-200 font-bold">{{ $printer->system_printer_name }}</span>
                             </div>
                             <div class="flex flex-wrap items-center gap-2 mt-2">
                                 <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold {{ $printer->type === 'bw' ? 'bg-slate-800 text-slate-300' : ($printer->type === 'color' ? 'bg-pink-500/10 text-pink-400 border border-pink-500/20' : ($printer->type === 'photocopy' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 'bg-purple-500/10 text-purple-400 border border-purple-500/20')) }}">
-                                    রাউটিং: {{ $printer->type === 'bw' ? 'সাদাকালো (BW)' : ($printer->type === 'color' ? 'কালার (Color)' : ($printer->type === 'photocopy' ? 'ফটোকপি মেশিন (Photocopier)' : strtoupper($printer->type))) }}
+                                    রাউটিং: {{ $printer->type === 'bw' ? 'সাদাকালো (BW)' : ($printer->type === 'color' ? 'কালার (Color)' : ($printer->type === 'photocopy' ? 'ফটোকপি মেশিন' : strtoupper($printer->type))) }}
                                 </span>
                                 @if($printer->status === 'online')
-                                    <span class="flex items-center gap-1.5 text-[11px] text-emerald-400 font-bold">
+                                    <span class="flex items-center gap-1.5 text-xs text-emerald-400 font-bold">
                                         <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                                         <span>অনলাইন ও প্রস্তুত</span>
                                     </span>
                                 @else
-                                    <span class="flex items-center gap-1.5 text-[11px] text-slate-500 font-bold">
+                                    <span class="flex items-center gap-1.5 text-xs text-slate-500 font-bold">
                                         <span class="w-2 h-2 rounded-full bg-slate-600"></span>
                                         <span>অফলাইন</span>
                                     </span>
                                 @endif
                                 @if($printer->last_heartbeat_at)
-                                    <span class="text-[10px] text-slate-500">
+                                    <span class="text-[11px] text-slate-500">
                                         • শেষ সিঙ্ক: {{ $printer->last_heartbeat_at->diffForHumans() }}
                                     </span>
                                 @endif
@@ -89,10 +89,10 @@
                         </div>
                     </div>
 
-                    <form action="{{ route('shop.printers.delete', $printer) }}" method="POST" onsubmit="return confirm('আপনি কি নিশ্চিত এই প্রিন্টারটি রিমুভ করতে চান?')">
+                    <form action="{{ route('shop.printers.delete', $printer) }}" method="POST" onsubmit="return confirm('আপনি কি নিশ্চিত এই প্রিন্টারটি রিমুভ করতে চান?')" class="self-end sm:self-center shrink-0">
                         @csrf
                         @method('DELETE')
-                        <button type="submit" class="px-3.5 py-2 rounded-xl text-xs font-bold text-rose-400 hover:bg-rose-500/15 border border-rose-500/30 transition-colors cursor-pointer">
+                        <button type="submit" aria-label="প্রিন্টার মুছে ফেলুন" class="min-h-[44px] px-4 py-2 rounded-xl text-xs font-bold text-rose-400 hover:bg-rose-500/15 border border-rose-500/30 transition-colors cursor-pointer flex items-center justify-center">
                             মুছুন
                         </button>
                     </form>
