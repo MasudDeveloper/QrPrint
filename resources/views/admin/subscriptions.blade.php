@@ -71,11 +71,13 @@
                             </td>
                             <td class="px-6 py-4 uppercase font-bold text-slate-300">
                                 @if($sub->payment_method === 'bkash')
-                                    <span class="text-pink-400">bKash</span>
+                                    <span class="px-2 py-0.5 rounded-md bg-pink-500/15 text-pink-400 font-bold border border-pink-500/30">bKash</span>
                                 @elseif($sub->payment_method === 'nagad')
-                                    <span class="text-amber-400">Nagad</span>
+                                    <span class="px-2 py-0.5 rounded-md bg-amber-500/15 text-amber-400 font-bold border border-amber-500/30">Nagad</span>
+                                @elseif($sub->payment_method === 'rocket')
+                                    <span class="px-2 py-0.5 rounded-md bg-purple-500/15 text-purple-400 font-bold border border-purple-500/30">Rocket</span>
                                 @else
-                                    {{ $sub->payment_method }}
+                                    <span class="px-2 py-0.5 rounded-md bg-slate-800 text-slate-300 font-bold">{{ $sub->payment_method }}</span>
                                 @endif
                             </td>
                             <td class="px-6 py-4">

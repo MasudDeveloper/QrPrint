@@ -82,6 +82,7 @@ class AdminController extends Controller
         $developerUrl = Setting::get('developer_url', 'https://mrdeveloper.xyz');
         $adminBkash = Setting::get('admin_bkash_number', '01644416378');
         $adminNagad = Setting::get('admin_nagad_number', '01644416378');
+        $adminRocket = Setting::get('admin_rocket_number', '01644416378');
         $paymentInstructions = Setting::get('admin_payment_instructions', 'বিকাশ বা নগদ সেন্ড মানি করে নিচের বক্সে আপনার Transaction ID ও সেন্ডার নাম্বারটি দিন।');
 
         // bKash Merchant PGW Settings
@@ -102,7 +103,7 @@ class AdminController extends Controller
         $mailFromName = Setting::get('mail_from_name', env('MAIL_FROM_NAME', 'PrintSheba'));
 
         return view('admin.settings', compact(
-            'videoUrl', 'videoTitle', 'hotline', 'email', 'developerUrl', 'adminBkash', 'adminNagad', 'paymentInstructions',
+            'videoUrl', 'videoTitle', 'hotline', 'email', 'developerUrl', 'adminBkash', 'adminNagad', 'adminRocket', 'paymentInstructions',
             'bkashEnabled', 'bkashSandbox', 'bkashAppKey', 'bkashAppSecret', 'bkashUsername', 'bkashPassword',
             'mailHost', 'mailPort', 'mailUsername', 'mailPassword', 'mailEncryption', 'mailFromAddress', 'mailFromName'
         ));
@@ -117,6 +118,7 @@ class AdminController extends Controller
             'support_email' => 'nullable|string|email|max:100',
             'admin_bkash_number' => 'nullable|string|max:30',
             'admin_nagad_number' => 'nullable|string|max:30',
+            'admin_rocket_number' => 'nullable|string|max:30',
             'admin_payment_instructions' => 'nullable|string|max:500',
             'bkash_pgw_app_key' => 'nullable|string|max:100',
             'bkash_pgw_app_secret' => 'nullable|string|max:100',
@@ -137,6 +139,7 @@ class AdminController extends Controller
         Setting::set('support_email', $request->support_email ?? 'masud.info@gmail.com');
         Setting::set('admin_bkash_number', $request->admin_bkash_number ?? '01644416378');
         Setting::set('admin_nagad_number', $request->admin_nagad_number ?? '01644416378');
+        Setting::set('admin_rocket_number', $request->admin_rocket_number ?? '01644416378');
         Setting::set('admin_payment_instructions', $request->admin_payment_instructions ?? '');
 
         // bKash Merchant Settings

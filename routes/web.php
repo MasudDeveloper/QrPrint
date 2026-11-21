@@ -184,6 +184,7 @@ Route::middleware(['auth'])->prefix('shop')->name('shop.')->group(function () {
     Route::delete('/printers/{printer}', [ShopController::class, 'deletePrinter'])->name('printers.delete');
     Route::get('/subscription', [ShopController::class, 'subscription'])->name('subscription');
     Route::post('/subscription/purchase', [ShopController::class, 'purchaseSubscription'])->name('subscription.purchase');
+    Route::get('/subscription/status', [ShopController::class, 'subscriptionStatus'])->name('subscription.status');
     Route::get('/agent-setup', [ShopController::class, 'agentSetup'])->name('agent_setup');
     Route::get('/agent-download/zip', [ShopController::class, 'downloadAgentZip'])->name('agent_download_zip');
     Route::get('/agent-download/exe', [ShopController::class, 'downloadAgentExe'])->name('agent_download_exe');

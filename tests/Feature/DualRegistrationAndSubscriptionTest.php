@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Shop;
 use App\Models\User;
 use App\Models\ShopSubscription;
+use App\Models\Setting;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -223,6 +224,121 @@ class DualRegistrationAndSubscriptionTest extends TestCase
         $shop->refresh();
         $this->assertEquals('Square Pharma Central', $shop->name);
         $this->assertEquals(0.00, $shop->rate_bw_single);
+    }
+
+    public function test_user_can_purchase_subscription_with_rocket_and_valid_phone(): void
+    {
+        $user = User::factory()->create(['role' => 'shop_owner']);
+        $shop = Shop::create([
+            'user_id' => $user->id,
+            'name' => 'Rocket Test Shop',
+            'slug' => 'rocket-test-shop',
+            'phone' => '01712345678',
+            'is_office_mode' => false,
+            'subscription_plan' => 'free_trial',
+        ]);
+
+        $response = $this->actingAs($user)->post(route('shop.subscription.purchase'), [
+            'plan' => 'yearly_pro',
+            'payment_method' => 'rocket',
+            'sender_number' => '01712345678',
+            'transaction_id' => 'rkt987654',
+        ]);
+
+        $response->assertSessionHas('success');
+        $this->assertDatabaseHas('shop_subscriptions', [
+            'shop_id' => $shop->id,
+            'plan' => 'yearly_pro',
+            'payment_method' => 'rocket',
+            'sender_number' => '01712345678',
+            'transaction_id' => 'RKT987654',
+            'status' => 'pending',
+        ]);
+    }
+
+    public function test_subscription_validation_enforces_bangladeshi_phone_pattern(): void
+    {
+        $user = User::factory()->create(['role' => 'shop_owner']);
+        $shop = Shop::create([
+            'user_id' => $user->id,
+            'name' => 'Validation Test Shop',
+            'slug' => 'val-test-shop',
+            'phone' => '01712345678',
+            'is_office_mode' => false,
+            'subscription_plan' => 'free_trial',
+        ]);
+
+        // Invalid phone number: not starting with 01[3-9] or wrong length
+        $response = $this->actingAs($user)->post(route('shop.subscription.purchase'), [
+            'plan' => 'yearly_pro',
+            'payment_method' => 'bkash',
+            'sender_number' => '02987654321', // landline pattern
+            'transaction_id' => 'BKB123456',
+        ]);
+
+        $response->assertSessionHasErrors('sender_number');
+
+        // Short TrxID (< 6 chars)
+        $shortTrxResponse = $this->actingAs($user)->post(route('shop.subscription.purchase'), [
+            'plan' => 'yearly_pro',
+            'payment_method' => 'nagad',
+            'sender_number' => '01712345678',
+            'transaction_id' => '1234',
+        ]);
+
+        $shortTrxResponse->assertSessionHasErrors('transaction_id');
+    }
+
+    public function test_subscription_status_polling_returns_accurate_state(): void
+    {
+        $user = User::factory()->create(['role' => 'shop_owner']);
+        $shop = Shop::create([
+            'user_id' => $user->id,
+            'name' => 'Polling Test Shop',
+            'slug' => 'poll-test-shop',
+            'phone' => '01712345678',
+            'is_office_mode' => false,
+            'subscription_plan' => 'free_trial',
+        ]);
+
+        $sub = ShopSubscription::create([
+            'shop_id' => $shop->id,
+            'plan' => 'yearly_pro',
+            'plan_name' => 'ইয়ারলি প্রো (১ বছর - দোকান)',
+            'amount' => 999.00,
+            'payment_method' => 'rocket',
+            'transaction_id' => 'RKT112233',
+            'sender_number' => '01712345678',
+            'status' => 'pending',
+        ]);
+
+        $response = $this->actingAs($user)->getJson(route('shop.subscription.status'));
+        $response->assertStatus(200);
+        $response->assertJson([
+            'has_pending' => true,
+            'status' => 'pending',
+            'subscription' => [
+                'id' => $sub->id,
+                'plan' => 'yearly_pro',
+                'payment_method' => 'rocket',
+                'transaction_id' => 'RKT112233',
+            ],
+        ]);
+    }
+
+    public function test_admin_settings_can_update_rocket_number(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+
+        $response = $this->actingAs($admin)->post(route('admin.settings.update'), [
+            'admin_bkash_number' => '01700000001',
+            'admin_nagad_number' => '01700000002',
+            'admin_rocket_number' => '01700000003',
+            'admin_payment_instructions' => 'রকেটে টাকা পাঠানোর নির্দেশিকা',
+        ]);
+
+        $response->assertSessionHas('success');
+        $this->assertEquals('01700000003', Setting::get('admin_rocket_number'));
     }
 }
 

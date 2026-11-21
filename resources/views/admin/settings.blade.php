@@ -69,7 +69,7 @@
                 </div>
             </div>
 
-            <div class="grid sm:grid-cols-2 gap-4">
+            <div class="grid sm:grid-cols-3 gap-4">
                 <div>
                     <label class="block text-xs font-bold text-slate-300 mb-1.5">সুপার এডমিন বিকাশ নম্বর (bKash):</label>
                     <input type="text" name="admin_bkash_number" value="{{ old('admin_bkash_number', $adminBkash ?? '') }}" 
@@ -81,6 +81,13 @@
                     <label class="block text-xs font-bold text-slate-300 mb-1.5">সুপার এডমিন নগদ নম্বর (Nagad):</label>
                     <input type="text" name="admin_nagad_number" value="{{ old('admin_nagad_number', $adminNagad ?? '') }}" 
                         class="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-800 text-xs sm:text-sm font-mono text-white focus:outline-none focus:border-rose-500"
+                        placeholder="017xxxxxxxx (Personal/Merchant)">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-300 mb-1.5">সুপার এডমিন রকেট নম্বর (Rocket):</label>
+                    <input type="text" name="admin_rocket_number" value="{{ old('admin_rocket_number', $adminRocket ?? '') }}" 
+                        class="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-800 text-xs sm:text-sm font-mono text-white focus:outline-none focus:border-purple-500"
                         placeholder="017xxxxxxxx (Personal/Merchant)">
                 </div>
             </div>

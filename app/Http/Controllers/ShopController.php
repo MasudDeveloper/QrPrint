@@ -633,22 +633,28 @@ class ShopController extends Controller
         $preselectedPlan = $request->query('plan', $defaultPlan);
         $adminBkash = Setting::get('admin_bkash_number', '01644416378');
         $adminNagad = Setting::get('admin_nagad_number', '01644416378');
-        $paymentInstructions = Setting::get('admin_payment_instructions', 'বিকাশ বা নগদ সেন্ড মানি করে নিচে আপনার Transaction ID ও সেন্ডার নাম্বার দিন।');
+        $adminRocket = Setting::get('admin_rocket_number', '01644416378');
+        $paymentInstructions = Setting::get('admin_payment_instructions', 'বিকাশ, নগদ বা রকেটে সেন্ড মানি করে নিচে আপনার Transaction ID ও সেন্ডার নাম্বার দিন।');
         
         $subscriptionsHistory = ShopSubscription::where('shop_id', $shop->id)->latest()->get();
+        $pendingSubscription = ShopSubscription::where('shop_id', $shop->id)->where('status', 'pending')->latest()->first();
+        $latestSubscription = ShopSubscription::where('shop_id', $shop->id)->latest()->first();
 
         return view('shop.subscription', compact(
             'shop',
             'preselectedPlan',
             'adminBkash',
             'adminNagad',
+            'adminRocket',
             'paymentInstructions',
-            'subscriptionsHistory'
+            'subscriptionsHistory',
+            'pendingSubscription',
+            'latestSubscription'
         ));
     }
 
     /**
-     * Submit subscription request with bKash/Nagad TrxID
+     * Submit subscription request with bKash/Nagad/Rocket TrxID
      */
     public function purchaseSubscription(Request $request)
     {
@@ -656,9 +662,13 @@ class ShopController extends Controller
 
         $request->validate([
             'plan' => 'required|string|in:monthly_starter,yearly_pro,lifetime,office_basic_monthly,office_basic_yearly,office_corporate_yearly',
-            'payment_method' => 'required|string|in:bkash,nagad',
-            'sender_number' => 'required|string|max:20',
-            'transaction_id' => 'required|string|max:50',
+            'payment_method' => 'required|string|in:bkash,nagad,rocket',
+            'sender_number' => ['required', 'string', 'regex:/^01[3-9]\d{8}$/'],
+            'transaction_id' => 'required|string|min:6|max:50',
+        ], [
+            'sender_number.regex' => '১১ ডিজিটের সঠিক মোবাইল নম্বর প্রদান করুন (যেমন: 01712345678)।',
+            'transaction_id.required' => 'পেমেন্ট ট্রানজেকশন আইডি (TrxID) দিন।',
+            'transaction_id.min' => 'সঠিক ট্রানজেকশন আইডি (কমপক্ষে ৬ ডিজিট/অক্ষর) দিন।',
         ]);
 
         $plans = [
@@ -672,18 +682,55 @@ class ShopController extends Controller
 
         $selectedPlan = $plans[$request->plan];
 
-        ShopSubscription::create([
+        $cleanTrxId = strtoupper(str_replace(' ', '', trim($request->transaction_id)));
+        $cleanSenderNumber = trim($request->sender_number);
+
+        $subscription = ShopSubscription::create([
             'shop_id' => $shop->id,
             'plan' => $request->plan,
             'plan_name' => $selectedPlan['name'],
             'amount' => $selectedPlan['amount'],
             'payment_method' => $request->payment_method,
-            'transaction_id' => strtoupper(trim($request->transaction_id)),
-            'sender_number' => trim($request->sender_number),
+            'transaction_id' => $cleanTrxId,
+            'sender_number' => $cleanSenderNumber,
             'status' => 'pending',
         ]);
 
-        return back()->with('success', 'আপনার সাবস্ক্রিপশন ও পেমেন্টের আবেদনটি সফলভাবে জমা হয়েছে! সুপার এডমিন পেমেন্ট ভেরিফাই করার সাথে সাথেই আপনার প্যাকেজটি সক্রিয় হয়ে যাবে।');
+        return back()
+            ->with('success', 'আপনার সাবস্ক্রিপশন ও পেমেন্টের আবেদনটি সফলভাবে জমা হয়েছে! এডমিন পেমেন্ট ভেরিফাই করার সাথে সাথেই আপনার প্যাকেজটি সক্রিয় হয়ে যাবে।')
+            ->with('submitted_subscription_id', $subscription->id);
+    }
+
+    /**
+     * Real-time polling endpoint for subscription verification status
+     */
+    public function subscriptionStatus()
+    {
+        $shop = $this->getShop();
+        $latest = ShopSubscription::where('shop_id', $shop->id)->latest()->first();
+        $pending = ShopSubscription::where('shop_id', $shop->id)->where('status', 'pending')->latest()->first();
+
+        return response()->json([
+            'has_pending' => (bool)$pending,
+            'status' => $latest ? $latest->status : 'none',
+            'subscription' => $latest ? [
+                'id' => $latest->id,
+                'invoice_no' => 'PS-INV-' . str_pad($latest->id, 5, '0', STR_PAD_LEFT),
+                'plan' => $latest->plan,
+                'plan_name' => $latest->plan_name,
+                'amount' => (float)$latest->amount,
+                'payment_method' => $latest->payment_method,
+                'transaction_id' => $latest->transaction_id,
+                'sender_number' => $latest->sender_number,
+                'created_at' => $latest->created_at ? $latest->created_at->format('d M, Y h:i A') : null,
+                'approved_at' => $latest->approved_at ? $latest->approved_at->format('d M, Y h:i A') : null,
+                'notes' => $latest->notes,
+            ] : null,
+            'is_active' => (bool)($shop->isSubscriptionActive() || $shop->is_lifetime),
+            'plan_label' => $shop->plan_label,
+            'formatted_expires_at' => $shop->formatted_expires_at,
+            'time_remaining_label' => $shop->time_remaining_label,
+        ]);
     }
 
     /**
