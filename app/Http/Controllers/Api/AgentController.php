@@ -175,6 +175,7 @@ class AgentController extends Controller
         $printersList = $request->input('printers', []);
         $bwPrinter = $request->input('bw_printer');
         $colorPrinter = $request->input('color_printer');
+        $photocopyPrinter = $request->input('photocopy_printer');
 
         // 1. Process B&W selected printer from Windows Agent
         if (!empty($bwPrinter) && $bwPrinter !== '-- উইন্ডোজ ডিফল্ট প্রিন্টার --') {
@@ -210,6 +211,23 @@ class AgentController extends Controller
         } elseif ($colorPrinter === '-- কোনো কালার প্রিন্টার নেই --') {
             Printer::where('shop_id', $shop->id)->where('type', 'color')->update(['status' => 'offline']);
             $shop->update(['has_color_print' => false]);
+        }
+
+        // 3. Process Photocopier machine from Windows Agent
+        if (!empty($photocopyPrinter) && $photocopyPrinter !== '-- উইন্ডোজ ডিফল্ট প্রিন্টার --' && $photocopyPrinter !== '-- কোনো ফটোকপি মেশিন নেই --') {
+            Printer::updateOrCreate(
+                ['shop_id' => $shop->id, 'system_printer_name' => $photocopyPrinter],
+                [
+                    'name' => $photocopyPrinter,
+                    'type' => 'photocopy',
+                    'status' => 'online',
+                    'last_heartbeat_at' => now(),
+                ]
+            );
+            $shop->update(['has_photocopier' => true]);
+        } elseif ($photocopyPrinter === '-- কোনো ফটোকপি মেশিন নেই --') {
+            Printer::where('shop_id', $shop->id)->where('type', 'photocopy')->update(['status' => 'offline']);
+            $shop->update(['has_photocopier' => false]);
         }
 
         // 3. Keep all installed printers reported by agent online (excluding virtual drivers)

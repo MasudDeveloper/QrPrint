@@ -90,7 +90,7 @@
                 </span>
             </h3>
 
-            <div class="grid sm:grid-cols-3 gap-4">
+            <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <!-- Color Print Toggle -->
                 <label class="p-4 rounded-2xl bg-slate-950 border border-slate-800 cursor-pointer flex items-center justify-between hover:border-slate-700 transition-all">
                     <div>
@@ -98,6 +98,15 @@
                         <span class="text-[10px] text-slate-400">রঙিন প্রিন্টার আছে কি?</span>
                     </div>
                     <input type="checkbox" name="has_color_print" value="1" {{ old('has_color_print', $shop->has_color_print) ? 'checked' : '' }} class="w-5 h-5 accent-pink-500 rounded">
+                </label>
+
+                <!-- Photocopier Machine Toggle -->
+                <label class="p-4 rounded-2xl bg-slate-950 border border-slate-800 cursor-pointer flex items-center justify-between hover:border-slate-700 transition-all">
+                    <div>
+                        <span class="text-xs font-bold text-amber-400 block">📠 ফটোকপি মেশিন</span>
+                        <span class="text-[10px] text-slate-400">সাশ্রয়ী সাদা-কালো কপির</span>
+                    </div>
+                    <input type="checkbox" name="has_photocopier" value="1" {{ old('has_photocopier', $shop->has_photocopier) ? 'checked' : '' }} class="w-5 h-5 accent-amber-500 rounded">
                 </label>
 
                 <!-- Duplex Print Toggle -->
@@ -112,8 +121,8 @@
                 <!-- NID Card Print Toggle -->
                 <label class="p-4 rounded-2xl bg-slate-950 border border-slate-800 cursor-pointer flex items-center justify-between hover:border-slate-700 transition-all">
                     <div>
-                        <span class="text-xs font-bold text-emerald-400 block">🪪 এনআইডি কার্ড প্রিন্ট (NID)</span>
-                        <span class="text-[10px] text-slate-400">স্মার্ট কার্ড ফ্রন্ট-ব্যাক অটো-ক্রপ ও A4 ফিট</span>
+                        <span class="text-xs font-bold text-emerald-400 block">🪪 এনআইডি কার্ড</span>
+                        <span class="text-[10px] text-slate-400">স্মার্ট কার্ড ফ্রন্ট-ব্যাক</span>
                     </div>
                     <input type="checkbox" name="has_nid_print" value="1" {{ old('has_nid_print', $shop->has_nid_print) ? 'checked' : '' }} class="w-5 h-5 accent-emerald-500 rounded">
                 </label>
@@ -162,6 +171,28 @@
                         <div class="flex items-center gap-2">
                             <span class="text-sm font-bold text-slate-400">৳</span>
                             <input type="number" step="0.5" name="rate_bw_double" value="{{ old('rate_bw_double', $shop->rate_bw_double) }}" required 
+                                class="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 font-bold text-white text-sm">
+                        </div>
+                    </div>
+
+                    <!-- Photocopier Single -->
+                    <div class="p-4 rounded-2xl bg-slate-950 border border-amber-500/20">
+                        <label class="block text-xs font-bold text-amber-400 mb-1">ফটোকপি মেশিন (১ পাশ / Single)</label>
+                        <span class="text-[11px] text-slate-400 block mb-2">কম খরচে বড় ফটোকপিয়ার মেশিনে প্রতি পেজ</span>
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm font-bold text-amber-400">৳</span>
+                            <input type="number" step="0.5" name="rate_photocopy_single" value="{{ old('rate_photocopy_single', $shop->rate_photocopy_single ?? 2.00) }}" 
+                                class="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 font-bold text-white text-sm">
+                        </div>
+                    </div>
+
+                    <!-- Photocopier Double -->
+                    <div class="p-4 rounded-2xl bg-slate-950 border border-amber-500/20">
+                        <label class="block text-xs font-bold text-amber-400 mb-1">ফটোকপি মেশিন (উভয় পাশ / Duplex)</label>
+                        <span class="text-[11px] text-slate-400 block mb-2">ফটোকপি মেশিনে উভয় পাশ বোথ-সাইড রেট</span>
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm font-bold text-amber-400">৳</span>
+                            <input type="number" step="0.5" name="rate_photocopy_double" value="{{ old('rate_photocopy_double', $shop->rate_photocopy_double ?? 3.00) }}" 
                                 class="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 font-bold text-white text-sm">
                         </div>
                     </div>

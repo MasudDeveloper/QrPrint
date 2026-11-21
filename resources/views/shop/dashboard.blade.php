@@ -196,8 +196,8 @@
                             </td>
                             <td class="px-6 py-4 text-slate-400 max-w-xs truncate">{{ $job->original_name }}</td>
                             <td class="px-6 py-4">
-                                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold {{ $job->color_mode === 'color' ? 'bg-pink-500/10 text-pink-400 border border-pink-500/20' : 'bg-slate-800 text-slate-300' }}">
-                                    {{ $job->color_mode === 'color' ? 'কালার' : 'সাদাকালো' }}
+                                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold {{ $job->color_mode === 'color' ? 'bg-pink-500/10 text-pink-400 border border-pink-500/20' : ($job->color_mode === 'photocopy' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 'bg-slate-800 text-slate-300') }}">
+                                    {{ $job->color_mode === 'color' ? 'কালার' : ($job->color_mode === 'photocopy' ? 'ফটোকপি' : 'সাদাকালো') }}
                                 </span>
                             </td>
                             @if($shop->is_office_mode)
@@ -313,8 +313,8 @@
                                     <div>{{ $job->customer_name ?: 'অফিস কর্মী' }}</div>
                                 </td>
                                 <td class="px-6 py-4">
-                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold {{ $job->color_mode === 'color' ? 'bg-pink-500/10 text-pink-400 border border-pink-500/20' : 'bg-slate-800 text-slate-300' }}">
-                                        {{ $job->color_mode === 'color' ? 'কালার' : 'সাদাকালো' }}
+                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold {{ $job->color_mode === 'color' ? 'bg-pink-500/10 text-pink-400 border border-pink-500/20' : ($job->color_mode === 'photocopy' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 'bg-slate-800 text-slate-300') }}">
+                                        {{ $job->color_mode === 'color' ? 'কালার' : ($job->color_mode === 'photocopy' ? 'ফটোকপি' : 'সাদাকালো') }}
                                     </span>
                                 </td>
                             @else
@@ -603,6 +603,9 @@
             const isSpooling = job.print_status === 'spooling';
             const isPaid = job.payment_status === 'paid';
             const isColor = job.color_mode === 'color';
+            const isPhotocopy = job.color_mode === 'photocopy';
+            const colorBadgeClass = isColor ? 'bg-pink-500/10 text-pink-400 border border-pink-500/20' : (isPhotocopy ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 'bg-slate-800 text-slate-300');
+            const colorBadgeText = isColor ? 'কালার' : (isPhotocopy ? 'ফটোকপি' : 'সাদাকালো');
 
             const phoneHtml = (job.customer_phone && !isOfficeMode) ? `<span class="text-[10px] text-slate-500 font-mono">${escapeHtml(job.customer_phone)}</span>` : '';
             const trxHtml = (job.payment_trx_id && !isOfficeMode) ? `<span class="text-[9px] text-slate-500 font-mono block mt-0.5">${escapeHtml(job.payment_trx_id)}</span>` : '';
@@ -688,8 +691,8 @@
                     </td>
                     <td class="px-6 py-4 text-slate-400 max-w-xs truncate">${escapeHtml(job.original_name)}</td>
                     <td class="px-6 py-4">
-                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold ${isColor ? 'bg-pink-500/10 text-pink-400 border border-pink-500/20' : 'bg-slate-800 text-slate-300'}">
-                            ${isColor ? 'কালার' : 'সাদাকালো'}
+                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold ${colorBadgeClass}">
+                            ${colorBadgeText}
                         </span>
                     </td>
                     ${middleCols}
@@ -739,8 +742,8 @@
                         <div>${escapeHtml(job.customer_name || 'অফিস কর্মী')}</div>
                     </td>
                     <td class="px-6 py-4">
-                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold ${isColor ? 'bg-pink-500/10 text-pink-400 border border-pink-500/20' : 'bg-slate-800 text-slate-300'}">
-                            ${isColor ? 'কালার' : 'সাদাকালো'}
+                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold ${colorBadgeClass}">
+                            ${colorBadgeText}
                         </span>
                     </td>
                 `;

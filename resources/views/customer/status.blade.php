@@ -91,8 +91,8 @@
                 </div>
                 <div class="flex justify-between">
                     <span class="text-slate-500">মোড:</span>
-                    <span class="font-bold {{ $job->color_mode === 'color' ? 'text-pink-600' : 'text-slate-800' }}">
-                        {{ $job->color_mode === 'color' ? 'কালার' : 'সাদাকালো' }} ({{ $job->is_duplex ? 'উভয় পাশ' : 'একপাশ' }})
+                    <span class="font-bold {{ $job->color_mode === 'color' ? 'text-pink-600' : ($job->color_mode === 'photocopy' ? 'text-amber-600' : 'text-slate-800') }}">
+                        {{ $job->color_mode === 'color' ? 'কালার' : ($job->color_mode === 'photocopy' ? 'ফটোকপি' : 'সাদাকালো') }} ({{ $job->is_duplex ? 'উভয় পাশ' : 'একপাশ' }})
                     </span>
                 </div>
                 @if($job->pickup_reference)

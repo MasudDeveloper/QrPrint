@@ -20,6 +20,7 @@ namespace PrintSheba
         public string api_token { get; set; }
         public string bw_printer { get; set; }
         public string color_printer { get; set; }
+        public string photocopy_printer { get; set; }
         public int poll_interval_sec { get; set; }
         public bool auto_start { get; set; }
         public bool minimize_to_tray { get; set; }
@@ -31,6 +32,7 @@ namespace PrintSheba
             api_token = "";
             bw_printer = "";
             color_printer = "";
+            photocopy_printer = "";
             poll_interval_sec = 3;
             auto_start = false;
             minimize_to_tray = true;
@@ -80,6 +82,7 @@ namespace PrintSheba
         private TextBox txtApiToken;
         private ComboBox cmbBwPrinter;
         private ComboBox cmbColorPrinter;
+        private ComboBox cmbPhotocopyPrinter;
         private CheckBox chkAutoStart;
         private CheckBox chkMinimizeToTray;
         private CheckBox chkForceDuplex;
@@ -214,10 +217,13 @@ namespace PrintSheba
         {
             cmbBwPrinter.Items.Clear();
             cmbColorPrinter.Items.Clear();
+            cmbPhotocopyPrinter.Items.Clear();
 
             cmbBwPrinter.Items.Add("-- উইন্ডোজ ডিফল্ট প্রিন্টার --");
             cmbColorPrinter.Items.Add("-- কোনো কালার প্রিন্টার নেই --");
             cmbColorPrinter.Items.Add("-- উইন্ডোজ ডিফল্ট প্রিন্টার --");
+            cmbPhotocopyPrinter.Items.Add("-- কোনো ফটোকপি মেশিন নেই --");
+            cmbPhotocopyPrinter.Items.Add("-- উইন্ডোজ ডিফল্ট প্রিন্টার --");
 
             // Filter out virtual/software print drivers that are not physical printers
             var virtualPrinterKeywords = new string[] {
@@ -245,11 +251,13 @@ namespace PrintSheba
                 {
                     cmbBwPrinter.Items.Add(printer);
                     cmbColorPrinter.Items.Add(printer);
+                    cmbPhotocopyPrinter.Items.Add(printer);
                 }
             }
 
             cmbBwPrinter.SelectedIndex = 0;
             cmbColorPrinter.SelectedIndex = 0;
+            cmbPhotocopyPrinter.SelectedIndex = 0;
         }
 
         private void ApplyConfigToUI()
@@ -267,6 +275,10 @@ namespace PrintSheba
             if (!string.IsNullOrEmpty(config.color_printer) && cmbColorPrinter.Items.Contains(config.color_printer))
             {
                 cmbColorPrinter.SelectedItem = config.color_printer;
+            }
+            if (!string.IsNullOrEmpty(config.photocopy_printer) && cmbPhotocopyPrinter.Items.Contains(config.photocopy_printer))
+            {
+                cmbPhotocopyPrinter.SelectedItem = config.photocopy_printer;
             }
         }
 
@@ -473,6 +485,10 @@ namespace PrintSheba
             if (colorMode == "color" && !string.IsNullOrEmpty(config.color_printer) && config.color_printer != "-- উইন্ডোজ ডিফল্ট প্রিন্টার --" && config.color_printer != "-- কোনো কালার প্রিন্টার নেই --")
             {
                 return config.color_printer;
+            }
+            if (colorMode == "photocopy" && !string.IsNullOrEmpty(config.photocopy_printer) && config.photocopy_printer != "-- উইন্ডোজ ডিফল্ট প্রিন্টার --" && config.photocopy_printer != "-- কোনো ফটোকপি মেশিন নেই --")
+            {
+                return config.photocopy_printer;
             }
             if (!string.IsNullOrEmpty(config.bw_printer) && config.bw_printer != "-- উইন্ডোজ ডিফল্ট প্রিন্টার --")
             {
@@ -854,7 +870,8 @@ namespace PrintSheba
                     printers = printersList,
                     bw_printer = config.bw_printer,
                     color_printer = config.color_printer,
-                    agent_version = "2.6"
+                    photocopy_printer = config.photocopy_printer,
+                    agent_version = "2.7"
                 });
                 byte[] bytes = Encoding.UTF8.GetBytes(payload);
 
@@ -957,8 +974,8 @@ namespace PrintSheba
         // ==================== MODERN PREMIUM BRANDED UI ====================
         private void InitializeComponent()
         {
-            this.Text = "PrintSheba • Windows Cloud Agent (Live Spooler v2.6)";
-            this.Size = new Size(820, 755);
+            this.Text = "PrintSheba • Windows Cloud Agent (Live Spooler v2.7)";
+            this.Size = new Size(820, 795);
             this.StartPosition = FormStartPosition.CenterScreen;
             this.Font = new Font("Segoe UI", 9F, FontStyle.Regular);
             this.BackColor = Color.FromArgb(9, 13, 22); // Deep Luxury OLED Dark Canvas
@@ -1121,7 +1138,7 @@ namespace PrintSheba
             Panel pnlConfig = new Panel
             {
                 Location = new Point(24, 206),
-                Size = new Size(756, 245),
+                Size = new Size(756, 280),
                 BackColor = Color.FromArgb(19, 29, 49)
             };
             pnlConfig.Paint += (s, e) =>
@@ -1216,16 +1233,33 @@ namespace PrintSheba
             btnColorProperties.FlatAppearance.BorderColor = Color.FromArgb(51, 65, 85);
             btnColorProperties.Click += (s, e) => OpenPrinterProperties(cmbColorPrinter.SelectedItem != null ? cmbColorPrinter.SelectedItem.ToString() : "");
 
-            // Row 4: Checkboxes
-            chkAutoStart = new CheckBox { Text = "উইন্ডোজ স্টার্টআপে চালু", Location = new Point(135, 154), AutoSize = true, Font = new Font("Segoe UI", 8.8F), ForeColor = Color.FromArgb(203, 213, 225) };
-            chkMinimizeToTray = new CheckBox { Text = "ট্রেতে মিনিমাইজ", Location = new Point(310, 154), AutoSize = true, Font = new Font("Segoe UI", 8.8F), ForeColor = Color.FromArgb(203, 213, 225) };
-            chkForceDuplex = new CheckBox { Text = "ফটোকপিয়ার মোড (সব প্রিন্ট ২-সাইড ফোর্স)", Location = new Point(445, 154), AutoSize = true, Font = new Font("Segoe UI", 8.8F, FontStyle.Bold), ForeColor = Color.FromArgb(251, 191, 36) };
+            // Row 4: Photocopier Machine (Digital Copier)
+            Label lblPhoto = new Label { Text = "ফটোকপি মেশিন:", Location = new Point(20, 158), AutoSize = true, Font = new Font("Segoe UI", 9F, FontStyle.Bold), ForeColor = Color.FromArgb(251, 191, 36) };
+            cmbPhotocopyPrinter = new ComboBox { Location = new Point(135, 155), Size = new Size(445, 26), DropDownStyle = ComboBoxStyle.DropDownList, Font = new Font("Segoe UI", 9.5F), BackColor = Color.FromArgb(10, 15, 29), ForeColor = Color.White };
+            Button btnPhotocopyProperties = new Button
+            {
+                Text = "⚙️ ড্রাইভার সেটিংস",
+                Location = new Point(588, 155),
+                Size = new Size(154, 26),
+                BackColor = Color.FromArgb(30, 41, 59),
+                ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat,
+                Font = new Font("Segoe UI", 8.5F, FontStyle.Bold),
+                Cursor = Cursors.Hand
+            };
+            btnPhotocopyProperties.FlatAppearance.BorderColor = Color.FromArgb(51, 65, 85);
+            btnPhotocopyProperties.Click += (s, e) => OpenPrinterProperties(cmbPhotocopyPrinter.SelectedItem != null ? cmbPhotocopyPrinter.SelectedItem.ToString() : "");
 
-            // Row 5: Action Buttons (Vibrant Gradient / Modern Solid)
+            // Row 5: Checkboxes
+            chkAutoStart = new CheckBox { Text = "উইন্ডোজ স্টার্টআপে চালু", Location = new Point(135, 192), AutoSize = true, Font = new Font("Segoe UI", 8.8F), ForeColor = Color.FromArgb(203, 213, 225) };
+            chkMinimizeToTray = new CheckBox { Text = "ট্রেতে মিনিমাইজ", Location = new Point(310, 192), AutoSize = true, Font = new Font("Segoe UI", 8.8F), ForeColor = Color.FromArgb(203, 213, 225) };
+            chkForceDuplex = new CheckBox { Text = "ফটোকপিয়ার মোড (সব প্রিন্ট ২-সাইড ফোর্স)", Location = new Point(445, 192), AutoSize = true, Font = new Font("Segoe UI", 8.8F, FontStyle.Bold), ForeColor = Color.FromArgb(251, 191, 36) };
+
+            // Row 6: Action Buttons (Vibrant Gradient / Modern Solid)
             btnSave = new Button
             {
                 Text = "💾 সেটিংস সেভ ও ক্লাউডে সিঙ্ক",
-                Location = new Point(135, 190),
+                Location = new Point(135, 226),
                 Size = new Size(245, 38),
                 BackColor = Color.FromArgb(225, 29, 72),
                 ForeColor = Color.White,
@@ -1242,6 +1276,7 @@ namespace PrintSheba
                 config.api_token = txtApiToken.Text.Trim();
                 config.bw_printer = cmbBwPrinter.SelectedItem != null ? cmbBwPrinter.SelectedItem.ToString() : "";
                 config.color_printer = cmbColorPrinter.SelectedItem != null ? cmbColorPrinter.SelectedItem.ToString() : "";
+                config.photocopy_printer = cmbPhotocopyPrinter.SelectedItem != null ? cmbPhotocopyPrinter.SelectedItem.ToString() : "";
                 config.auto_start = chkAutoStart.Checked;
                 config.minimize_to_tray = chkMinimizeToTray.Checked;
                 config.force_duplex = chkForceDuplex.Checked;
@@ -1258,7 +1293,7 @@ namespace PrintSheba
             btnTestPrint = new Button
             {
                 Text = "🖨️ টেস্ট পেজ প্রিন্ট করুন",
-                Location = new Point(390, 190),
+                Location = new Point(390, 226),
                 Size = new Size(185, 38),
                 BackColor = Color.FromArgb(16, 185, 129),
                 ForeColor = Color.White,
@@ -1274,7 +1309,7 @@ namespace PrintSheba
             btnCheckNow = new Button
             {
                 Text = "🔄 এখনই রিফ্রেশ ও সিঙ্ক",
-                Location = new Point(585, 190),
+                Location = new Point(585, 226),
                 Size = new Size(157, 38),
                 BackColor = Color.FromArgb(30, 41, 59),
                 ForeColor = Color.White,
@@ -1306,6 +1341,9 @@ namespace PrintSheba
             pnlConfig.Controls.Add(lblCol);
             pnlConfig.Controls.Add(cmbColorPrinter);
             pnlConfig.Controls.Add(btnColorProperties);
+            pnlConfig.Controls.Add(lblPhoto);
+            pnlConfig.Controls.Add(cmbPhotocopyPrinter);
+            pnlConfig.Controls.Add(btnPhotocopyProperties);
             pnlConfig.Controls.Add(chkAutoStart);
             pnlConfig.Controls.Add(chkMinimizeToTray);
             pnlConfig.Controls.Add(chkForceDuplex);
@@ -1317,7 +1355,7 @@ namespace PrintSheba
             // 4. ACTIVITY CONSOLE PANEL (Luxury Developer Terminal)
             Panel pnlTerminal = new Panel
             {
-                Location = new Point(24, 465),
+                Location = new Point(24, 502),
                 Size = new Size(756, 235),
                 BackColor = Color.FromArgb(11, 17, 32)
             };

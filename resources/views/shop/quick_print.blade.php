@@ -251,25 +251,34 @@
                         </span>
                     </div>
 
-                    <!-- 1. Color Mode (কালার মোড) -->
+                    <!-- 1. Color Mode (কালার মোড ও মেশিন) -->
                     <div class="space-y-2">
-                        <label class="block text-xs font-bold text-slate-300">১. কালার মোড নির্বাচন করুন *</label>
-                        <div class="grid grid-cols-2 gap-3">
+                        <label class="block text-xs font-bold text-slate-300">১. প্রিন্ট মোড ও মেশিন নির্বাচন করুন *</label>
+                        <div class="grid grid-cols-3 gap-2.5">
                             <label class="cursor-pointer">
                                 <input type="radio" name="color_mode" value="bw" class="peer sr-only" checked>
-                                <div class="p-3.5 rounded-2xl bg-slate-950 border-2 border-slate-800 peer-checked:border-emerald-500 peer-checked:bg-emerald-500/10 hover:border-slate-700 transition-all text-center space-y-1">
-                                    <div class="text-xl">⚫</div>
-                                    <div class="text-xs font-bold text-white">সাদা-কালো (B&W)</div>
-                                    <div class="text-[10px] text-slate-400 font-en">Mono / Grayscale</div>
+                                <div class="p-3 rounded-2xl bg-slate-950 border-2 border-slate-800 peer-checked:border-emerald-500 peer-checked:bg-emerald-500/10 hover:border-slate-700 transition-all text-center space-y-1">
+                                    <div class="text-lg">⚫</div>
+                                    <div class="text-xs font-bold text-white">সাদা-কালো</div>
+                                    <div class="text-[10px] text-slate-400 font-en">লেজার প্রিন্টার</div>
+                                </div>
+                            </label>
+
+                            <label class="cursor-pointer">
+                                <input type="radio" name="color_mode" value="photocopy" class="peer sr-only">
+                                <div class="p-3 rounded-2xl bg-slate-950 border-2 border-slate-800 peer-checked:border-amber-500 peer-checked:bg-amber-500/10 hover:border-slate-700 transition-all text-center space-y-1">
+                                    <div class="text-lg">📠</div>
+                                    <div class="text-xs font-bold text-white">ফটোকপি</div>
+                                    <div class="text-[10px] text-amber-400 font-en">কপির মেশিন</div>
                                 </div>
                             </label>
 
                             <label class="cursor-pointer">
                                 <input type="radio" name="color_mode" value="color" class="peer sr-only">
-                                <div class="p-3.5 rounded-2xl bg-slate-950 border-2 border-slate-800 peer-checked:border-rose-500 peer-checked:bg-rose-500/10 hover:border-slate-700 transition-all text-center space-y-1">
-                                    <div class="text-xl">🎨</div>
+                                <div class="p-3 rounded-2xl bg-slate-950 border-2 border-slate-800 peer-checked:border-rose-500 peer-checked:bg-rose-500/10 hover:border-slate-700 transition-all text-center space-y-1">
+                                    <div class="text-lg">🎨</div>
                                     <div class="text-xs font-bold text-white">রঙিন (Color)</div>
-                                    <div class="text-[10px] text-slate-400 font-en">Full Color RGB</div>
+                                    <div class="text-[10px] text-slate-400 font-en">Full RGB</div>
                                 </div>
                             </label>
                         </div>

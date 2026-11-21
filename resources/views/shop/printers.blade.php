@@ -66,8 +66,8 @@
                                 সিস্টেম ড্রাইভার নাম: <span class="font-mono text-slate-200 font-bold">{{ $printer->system_printer_name }}</span>
                             </div>
                             <div class="flex flex-wrap items-center gap-2 mt-2">
-                                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold {{ $printer->type === 'bw' ? 'bg-slate-800 text-slate-300' : ($printer->type === 'color' ? 'bg-pink-500/10 text-pink-400 border border-pink-500/20' : 'bg-purple-500/10 text-purple-400 border border-purple-500/20') }}">
-                                    রাউটিং: {{ $printer->type === 'bw' ? 'সাদাকালো (BW)' : ($printer->type === 'color' ? 'কালার (Color)' : strtoupper($printer->type)) }}
+                                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold {{ $printer->type === 'bw' ? 'bg-slate-800 text-slate-300' : ($printer->type === 'color' ? 'bg-pink-500/10 text-pink-400 border border-pink-500/20' : ($printer->type === 'photocopy' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 'bg-purple-500/10 text-purple-400 border border-purple-500/20')) }}">
+                                    রাউটিং: {{ $printer->type === 'bw' ? 'সাদাকালো (BW)' : ($printer->type === 'color' ? 'কালার (Color)' : ($printer->type === 'photocopy' ? 'ফটোকপি মেশিন (Photocopier)' : strtoupper($printer->type))) }}
                                 </span>
                                 @if($printer->status === 'online')
                                     <span class="flex items-center gap-1.5 text-[11px] text-emerald-400 font-bold">
@@ -134,6 +134,7 @@
                     <label class="block text-xs font-bold text-slate-300 mb-1">প্রিন্টার টাইপ (স্মার্ট রাউটিং)</label>
                     <select name="type" class="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white focus:outline-none focus:border-rose-500">
                         <option value="bw">সাদাকালো লেজার (HP, Canon)</option>
+                        <option value="photocopy">ফটোকপি মেশিন / ডিজিটাল কপির (Toshiba, Canon iR, Ricoh, Sharp)</option>
                         <option value="color">কালার ইঙ্কজেট (Epson, Canon)</option>
                         <option value="all">সব ধরনের প্রিন্ট (All-in-one)</option>
                     </select>

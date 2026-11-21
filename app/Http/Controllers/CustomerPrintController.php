@@ -70,7 +70,7 @@ class CustomerPrintController extends Controller
 
         $request->validate([
             'document' => 'required|file|max:51200|mimes:pdf,doc,docx,jpg,jpeg,png',
-            'color_mode' => 'required|in:bw,color',
+            'color_mode' => 'required|in:bw,color,photocopy',
             'is_duplex' => 'nullable',
             'copies' => 'required|integer|min:1|max:100',
             'paper_size' => 'nullable|string',
@@ -125,7 +125,9 @@ class CustomerPrintController extends Controller
         if ($paperSize === '4x6_passport') {
             $totalAmount = $shop->rate_photo_passport * $copies;
         } else {
-            if ($colorMode === 'bw') {
+            if ($colorMode === 'photocopy') {
+                $unitRate = $isDuplex ? ($shop->rate_photocopy_double / 2) : $shop->rate_photocopy_single;
+            } elseif ($colorMode === 'bw') {
                 $unitRate = $isDuplex ? ($shop->rate_bw_double / 2) : $shop->rate_bw_single;
             } else {
                 $unitRate = $isDuplex ? ($shop->rate_color_double / 2) : $shop->rate_color_single;
@@ -443,7 +445,7 @@ class CustomerPrintController extends Controller
 
         $request->validate([
             'document' => 'required|file|max:51200|mimes:pdf,doc,docx,jpg,jpeg,png',
-            'color_mode' => 'required|in:bw,color',
+            'color_mode' => 'required|in:bw,color,photocopy',
             'is_duplex' => 'nullable',
             'copies' => 'required|integer|min:1|max:100',
             'paper_size' => 'nullable|string',

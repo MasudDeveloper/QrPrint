@@ -190,26 +190,38 @@
                     <span>প্রিন্ট সেটিংস</span>
                 </span>
 
-                <!-- Mode: B&W vs Color (Only if Shop has Color Print enabled) -->
-                @if($shop->has_color_print)
+                <!-- Mode: B&W Laser vs Photocopier Machine vs Color -->
+                @if($shop->has_color_print || $shop->has_photocopier)
                 <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-2">কালার মোড:</label>
-                    <div class="grid grid-cols-2 gap-3">
+                    <label class="block text-xs font-bold text-slate-700 mb-2">প্রিন্ট মোড / মেশিন নির্বাচন করুন:</label>
+                    <div class="grid grid-cols-1 sm:grid-cols-{{ ($shop->has_color_print && $shop->has_photocopier) ? '3' : '2' }} gap-2.5">
                         <label class="border-2 border-slate-200 rounded-2xl p-3 flex items-center justify-between cursor-pointer has-[:checked]:border-slate-900 has-[:checked]:bg-slate-50 transition-all">
                             <div>
-                                <span class="text-xs font-bold text-slate-900 block">সাদাকালো</span>
-                                <span class="text-[10px] text-slate-500">৳{{ $shop->rate_bw_single }}/পেজ</span>
+                                <span class="text-xs font-bold text-slate-900 block">⚪⚫ সাদাকালো লেজার</span>
+                                <span class="text-[10px] text-slate-500 font-medium">৳{{ $shop->rate_bw_single }}/পেজ</span>
                             </div>
                             <input type="radio" name="color_mode" value="bw" checked class="accent-slate-900 rate-trigger">
                         </label>
 
+                        @if($shop->has_photocopier)
+                        <label class="border-2 border-slate-200 rounded-2xl p-3 flex items-center justify-between cursor-pointer has-[:checked]:border-amber-500 has-[:checked]:bg-amber-50/40 transition-all">
+                            <div>
+                                <span class="text-xs font-bold text-amber-900 block">📠 ফটোকপি (সাশ্রয়ী)</span>
+                                <span class="text-[10px] text-amber-700 font-bold">৳{{ $shop->rate_photocopy_single }}/পেজ</span>
+                            </div>
+                            <input type="radio" name="color_mode" value="photocopy" class="accent-amber-500 rate-trigger">
+                        </label>
+                        @endif
+
+                        @if($shop->has_color_print)
                         <label class="border-2 border-slate-200 rounded-2xl p-3 flex items-center justify-between cursor-pointer has-[:checked]:border-rose-500 has-[:checked]:bg-rose-50/30 transition-all">
                             <div>
-                                <span class="text-xs font-bold text-slate-900 block">রঙিন (Color)</span>
-                                <span class="text-[10px] text-rose-600">৳{{ $shop->rate_color_single }}/পেজ</span>
+                                <span class="text-xs font-bold text-slate-900 block">🎨 রঙিন (Color)</span>
+                                <span class="text-[10px] text-rose-600 font-medium">৳{{ $shop->rate_color_single }}/পেজ</span>
                             </div>
                             <input type="radio" name="color_mode" value="color" class="accent-rose-500 rate-trigger">
                         </label>
+                        @endif
                     </div>
                 </div>
                 @else
@@ -381,6 +393,8 @@
     <script>
         const rateBwSingle = {{ $shop->rate_bw_single }};
         const rateBwDouble = {{ $shop->rate_bw_double }};
+        const ratePhotocopySingle = {{ $shop->rate_photocopy_single ?? 2.00 }};
+        const ratePhotocopyDouble = {{ $shop->rate_photocopy_double ?? 3.00 }};
         const rateColorSingle = {{ $shop->rate_color_single }};
         const rateColorDouble = {{ $shop->rate_color_double }};
 
@@ -392,7 +406,9 @@
             const colorMode = document.querySelector('input[name="color_mode"]:checked')?.value || document.querySelector('input[name="color_mode"]')?.value || 'bw';
 
             let unit = 0;
-            if (colorMode === 'bw') {
+            if (colorMode === 'photocopy') {
+                unit = isDuplex ? (ratePhotocopyDouble / 2) : ratePhotocopySingle;
+            } else if (colorMode === 'bw') {
                 unit = isDuplex ? (rateBwDouble / 2) : rateBwSingle;
             } else {
                 unit = isDuplex ? (rateColorDouble / 2) : rateColorSingle;

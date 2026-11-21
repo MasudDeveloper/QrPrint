@@ -101,7 +101,7 @@
                         <td class="py-2 font-bold">{{ $shop->is_office_mode ? ($job->customer_name ?: 'অফিস কর্মী') : ($job->pickup_reference ?: ($job->customer_name ?: 'কাস্টমার')) }}</td>
                         <td class="py-2 max-w-[140px] truncate">{{ $job->original_name }}</td>
                         <td class="py-2 font-mono">{{ $job->total_pages }} × {{ $job->copies }}</td>
-                        <td class="py-2">{{ $job->color_mode === 'color' ? 'কালার' : 'সাদাকালো' }}</td>
+                        <td class="py-2">{{ $job->color_mode === 'color' ? 'কালার' : ($job->color_mode === 'photocopy' ? 'ফটোকপি' : 'সাদাকালো') }}</td>
                         @if($shop->is_office_mode)
                             <td class="py-2 font-mono">{{ $job->pickup_reference ?: '-' }}</td>
                             <td class="py-2 text-right font-mono">{{ $job->paper_size ?: 'A4' }}</td>

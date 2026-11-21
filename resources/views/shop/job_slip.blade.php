@@ -94,8 +94,8 @@
 
             <div class="flex justify-between pt-1">
                 <span class="text-slate-500">প্রিন্ট মোড:</span>
-                <span class="font-bold {{ $job->color_mode === 'color' ? 'text-pink-600' : 'text-slate-900' }}">
-                    {{ $job->color_mode === 'color' ? 'রঙিন (Color)' : 'সাদাকালো' }} 
+                <span class="font-bold {{ $job->color_mode === 'color' ? 'text-pink-600' : ($job->color_mode === 'photocopy' ? 'text-amber-600' : 'text-slate-900') }}">
+                    {{ $job->color_mode === 'color' ? 'রঙিন (Color)' : ($job->color_mode === 'photocopy' ? 'ফটোকপি মেশিন' : 'সাদাকালো') }} 
                     ({{ $job->is_duplex ? 'উভয় পাশ' : 'একপাশ' }})
                 </span>
             </div>

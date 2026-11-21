@@ -164,10 +164,10 @@
                     <span>প্রিন্ট সেটিংস</span>
                 </span>
 
-                <!-- Mode: B&W vs Color -->
+                <!-- Mode: B&W Laser vs Photocopier Machine vs Color -->
                 <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-2">কালার মোড:</label>
-                    <div class="grid grid-cols-2 gap-3">
+                    <label class="block text-xs font-bold text-slate-700 mb-2">প্রিন্ট মোড / আউটপুট ডিভাইস:</label>
+                    <div class="grid grid-cols-1 sm:grid-cols-{{ (1 + ($shop->has_photocopier ? 1 : 0) + ($shop->has_color_print ? 1 : 0)) > 2 ? '3' : '2' }} gap-2.5">
                         <label class="border-2 border-slate-200 rounded-2xl p-3 flex items-center justify-between cursor-pointer has-[:checked]:border-slate-900 has-[:checked]:bg-slate-50 transition-all">
                             <div>
                                 <span class="text-xs font-bold text-slate-900 block">⚪⚫ সাদাকালো</span>
@@ -175,6 +175,16 @@
                             </div>
                             <input type="radio" name="color_mode" value="bw" checked class="accent-slate-900">
                         </label>
+
+                        @if($shop->has_photocopier)
+                        <label class="border-2 border-slate-200 rounded-2xl p-3 flex items-center justify-between cursor-pointer has-[:checked]:border-amber-600 has-[:checked]:bg-amber-50/30 transition-all">
+                            <div>
+                                <span class="text-xs font-bold text-slate-900 block">📠 ফটোকপি মেশিন</span>
+                                <span class="text-[10px] text-amber-700 font-bold">হেভি-ডিউটি ডিজিটাল কপির</span>
+                            </div>
+                            <input type="radio" name="color_mode" value="photocopy" class="accent-amber-600">
+                        </label>
+                        @endif
 
                         @if($shop->has_color_print)
                         <label class="border-2 border-slate-200 rounded-2xl p-3 flex items-center justify-between cursor-pointer has-[:checked]:border-indigo-600 has-[:checked]:bg-indigo-50/30 transition-all">

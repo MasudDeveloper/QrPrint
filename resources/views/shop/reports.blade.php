@@ -188,8 +188,8 @@
                                 <span class="text-[10px] text-slate-500 font-normal">({{ $job->total_pages * $job->copies }})</span>
                             </td>
                             <td class="px-5 py-4">
-                                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full {{ $job->color_mode === 'color' ? 'bg-pink-500/10 text-pink-400 border border-pink-500/20' : 'bg-slate-800 text-slate-300' }}">
-                                    {{ $job->color_mode === 'color' ? 'কালার' : 'সাদাকালো' }}
+                                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full {{ $job->color_mode === 'color' ? 'bg-pink-500/10 text-pink-400 border border-pink-500/20' : ($job->color_mode === 'photocopy' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 'bg-slate-800 text-slate-300') }}">
+                                    {{ $job->color_mode === 'color' ? 'কালার' : ($job->color_mode === 'photocopy' ? 'ফটোকপি' : 'সাদাকালো') }}
                                 </span>
                             </td>
                             @if($shop->is_office_mode)

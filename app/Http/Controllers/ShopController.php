@@ -139,6 +139,8 @@ class ShopController extends Controller
             $rules['nagad_number'] = 'nullable|string|max:20';
             $rules['rate_bw_single'] = 'required|numeric|min:0.5';
             $rules['rate_bw_double'] = 'required|numeric|min:0.5';
+            $rules['rate_photocopy_single'] = 'nullable|numeric|min:0.5';
+            $rules['rate_photocopy_double'] = 'nullable|numeric|min:0.5';
             $rules['rate_color_single'] = 'required|numeric|min:1';
             $rules['rate_color_double'] = 'required|numeric|min:1';
             $rules['rate_photo_passport'] = 'nullable|numeric|min:0';
@@ -152,10 +154,13 @@ class ShopController extends Controller
             $data = $request->only(['name', 'phone']);
             $data['has_color_print'] = $request->boolean('has_color_print');
             $data['has_duplex_print'] = $request->boolean('has_duplex_print');
+            $data['has_photocopier'] = $request->boolean('has_photocopier');
             $data['has_nid_print'] = $request->boolean('has_nid_print');
             // Ensure rates stay zero for office mode
             $data['rate_bw_single'] = 0.00;
             $data['rate_bw_double'] = 0.00;
+            $data['rate_photocopy_single'] = 0.00;
+            $data['rate_photocopy_double'] = 0.00;
             $data['rate_color_single'] = 0.00;
             $data['rate_color_double'] = 0.00;
         } else {
@@ -166,6 +171,8 @@ class ShopController extends Controller
                 'nagad_number',
                 'rate_bw_single',
                 'rate_bw_double',
+                'rate_photocopy_single',
+                'rate_photocopy_double',
                 'rate_color_single',
                 'rate_color_double',
                 'rate_photo_passport',
@@ -174,6 +181,7 @@ class ShopController extends Controller
             ]);
             $data['has_color_print'] = $request->boolean('has_color_print');
             $data['has_duplex_print'] = $request->boolean('has_duplex_print');
+            $data['has_photocopier'] = $request->boolean('has_photocopier');
             $data['has_passport_photo'] = $request->boolean('has_passport_photo');
             $data['has_nid_print'] = $request->boolean('has_nid_print');
         }
@@ -196,7 +204,7 @@ class ShopController extends Controller
 
         $request->validate([
             'name' => 'required|string|max:100',
-            'type' => 'required|in:all,bw,color,photo',
+            'type' => 'required|in:all,bw,color,photo,photocopy',
             'system_printer_name' => 'nullable|string|max:150',
         ]);
 
@@ -290,6 +298,7 @@ class ShopController extends Controller
             'api_token' => $shop->api_token,
             'bw_printer' => '',
             'color_printer' => '',
+            'photocopy_printer' => '',
             'poll_interval_sec' => 3,
             'auto_start' => true,
             'minimize_to_tray' => true,
@@ -353,6 +362,7 @@ class ShopController extends Controller
             'api_token' => $shop->api_token,
             'bw_printer' => '',
             'color_printer' => '',
+            'photocopy_printer' => '',
             'poll_interval_sec' => 3,
             'auto_start' => true,
             'minimize_to_tray' => true,
@@ -389,6 +399,7 @@ class ShopController extends Controller
             'api_token' => $shop->api_token,
             'bw_printer' => '',
             'color_printer' => '',
+            'photocopy_printer' => '',
             'poll_interval_sec' => 3,
             'auto_start' => true,
             'minimize_to_tray' => true,
@@ -895,7 +906,7 @@ class ShopController extends Controller
             'temp_file' => 'nullable|string',
             'scanned_image_data' => 'nullable|string',
             'document' => 'nullable|file|max:51200|mimes:pdf,doc,docx,jpg,jpeg,png,webp,bmp,gif',
-            'color_mode' => 'required|in:bw,color',
+            'color_mode' => 'required|in:bw,color,photocopy',
             'copies' => 'required|integer|min:1|max:100',
             'paper_size' => 'nullable|string',
             'is_duplex' => 'nullable',
