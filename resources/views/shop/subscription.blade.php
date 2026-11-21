@@ -204,7 +204,7 @@
                         </span>
                         <div class="hidden md:block">
                             <span class="text-[10px] uppercase font-bold text-rose-400 block tracking-wider">ধাপ ১</span>
-                            <span class="text-xs sm:text-sm font-black text-white block">প্যাকেজ নির্বাচন</span>
+                            <span class="step-title text-xs sm:text-sm font-black text-white block">প্যাকেজ নির্বাচন</span>
                         </div>
                     </div>
                     <div class="h-1.5 w-full bg-rose-500 rounded-full mt-3 step-indicator"></div>
@@ -218,7 +218,7 @@
                         </span>
                         <div class="hidden md:block">
                             <span class="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">ধাপ ২</span>
-                            <span class="text-xs sm:text-sm font-black text-slate-400 block">পেমেন্ট মাধ্যম</span>
+                            <span class="step-title text-xs sm:text-sm font-black text-slate-400 block">পেমেন্ট মাধ্যম</span>
                         </div>
                     </div>
                     <div class="h-1.5 w-full bg-slate-800 rounded-full mt-3 step-indicator"></div>
@@ -232,7 +232,7 @@
                         </span>
                         <div class="hidden md:block">
                             <span class="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">ধাপ ৩</span>
-                            <span class="text-xs sm:text-sm font-black text-slate-400 block">টাকা পাঠান</span>
+                            <span class="step-title text-xs sm:text-sm font-black text-slate-400 block">টাকা পাঠান</span>
                         </div>
                     </div>
                     <div class="h-1.5 w-full bg-slate-800 rounded-full mt-3 step-indicator"></div>
@@ -246,7 +246,7 @@
                         </span>
                         <div class="hidden md:block">
                             <span class="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">ধাপ ৪</span>
-                            <span class="text-xs sm:text-sm font-black text-slate-400 block">যাচাই ও কনফার্ম</span>
+                            <span class="step-title text-xs sm:text-sm font-black text-slate-400 block">যাচাই ও কনফার্ম</span>
                         </div>
                     </div>
                     <div class="h-1.5 w-full bg-slate-800 rounded-full mt-3 step-indicator"></div>
@@ -412,15 +412,15 @@
                     <!-- 3 LARGE BRANDED TILES -->
                     <div class="grid sm:grid-cols-3 gap-5">
                         <!-- bKash Tile -->
-                        <div onclick="selectMethod('bkash')" id="methodTile_bkash" class="method-tile p-6 rounded-3xl border-2 border-pink-500/80 bg-pink-500/10 cursor-pointer transition-all hover:scale-[1.02] shadow-xl relative overflow-hidden group">
+                        <div onclick="selectMethod('bkash')" id="methodTile_bkash" class="method-tile p-5 sm:p-6 rounded-3xl border-2 border-pink-500/80 bg-pink-500/10 cursor-pointer transition-all hover:scale-[1.02] shadow-xl relative overflow-hidden group">
                             <div class="flex items-center justify-between pb-3 border-b border-pink-500/30">
-                                <div class="w-10 h-10 rounded-2xl bg-pink-500 text-white flex items-center justify-center font-black text-sm shadow-md">
-                                    ব
+                                <div class="h-10 px-3 rounded-xl bg-white flex items-center justify-center shadow-md">
+                                    <img src="{{ asset('images/payments/bkash.png') }}" alt="bKash" class="h-7 w-auto object-contain">
                                 </div>
                                 <span class="method-check w-6 h-6 rounded-full bg-pink-500 text-white flex items-center justify-center text-xs font-black">✓</span>
                             </div>
                             <div class="mt-4 space-y-1">
-                                <div class="text-lg font-black text-white">বিকাশ (bKash)</div>
+                                <div class="text-base sm:text-lg font-black text-white">বিকাশ (bKash)</div>
                                 <div class="text-xs text-pink-300 font-medium">Send Money (পার্সোনাল)</div>
                             </div>
                             <div class="mt-4 pt-3 border-t border-pink-500/20 text-[11px] text-pink-200 flex items-center gap-1.5 font-bold">
@@ -429,15 +429,15 @@
                         </div>
 
                         <!-- Nagad Tile -->
-                        <div onclick="selectMethod('nagad')" id="methodTile_nagad" class="method-tile p-6 rounded-3xl border-2 border-slate-800 bg-slate-900/90 cursor-pointer transition-all hover:scale-[1.02] hover:border-amber-500/80 relative overflow-hidden group">
+                        <div onclick="selectMethod('nagad')" id="methodTile_nagad" class="method-tile p-5 sm:p-6 rounded-3xl border-2 border-slate-800 bg-slate-900/90 cursor-pointer transition-all hover:scale-[1.02] hover:border-amber-500/80 relative overflow-hidden group">
                             <div class="flex items-center justify-between pb-3 border-b border-slate-800">
-                                <div class="w-10 h-10 rounded-2xl bg-amber-500 text-white flex items-center justify-center font-black text-sm shadow-md">
-                                    ন
+                                <div class="h-10 px-3 rounded-xl bg-white flex items-center justify-center shadow-md">
+                                    <img src="{{ asset('images/payments/nagad.png') }}" alt="Nagad" class="h-7 w-auto object-contain">
                                 </div>
                                 <span class="method-check w-6 h-6 rounded-full border-2 border-slate-700 flex items-center justify-center text-xs font-black text-white"></span>
                             </div>
                             <div class="mt-4 space-y-1">
-                                <div class="text-lg font-black text-white">নগদ (Nagad)</div>
+                                <div class="text-base sm:text-lg font-black text-white">নগদ (Nagad)</div>
                                 <div class="text-xs text-slate-400 font-medium">Send Money (পার্সোনাল)</div>
                             </div>
                             <div class="mt-4 pt-3 border-t border-slate-800 text-[11px] text-slate-400 flex items-center gap-1.5 font-bold">
@@ -446,15 +446,15 @@
                         </div>
 
                         <!-- Rocket Tile -->
-                        <div onclick="selectMethod('rocket')" id="methodTile_rocket" class="method-tile p-6 rounded-3xl border-2 border-slate-800 bg-slate-900/90 cursor-pointer transition-all hover:scale-[1.02] hover:border-purple-500/80 relative overflow-hidden group">
+                        <div onclick="selectMethod('rocket')" id="methodTile_rocket" class="method-tile p-5 sm:p-6 rounded-3xl border-2 border-slate-800 bg-slate-900/90 cursor-pointer transition-all hover:scale-[1.02] hover:border-purple-500/80 relative overflow-hidden group">
                             <div class="flex items-center justify-between pb-3 border-b border-slate-800">
-                                <div class="w-10 h-10 rounded-2xl bg-purple-600 text-white flex items-center justify-center font-black text-sm shadow-md">
-                                    র
+                                <div class="h-10 px-3 rounded-xl bg-white flex items-center justify-center shadow-md">
+                                    <img src="{{ asset('images/payments/rocket.svg') }}" alt="Rocket" class="h-7 w-auto object-contain">
                                 </div>
                                 <span class="method-check w-6 h-6 rounded-full border-2 border-slate-700 flex items-center justify-center text-xs font-black text-white"></span>
                             </div>
                             <div class="mt-4 space-y-1">
-                                <div class="text-lg font-black text-white">রকেট (Rocket)</div>
+                                <div class="text-base sm:text-lg font-black text-white">রকেট (Rocket)</div>
                                 <div class="text-xs text-slate-400 font-medium">Send Money (পার্সোনাল)</div>
                             </div>
                             <div class="mt-4 pt-3 border-t border-slate-800 text-[11px] text-slate-400 flex items-center gap-1.5 font-bold">
@@ -490,9 +490,11 @@
                         <!-- Account Type Badge & Warning -->
                         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-pink-500/20" id="sendMoneyHeaderBorder">
                             <div class="flex items-center gap-3">
-                                <span id="brandIconBadge" class="w-10 h-10 rounded-2xl bg-pink-500 text-white flex items-center justify-center font-black text-base shadow">ব</span>
+                                <div class="h-12 px-3 rounded-2xl bg-white flex items-center justify-center shadow-md shrink-0">
+                                    <img id="brandLogoImg" src="{{ asset('images/payments/bkash.png') }}" alt="bKash" class="h-8 w-auto object-contain">
+                                </div>
                                 <div>
-                                    <div id="brandTitleText" class="text-base font-black text-white">বিকাশ পার্সোনাল একাউন্ট</div>
+                                    <div id="brandTitleText" class="text-base sm:text-lg font-black text-white">বিকাশ পার্সোনাল একাউন্ট (bKash Personal)</div>
                                     <span class="text-xs text-pink-400 font-bold" id="brandSubText">Send Money করুন — পেমেন্ট বা ক্যাশআউট নয়</span>
                                 </div>
                             </div>
@@ -684,8 +686,10 @@
                     <div class="space-y-1 pt-2 border-t border-slate-800/80">
                         <span class="text-[11px] text-slate-400 block">পেমেন্ট মাধ্যম:</span>
                         <div class="text-sm font-bold text-pink-400 flex items-center gap-2" id="summaryMethodText">
-                            <span class="w-2 h-2 rounded-full bg-pink-400"></span>
-                            <span>বিকাশ (bKash Send Money)</span>
+                            <div class="h-6 px-1.5 rounded bg-white flex items-center justify-center shadow-sm shrink-0">
+                                <img id="summaryMethodLogo" src="{{ asset('images/payments/bkash.png') }}" alt="bKash" class="h-4 w-auto object-contain">
+                            </div>
+                            <span id="summaryMethodLabel">বিকাশ (bKash Send Money)</span>
                         </div>
                     </div>
 
@@ -890,6 +894,13 @@
         'rocket': '{{ $adminRocket }}'
     };
 
+    // Brand Payment Logos
+    const paymentLogos = {
+        'bkash': '{{ asset('images/payments/bkash.png') }}',
+        'nagad': '{{ asset('images/payments/nagad.png') }}',
+        'rocket': '{{ asset('images/payments/rocket.svg') }}'
+    };
+
     // State Variables
     let currentStep = 1;
     let selectedPlan = '{{ $preselectedPlan ?: ($shop->is_office_mode ? 'office_basic_yearly' : 'yearly_pro') }}';
@@ -906,56 +917,97 @@
         if (step < 1 || step > 4) return;
         currentStep = step;
 
-        // Hide all containers
+        // 1. Show/Hide Containers
         for (let i = 1; i <= 4; i++) {
             const container = document.getElementById('stepContainer' + i);
-            const tab = document.getElementById('stepTab' + i);
-            if (!container || !tab) continue;
-
-            const badge = tab.querySelector('.step-badge');
-            const indicator = tab.querySelector('.step-indicator');
-            const title = tab.querySelector('span.text-xs, span.text-sm');
-
-            if (i === step) {
-                container.classList.remove('hidden');
-                badge.className = `step-badge w-8 h-8 sm:w-10 sm:h-10 rounded-2xl bg-${primaryColor}-500 text-white flex items-center justify-center font-black text-xs sm:text-sm shadow-lg shadow-${primaryColor}-500/30 transition-all`;
-                badge.innerText = i;
-                indicator.className = `h-1.5 w-full bg-${primaryColor}-500 rounded-full mt-3 step-indicator`;
-                if (title) title.className = 'text-xs sm:text-sm font-black text-white block';
-            } else if (i < step) {
-                container.classList.add('hidden');
-                badge.className = 'step-badge w-8 h-8 sm:w-10 sm:h-10 rounded-2xl bg-emerald-500 text-white flex items-center justify-center font-black text-xs sm:text-sm shadow transition-all';
-                badge.innerText = '✓';
-                indicator.className = 'h-1.5 w-full bg-emerald-500 rounded-full mt-3 step-indicator';
-                if (title) title.className = 'text-xs sm:text-sm font-black text-slate-300 block';
-            } else {
-                container.classList.add('hidden');
-                badge.className = 'step-badge w-8 h-8 sm:w-10 sm:h-10 rounded-2xl bg-slate-800 text-slate-500 flex items-center justify-center font-black text-xs sm:text-sm transition-all';
-                badge.innerText = i;
-                indicator.className = 'h-1.5 w-full bg-slate-800 rounded-full mt-3 step-indicator';
-                if (title) title.className = 'text-xs sm:text-sm font-black text-slate-500 block';
+            if (container) {
+                if (i === step) {
+                    container.classList.remove('hidden');
+                } else {
+                    container.classList.add('hidden');
+                }
             }
         }
 
-        // Update Summary CTA Button text
-        const summaryNextBtnText = document.getElementById('summaryNextBtnText');
-        const mobileNextBtnText = document.getElementById('mobileNextBtnText');
-        if (step === 4) {
-            summaryNextBtnText.innerText = 'যাচাই ও কনফার্ম ফর্মে আছি';
-            mobileNextBtnText.innerText = 'সাবমিট করুন';
-        } else if (step === 3) {
-            summaryNextBtnText.innerText = 'টাকা পাঠানো শেষ, TrxID দিন →';
-            mobileNextBtnText.innerText = 'TrxID দিন →';
-        } else if (step === 2) {
-            summaryNextBtnText.innerText = 'পরবর্তী: টাকা পাঠান →';
-            mobileNextBtnText.innerText = 'টাকা পাঠান →';
-        } else {
-            summaryNextBtnText.innerText = 'পরবর্তী ধাপ: মাধ্যম নির্বাচন →';
-            mobileNextBtnText.innerText = 'মাধ্যম নির্বাচন →';
+        // 2. Update Tabs
+        for (let i = 1; i <= 4; i++) {
+            const tab = document.getElementById('stepTab' + i);
+            if (!tab) continue;
+
+            const badge = tab.querySelector('.step-badge');
+            const indicator = tab.querySelector('.step-indicator');
+            const title = tab.querySelector('.step-title');
+
+            if (badge) {
+                if (i === step) {
+                    badge.className = `step-badge w-8 h-8 sm:w-10 sm:h-10 rounded-2xl ${isOffice ? 'bg-indigo-600 shadow-indigo-600/30' : 'bg-rose-500 shadow-rose-500/30'} text-white flex items-center justify-center font-black text-xs sm:text-sm shadow-lg transition-all`;
+                    badge.innerText = i;
+                } else if (i < step) {
+                    badge.className = 'step-badge w-8 h-8 sm:w-10 sm:h-10 rounded-2xl bg-emerald-500 text-white flex items-center justify-center font-black text-xs sm:text-sm shadow transition-all';
+                    badge.innerText = '✓';
+                } else {
+                    badge.className = 'step-badge w-8 h-8 sm:w-10 sm:h-10 rounded-2xl bg-slate-800 text-slate-500 flex items-center justify-center font-black text-xs sm:text-sm transition-all';
+                    badge.innerText = i;
+                }
+            }
+
+            if (indicator) {
+                if (i === step) {
+                    indicator.className = `h-1.5 w-full ${isOffice ? 'bg-indigo-500' : 'bg-rose-500'} rounded-full mt-3 step-indicator`;
+                } else if (i < step) {
+                    indicator.className = 'h-1.5 w-full bg-emerald-500 rounded-full mt-3 step-indicator';
+                } else {
+                    indicator.className = 'h-1.5 w-full bg-slate-800 rounded-full mt-3 step-indicator';
+                }
+            }
+
+            if (title) {
+                if (i === step) {
+                    title.className = 'step-title text-xs sm:text-sm font-black text-white block';
+                } else if (i < step) {
+                    title.className = 'step-title text-xs sm:text-sm font-black text-slate-300 block';
+                } else {
+                    title.className = 'step-title text-xs sm:text-sm font-black text-slate-500 block';
+                }
+            }
         }
 
-        // Auto-scroll smooth to top of checkout on mobile
-        window.scrollTo({ top: document.getElementById('subscriptionPage').offsetTop - 30, behavior: 'smooth' });
+        // 3. Update Summary CTA Button text safely
+        const summaryNextBtnText = document.getElementById('summaryNextBtnText');
+        const mobileNextBtnText = document.getElementById('mobileNextBtnText');
+        if (summaryNextBtnText) {
+            if (step === 4) {
+                summaryNextBtnText.innerText = 'যাচাই ও কনফার্ম ফর্মে আছি';
+            } else if (step === 3) {
+                summaryNextBtnText.innerText = 'টাকা পাঠানো শেষ, TrxID দিন →';
+            } else if (step === 2) {
+                summaryNextBtnText.innerText = 'পরবর্তী: টাকা পাঠান →';
+            } else {
+                summaryNextBtnText.innerText = 'পরবর্তী ধাপ: মাধ্যম নির্বাচন →';
+            }
+        }
+
+        if (mobileNextBtnText) {
+            if (step === 4) {
+                mobileNextBtnText.innerText = 'সাবমিট করুন';
+            } else if (step === 3) {
+                mobileNextBtnText.innerText = 'TrxID দিন →';
+            } else if (step === 2) {
+                mobileNextBtnText.innerText = 'টাকা পাঠান →';
+            } else {
+                mobileNextBtnText.innerText = 'মাধ্যম নির্বাচন →';
+            }
+        }
+
+        // 4. Safe Auto-scroll
+        try {
+            const pageEl = document.getElementById('subscriptionPage');
+            if (pageEl && typeof pageEl.offsetTop === 'number') {
+                window.scrollTo({ top: Math.max(0, pageEl.offsetTop - 30), behavior: 'smooth' });
+            }
+        } catch (e) {
+            console.warn('Scroll warning:', e);
+        }
     }
 
     function nextStep() {
@@ -1023,7 +1075,7 @@
         // Reset Tiles
         [tileBkash, tileNagad, tileRocket].forEach(tile => {
             if (!tile) return;
-            tile.className = 'method-tile p-6 rounded-3xl border-2 border-slate-800 bg-slate-900/90 cursor-pointer transition-all hover:scale-[1.02] relative overflow-hidden group';
+            tile.className = 'method-tile p-5 sm:p-6 rounded-3xl border-2 border-slate-800 bg-slate-900/90 cursor-pointer transition-all hover:scale-[1.02] relative overflow-hidden group';
             const check = tile.querySelector('.method-check');
             if (check) {
                 check.className = 'method-check w-6 h-6 rounded-full border-2 border-slate-700 flex items-center justify-center text-xs font-black text-white';
@@ -1033,67 +1085,79 @@
 
         // Set Active Tile & Dynamic Color Scheme
         const sendMoneyBox = document.getElementById('sendMoneyBrandBox');
-        const brandIconBadge = document.getElementById('brandIconBadge');
+        const brandLogoImg = document.getElementById('brandLogoImg');
         const brandTitleText = document.getElementById('brandTitleText');
         const brandSubText = document.getElementById('brandSubText');
         const copyNumBtn = document.getElementById('copyNumBtn');
         const currentMethodNumber = document.getElementById('currentMethodNumber');
         const formSummaryMethod = document.getElementById('formSummaryMethod');
+        const summaryMethodLogo = document.getElementById('summaryMethodLogo');
+        const summaryMethodLabel = document.getElementById('summaryMethodLabel');
         const summaryMethodText = document.getElementById('summaryMethodText');
 
         const activeNumber = adminNumbers[method] || '01644416378';
-        currentMethodNumber.innerText = activeNumber;
+        if (currentMethodNumber) currentMethodNumber.innerText = activeNumber;
+
+        if (brandLogoImg && paymentLogos[method]) {
+            brandLogoImg.src = paymentLogos[method];
+            brandLogoImg.alt = method.toUpperCase();
+        }
+
+        if (summaryMethodLogo && paymentLogos[method]) {
+            summaryMethodLogo.src = paymentLogos[method];
+            summaryMethodLogo.alt = method.toUpperCase();
+        }
 
         if (method === 'bkash') {
-            tileBkash.className = 'method-tile p-6 rounded-3xl border-2 border-pink-500/80 bg-pink-500/10 cursor-pointer transition-all hover:scale-[1.02] shadow-xl relative overflow-hidden group';
+            tileBkash.className = 'method-tile p-5 sm:p-6 rounded-3xl border-2 border-pink-500/80 bg-pink-500/10 cursor-pointer transition-all hover:scale-[1.02] shadow-xl relative overflow-hidden group';
             tileBkash.querySelector('.method-check').className = 'method-check w-6 h-6 rounded-full bg-pink-500 text-white flex items-center justify-center text-xs font-black';
             tileBkash.querySelector('.method-check').innerText = '✓';
 
-            sendMoneyBox.className = 'p-6 sm:p-8 rounded-3xl border-2 border-pink-500/60 bg-pink-500/5 shadow-2xl space-y-6 transition-all duration-300';
-            brandIconBadge.className = 'w-10 h-10 rounded-2xl bg-pink-500 text-white flex items-center justify-center font-black text-base shadow';
-            brandIconBadge.innerText = 'ব';
-            brandTitleText.innerText = 'বিকাশ পার্সোনাল একাউন্ট (bKash Personal)';
-            brandSubText.className = 'text-xs text-pink-400 font-bold';
-            copyNumBtn.className = 'px-3.5 py-2 rounded-xl bg-pink-500 hover:bg-pink-600 text-white text-xs font-bold transition shadow cursor-pointer shrink-0';
+            if (sendMoneyBox) sendMoneyBox.className = 'p-6 sm:p-8 rounded-3xl border-2 border-pink-500/60 bg-pink-500/5 shadow-2xl space-y-6 transition-all duration-300';
+            if (brandTitleText) brandTitleText.innerText = 'বিকাশ পার্সোনাল একাউন্ট (bKash Personal)';
+            if (brandSubText) brandSubText.className = 'text-xs text-pink-400 font-bold';
+            if (copyNumBtn) copyNumBtn.className = 'px-3.5 py-2 rounded-xl bg-pink-500 hover:bg-pink-600 text-white text-xs font-bold transition shadow cursor-pointer shrink-0';
 
-            formSummaryMethod.className = 'font-bold uppercase text-pink-400';
-            formSummaryMethod.innerText = 'বিকাশ (bKash)';
-            summaryMethodText.innerHTML = '<span class="w-2 h-2 rounded-full bg-pink-400"></span><span>বিকাশ (bKash Send Money)</span>';
-            summaryMethodText.className = 'text-sm font-bold text-pink-400 flex items-center gap-2';
+            if (formSummaryMethod) {
+                formSummaryMethod.className = 'font-bold uppercase text-pink-400';
+                formSummaryMethod.innerText = 'বিকাশ (bKash)';
+            }
+            if (summaryMethodLabel) summaryMethodLabel.innerText = 'বিকাশ (bKash Send Money)';
+            if (summaryMethodText) summaryMethodText.className = 'text-sm font-bold text-pink-400 flex items-center gap-2';
 
         } else if (method === 'nagad') {
-            tileNagad.className = 'method-tile p-6 rounded-3xl border-2 border-amber-500/80 bg-amber-500/10 cursor-pointer transition-all hover:scale-[1.02] shadow-xl relative overflow-hidden group';
+            tileNagad.className = 'method-tile p-5 sm:p-6 rounded-3xl border-2 border-amber-500/80 bg-amber-500/10 cursor-pointer transition-all hover:scale-[1.02] shadow-xl relative overflow-hidden group';
             tileNagad.querySelector('.method-check').className = 'method-check w-6 h-6 rounded-full bg-amber-500 text-white flex items-center justify-center text-xs font-black';
             tileNagad.querySelector('.method-check').innerText = '✓';
 
-            sendMoneyBox.className = 'p-6 sm:p-8 rounded-3xl border-2 border-amber-500/60 bg-amber-500/5 shadow-2xl space-y-6 transition-all duration-300';
-            brandIconBadge.className = 'w-10 h-10 rounded-2xl bg-amber-500 text-white flex items-center justify-center font-black text-base shadow';
-            brandIconBadge.innerText = 'ন';
-            brandTitleText.innerText = 'নগদ পার্সোনাল একাউন্ট (Nagad Personal)';
-            brandSubText.className = 'text-xs text-amber-400 font-bold';
-            copyNumBtn.className = 'px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold transition shadow cursor-pointer shrink-0';
+            if (sendMoneyBox) sendMoneyBox.className = 'p-6 sm:p-8 rounded-3xl border-2 border-amber-500/60 bg-amber-500/5 shadow-2xl space-y-6 transition-all duration-300';
+            if (brandTitleText) brandTitleText.innerText = 'নগদ পার্সোনাল একাউন্ট (Nagad Personal)';
+            if (brandSubText) brandSubText.className = 'text-xs text-amber-400 font-bold';
+            if (copyNumBtn) copyNumBtn.className = 'px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold transition shadow cursor-pointer shrink-0';
 
-            formSummaryMethod.className = 'font-bold uppercase text-amber-400';
-            formSummaryMethod.innerText = 'নগদ (Nagad)';
-            summaryMethodText.innerHTML = '<span class="w-2 h-2 rounded-full bg-amber-400"></span><span>নগদ (Nagad Send Money)</span>';
-            summaryMethodText.className = 'text-sm font-bold text-amber-400 flex items-center gap-2';
+            if (formSummaryMethod) {
+                formSummaryMethod.className = 'font-bold uppercase text-amber-400';
+                formSummaryMethod.innerText = 'নগদ (Nagad)';
+            }
+            if (summaryMethodLabel) summaryMethodLabel.innerText = 'নগদ (Nagad Send Money)';
+            if (summaryMethodText) summaryMethodText.className = 'text-sm font-bold text-amber-400 flex items-center gap-2';
 
         } else if (method === 'rocket') {
-            tileRocket.className = 'method-tile p-6 rounded-3xl border-2 border-purple-500/80 bg-purple-500/10 cursor-pointer transition-all hover:scale-[1.02] shadow-xl relative overflow-hidden group';
+            tileRocket.className = 'method-tile p-5 sm:p-6 rounded-3xl border-2 border-purple-500/80 bg-purple-500/10 cursor-pointer transition-all hover:scale-[1.02] shadow-xl relative overflow-hidden group';
             tileRocket.querySelector('.method-check').className = 'method-check w-6 h-6 rounded-full bg-purple-600 text-white flex items-center justify-center text-xs font-black';
             tileRocket.querySelector('.method-check').innerText = '✓';
 
-            sendMoneyBox.className = 'p-6 sm:p-8 rounded-3xl border-2 border-purple-500/60 bg-purple-500/5 shadow-2xl space-y-6 transition-all duration-300';
-            brandIconBadge.className = 'w-10 h-10 rounded-2xl bg-purple-600 text-white flex items-center justify-center font-black text-base shadow';
-            brandIconBadge.innerText = 'র';
-            brandTitleText.innerText = 'রকেট পার্সোনাল একাউন্ট (Rocket Personal)';
-            brandSubText.className = 'text-xs text-purple-400 font-bold';
-            copyNumBtn.className = 'px-3.5 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold transition shadow cursor-pointer shrink-0';
+            if (sendMoneyBox) sendMoneyBox.className = 'p-6 sm:p-8 rounded-3xl border-2 border-purple-500/60 bg-purple-500/5 shadow-2xl space-y-6 transition-all duration-300';
+            if (brandTitleText) brandTitleText.innerText = 'রকেট পার্সোনাল একাউন্ট (Rocket Personal)';
+            if (brandSubText) brandSubText.className = 'text-xs text-purple-400 font-bold';
+            if (copyNumBtn) copyNumBtn.className = 'px-3.5 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold transition shadow cursor-pointer shrink-0';
 
-            formSummaryMethod.className = 'font-bold uppercase text-purple-400';
-            formSummaryMethod.innerText = 'রকেট (Rocket)';
-            summaryMethodText.innerHTML = '<span class="w-2 h-2 rounded-full bg-purple-400"></span><span>রকেট (Rocket Send Money)</span>';
-            summaryMethodText.className = 'text-sm font-bold text-purple-400 flex items-center gap-2';
+            if (formSummaryMethod) {
+                formSummaryMethod.className = 'font-bold uppercase text-purple-400';
+                formSummaryMethod.innerText = 'রকেট (Rocket)';
+            }
+            if (summaryMethodLabel) summaryMethodLabel.innerText = 'রকেট (Rocket Send Money)';
+            if (summaryMethodText) summaryMethodText.className = 'text-sm font-bold text-purple-400 flex items-center gap-2';
         }
     }
 
