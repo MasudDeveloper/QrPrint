@@ -663,11 +663,11 @@
                 <!-- 2 -->
                 <div class="p-6 rounded-3xl bg-slate-50/70 border border-slate-200 hover:bg-white hover:shadow-lg transition-all space-y-3">
                     <span class="w-10 h-10 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center text-lg font-bold">
-                        🖼️
+                        🪪
                     </span>
-                    <h3 class="text-base font-bold text-slate-900">৪×৬ পাসপোর্ট সাইজ গ্রিড</h3>
+                    <h3 class="text-base font-bold text-slate-900">স্মার্ট এনআইডি কার্ড ২-সাইড প্রিন্ট</h3>
                     <p class="text-xs text-slate-600 leading-relaxed">
-                        ১ ক্লিকে ৪ কপি বা ৮ কপি পাসপোর্ট সাইজ ছবি নিখুঁত কাটিং বর্ডার সহ ৪×৬ ফটো পেপারে সেটিং হয়ে প্রিন্ট বের হয়। কোনো পেপার ওয়েস্টেজ নেই।
+                        এনআইডি কার্ডের সামনের ও পেছনের ছবি আপলোড করলেই ১ ক্লিকে পেপারের সঠিক মাপে স্বয়ংক্রিয় এলাইন হয়ে প্রিন্ট বের হয়। ফটোশপে আলাদা কাটাকাটি লাগবে না।
                     </p>
                 </div>
 

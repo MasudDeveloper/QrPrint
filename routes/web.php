@@ -42,6 +42,9 @@ Route::post('/contact', function (\Illuminate\Http\Request $request) {
         'phone' => 'required|string|max:20',
         'message' => 'required|string|max:1000',
     ]);
+
+    \Illuminate\Support\Facades\Log::info("নূতন যোগাযোগ বার্তা [Contact Form]: নাম: {$request->name}, ফোন: {$request->phone}, বার্তা: {$request->message}");
+
     return back()->with('success', 'ধন্যবাদ! আপনার বার্তাটি সফলভাবে পাঠানো হয়েছে। আমাদের টিম খুব দ্রুত আপনার সাথে যোগাযোগ করবে।');
 })->name('contact.submit');
 

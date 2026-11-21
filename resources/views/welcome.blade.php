@@ -271,7 +271,7 @@
                         <span>💰 সেটআপ ও প্যাকেজ রেট দেখুন ⬇</span>
                     </a>
 
-                    <a href="#demo-live" class="w-full sm:w-auto px-8 py-4 rounded-full text-sm font-black text-rose-600 bg-white hover:bg-rose-50 border-2 border-rose-500 shadow-sm transition-all hover:scale-105 flex items-center justify-center gap-2">
+                    <a href="#video-demo" class="w-full sm:w-auto px-8 py-4 rounded-full text-sm font-black text-rose-600 bg-white hover:bg-rose-50 border-2 border-rose-500 shadow-sm transition-all hover:scale-105 flex items-center justify-center gap-2">
                         <span>🎯 ফ্রি ডেমো টেস্ট করুন</span>
                     </a>
                 </div>
@@ -532,27 +532,27 @@
                     </div>
                 </div>
 
-                <!-- Feature 2: 4x6 Passport Photo Grid -->
+                <!-- Feature 2: Smart NID Card Auto Layout -->
                 <div class="bg-white rounded-3xl p-6 border border-slate-200/90 card-shadow hover:border-purple-400 hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between group">
                     <div>
                         <div class="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zm10 0a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zm10 0a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"></path>
                             </svg>
                         </div>
                         <div class="flex items-center gap-2 mb-2">
-                            <span class="text-[10px] font-black uppercase px-2 py-0.5 rounded bg-purple-100 text-purple-700">১-ক্লিক পাসপোর্ট</span>
-                            <span class="text-[10px] font-bold text-slate-400">৪×৬ গ্রিড</span>
+                            <span class="text-[10px] font-black uppercase px-2 py-0.5 rounded bg-purple-100 text-purple-700">স্মার্ট কার্ড</span>
+                            <span class="text-[10px] font-bold text-slate-400">২-সাইড লেআউট</span>
                         </div>
                         <h3 class="text-lg font-bold text-slate-900 mb-2">
-                            পাসপোর্ট ও স্ট্যাম্প সাইজ অটো-গ্রিড
+                            স্মার্ট এনআইডি কার্ড অটো-প্রিন্ট
                         </h3>
                         <p class="text-xs text-slate-600 leading-relaxed">
-                            ১ ক্লিকে ৪ কপি বা ৮ কপি পাসপোর্ট ও স্ট্যাম্প সাইজ ছবি কাটিং বর্ডার সহ ৪×৬ ফটো পেপারে নিখুঁতভাবে সাজিয়ে নেয়। কোনো পেপার ওয়েস্টেজ নেই।
+                            এনআইডি কার্ডের সামনের ও পেছনের ছবি আপলোড করলেই ১ ক্লিকে পেপারের সঠিক মাপে স্বয়ংক্রিয় এলাইন হয়ে প্রিন্ট বের হয়। ফটোশপে কাটাকাটির ঝামেলা নেই।
                         </p>
                     </div>
                     <div class="mt-4 pt-3 border-t border-slate-100 text-[11px] font-bold text-purple-600 flex items-center gap-1">
-                        ✓ নিমিষেই ৮ কপি ছবি প্রিন্ট
+                        ✓ উভয় পিঠের নিখুঁত সাইজ এলাইনমেন্ট
                     </div>
                 </div>
 
@@ -1054,7 +1054,7 @@
                             </li>
                             <li class="flex items-center gap-2.5">
                                 <span class="w-4 h-4 rounded-full bg-rose-500 text-white flex items-center justify-center text-[10px] font-bold shrink-0">✓</span>
-                                <span>৪x৬ পাসপোর্ট সাইজ মেকার</span>
+                                <span>স্মার্ট এনআইডি কার্ড ২-সাইড প্রিন্ট</span>
                             </li>
                             <li class="flex items-center gap-2.5">
                                 <span class="w-4 h-4 rounded-full bg-rose-500 text-white flex items-center justify-center text-[10px] font-bold shrink-0">✓</span>

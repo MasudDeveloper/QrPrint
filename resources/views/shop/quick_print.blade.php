@@ -193,7 +193,7 @@
                         </div>
 
                         <!-- Dynamic Instant Client Preview after local selection -->
-                        <div id="clientPreviewWrapper" class="hidden space-y-3 pointer-events-auto">
+                        <div id="clientPreviewWrapper" class="hidden space-y-3 pointer-events-auto relative z-30">
                             <div class="flex items-center justify-between border-b border-slate-800 pb-2">
                                 <div class="flex items-center gap-2 overflow-hidden text-left">
                                     <span class="text-xl" id="clientFileIcon">📄</span>
@@ -202,7 +202,7 @@
                                         <p class="text-[10px] text-slate-400" id="clientFileSize">0 KB</p>
                                     </div>
                                 </div>
-                                <button type="button" onclick="clearDirectFile()" class="p-1.5 rounded-lg bg-rose-500/20 text-rose-300 text-xs hover:bg-rose-500/30">
+                                <button type="button" onclick="event.stopPropagation(); clearDirectFile()" class="p-1.5 rounded-lg bg-rose-500/20 text-rose-300 text-xs hover:bg-rose-500/30 cursor-pointer">
                                     ✕ পরিবর্তন
                                 </button>
                             </div>
@@ -211,7 +211,7 @@
                                 <!-- Image or PDF frame injected via JS -->
                             </div>
                             <div id="directDocScannerBtnContainer" class="hidden pt-1">
-                                <button type="button" onclick="openDocScannerModal(currentDirectImageDataUrl)" class="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow transition-all cursor-pointer">
+                                <button type="button" onclick="event.stopPropagation(); openDocScannerModal(currentDirectImageDataUrl)" class="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-emerald-600/20 transition-all cursor-pointer">
                                     <span>📐 কর্নার ডিটেক্ট ও ডকুমেন্ট সোজা করুন (Doc Scanner)</span>
                                 </button>
                                 <div id="directScanBadge" class="hidden mt-2 inline-flex items-center gap-1 text-[11px] font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-xl border border-emerald-500/20">
@@ -252,35 +252,51 @@
                     </div>
 
                     <!-- 1. Color Mode (কালার মোড ও মেশিন) -->
+                    @php
+                        $hasBw = (bool) ($shop->has_bw_print ?? true);
+                        $hasPhotocopy = (bool) ($shop->has_photocopier ?? false);
+                        $hasColor = (bool) ($shop->has_color_print ?? false);
+                        if (!$hasBw && !$hasPhotocopy && !$hasColor) {
+                            $hasBw = true;
+                        }
+                        $totalModes = ($hasBw ? 1 : 0) + ($hasPhotocopy ? 1 : 0) + ($hasColor ? 1 : 0);
+                        $defaultMode = $hasBw ? 'bw' : ($hasPhotocopy ? 'photocopy' : 'color');
+                    @endphp
                     <div class="space-y-2">
                         <label class="block text-xs font-bold text-slate-300">১. প্রিন্ট মোড ও মেশিন নির্বাচন করুন *</label>
-                        <div class="grid grid-cols-3 gap-2.5">
+                        <div class="grid grid-cols-{{ $totalModes }} gap-2.5">
+                            @if($hasBw)
                             <label class="cursor-pointer">
-                                <input type="radio" name="color_mode" value="bw" class="peer sr-only" checked>
+                                <input type="radio" name="color_mode" value="bw" class="peer sr-only" {{ $defaultMode === 'bw' ? 'checked' : '' }}>
                                 <div class="p-3 rounded-2xl bg-slate-950 border-2 border-slate-800 peer-checked:border-emerald-500 peer-checked:bg-emerald-500/10 hover:border-slate-700 transition-all text-center space-y-1">
                                     <div class="text-lg">⚫</div>
                                     <div class="text-xs font-bold text-white">সাদা-কালো</div>
                                     <div class="text-[10px] text-slate-400 font-en">লেজার প্রিন্টার</div>
                                 </div>
                             </label>
+                            @endif
 
+                            @if($hasPhotocopy)
                             <label class="cursor-pointer">
-                                <input type="radio" name="color_mode" value="photocopy" class="peer sr-only">
+                                <input type="radio" name="color_mode" value="photocopy" class="peer sr-only" {{ $defaultMode === 'photocopy' ? 'checked' : '' }}>
                                 <div class="p-3 rounded-2xl bg-slate-950 border-2 border-slate-800 peer-checked:border-amber-500 peer-checked:bg-amber-500/10 hover:border-slate-700 transition-all text-center space-y-1">
                                     <div class="text-lg">📠</div>
                                     <div class="text-xs font-bold text-white">ফটোকপি</div>
                                     <div class="text-[10px] text-amber-400 font-en">কপির মেশিন</div>
                                 </div>
                             </label>
+                            @endif
 
+                            @if($hasColor)
                             <label class="cursor-pointer">
-                                <input type="radio" name="color_mode" value="color" class="peer sr-only">
+                                <input type="radio" name="color_mode" value="color" class="peer sr-only" {{ $defaultMode === 'color' ? 'checked' : '' }}>
                                 <div class="p-3 rounded-2xl bg-slate-950 border-2 border-slate-800 peer-checked:border-rose-500 peer-checked:bg-rose-500/10 hover:border-slate-700 transition-all text-center space-y-1">
                                     <div class="text-lg">🎨</div>
                                     <div class="text-xs font-bold text-white">রঙিন (Color)</div>
                                     <div class="text-[10px] text-slate-400 font-en">Full RGB</div>
                                 </div>
                             </label>
+                            @endif
                         </div>
                     </div>
 
@@ -514,6 +530,9 @@
 
         prompt.classList.add('hidden');
         preview.classList.remove('hidden');
+        const dropzone = document.getElementById('dropzoneContainer');
+        if (dropzone) dropzone.classList.remove('cursor-pointer');
+        input.classList.add('hidden');
 
         fileName.textContent = file.name;
         const sizeMb = (file.size / (1024 * 1024)).toFixed(2);
@@ -581,7 +600,12 @@
 
     function clearDirectFile() {
         const input = document.getElementById('documentInput');
-        if (input) input.value = '';
+        if (input) {
+            input.value = '';
+            input.classList.remove('hidden');
+        }
+        const dropzone = document.getElementById('dropzoneContainer');
+        if (dropzone) dropzone.classList.add('cursor-pointer');
         currentDirectImageDataUrl = null;
         document.getElementById('scannedImageDataInput').value = '';
         document.getElementById('directDocScannerBtnContainer')?.classList.add('hidden');
@@ -636,18 +660,121 @@
         canvas.width = w;
         canvas.height = h;
 
-        // Auto corners with 5% inset
-        const insetX = w * 0.05;
-        const insetY = h * 0.05;
-        scannerCorners = [
-            { x: insetX, y: insetY },
-            { x: w - insetX, y: insetY },
-            { x: w - insetX, y: h - insetY },
-            { x: insetX, y: h - insetY }
-        ];
-
-        drawScannerCanvas();
+        autoDetectDocCorners();
         setupScannerInteractions();
+    }
+
+    function autoDetectDocCorners() {
+        if (!scannerImg) return;
+        const canvas = document.getElementById('scannerCanvas');
+        if (!canvas) return;
+
+        const w = canvas.width;
+        const h = canvas.height;
+
+        try {
+            // Downsample to max dimension 400 for instant edge analysis
+            const scale = Math.min(1, 400 / Math.max(w, h));
+            const sw = Math.round(w * scale);
+            const sh = Math.round(h * scale);
+
+            const small = document.createElement('canvas');
+            small.width = sw;
+            small.height = sh;
+            const sctx = small.getContext('2d');
+
+            sctx.save();
+            sctx.translate(sw / 2, sh / 2);
+            sctx.rotate((scannerRotation * Math.PI) / 180);
+            sctx.drawImage(scannerImg, -scannerImg.width * scale / 2, -scannerImg.height * scale / 2, scannerImg.width * scale, scannerImg.height * scale);
+            sctx.restore();
+
+            const imgData = sctx.getImageData(0, 0, sw, sh);
+            const data = imgData.data;
+
+            // 1. Sample border pixels to detect background color & luminosity
+            let bgR = 0, bgG = 0, bgB = 0, bgCount = 0;
+            const margin = Math.max(3, Math.floor(sw * 0.03));
+            const sampleCoords = [
+                [margin, margin], [sw - margin, margin],
+                [margin, sh - margin], [sw - margin, sh - margin],
+                [Math.floor(sw / 2), margin], [margin, Math.floor(sh / 2)],
+                [sw - margin, Math.floor(sh / 2)], [Math.floor(sw / 2), sh - margin]
+            ];
+
+            sampleCoords.forEach(([sx, sy]) => {
+                const idx = (sy * sw + sx) * 4;
+                bgR += data[idx];
+                bgG += data[idx + 1];
+                bgB += data[idx + 2];
+                bgCount++;
+            });
+
+            bgR /= bgCount;
+            bgG /= bgCount;
+            bgB /= bgCount;
+            const bgLum = 0.299 * bgR + 0.587 * bgG + 0.114 * bgB;
+
+            // 2. Scan foreground document pixels
+            const step = 3;
+            const foregroundPoints = [];
+
+            for (let y = margin; y < sh - margin; y += step) {
+                for (let x = margin; x < sw - margin; x += step) {
+                    const idx = (y * sw + x) * 4;
+                    const r = data[idx];
+                    const g = data[idx + 1];
+                    const b = data[idx + 2];
+
+                    const lum = 0.299 * r + 0.587 * g + 0.114 * b;
+                    const colorDiff = Math.sqrt((r - bgR)**2 + (g - bgG)**2 + (b - bgB)**2);
+
+                    if (colorDiff > 28 || Math.abs(lum - bgLum) > 22) {
+                        foregroundPoints.push([x, y]);
+                    }
+                }
+            }
+
+            // 3. Find 4 extremal corners (Top-Left, Top-Right, Bottom-Right, Bottom-Left)
+            if (foregroundPoints.length > (sw * sh / (step * step * 12))) {
+                let minSum = Infinity, maxSum = -Infinity;
+                let minDiff = Infinity, maxDiff = -Infinity;
+                let tl = null, br = null, tr = null, bl = null;
+
+                for (let i = 0; i < foregroundPoints.length; i++) {
+                    const [px, py] = foregroundPoints[i];
+                    const sum = px + py;
+                    const diff = px - py;
+
+                    if (sum < minSum) { minSum = sum; tl = [px, py]; }
+                    if (sum > maxSum) { maxSum = sum; br = [px, py]; }
+                    if (diff > maxDiff) { maxDiff = diff; tr = [px, py]; }
+                    if (diff < minDiff) { minDiff = diff; bl = [px, py]; }
+                }
+
+                if (tl && tr && br && bl) {
+                    const invScale = 1 / scale;
+                    const widthTop = Math.hypot(tr[0] - tl[0], tr[1] - tl[1]) * invScale;
+                    const heightLeft = Math.hypot(bl[0] - tl[0], bl[1] - tl[1]) * invScale;
+
+                    if (widthTop >= w * 0.25 && heightLeft >= h * 0.25) {
+                        scannerCorners = [
+                            { x: Math.max(0, Math.min(w, tl[0] * invScale)), y: Math.max(0, Math.min(h, tl[1] * invScale)) },
+                            { x: Math.max(0, Math.min(w, tr[0] * invScale)), y: Math.max(0, Math.min(h, tr[1] * invScale)) },
+                            { x: Math.max(0, Math.min(w, br[0] * invScale)), y: Math.max(0, Math.min(h, br[1] * invScale)) },
+                            { x: Math.max(0, Math.min(w, bl[0] * invScale)), y: Math.max(0, Math.min(h, bl[1] * invScale)) }
+                        ];
+                        drawScannerCanvas();
+                        return;
+                    }
+                }
+            }
+        } catch (e) {
+            console.error('Auto detect error:', e);
+        }
+
+        // Fallback default: centered 5% inset
+        resetScannerCorners();
     }
 
     function drawScannerCanvas() {
@@ -984,7 +1111,9 @@
             <div class="mt-2 text-[10px] sm:text-xs text-slate-400 text-center flex items-center justify-center gap-2">
                 <span>💡 কোণাগুলো টেনে ডকুমেন্টের সীমানা নির্দিষ্ট করুন</span>
                 <span>•</span>
-                <button type="button" onclick="resetScannerCorners()" class="text-emerald-400 hover:underline font-bold cursor-pointer">📐 অটো কর্নার রিসেট</button>
+                <button type="button" onclick="autoDetectDocCorners()" class="text-emerald-400 hover:underline font-bold cursor-pointer">🤖 অটো কর্নার ডিটেক্ট</button>
+                <span>•</span>
+                <button type="button" onclick="resetScannerCorners()" class="text-slate-400 hover:underline font-bold cursor-pointer">↺ চারপাশ রিসেট</button>
                 <span>•</span>
                 <button type="button" onclick="rotateScannerDoc()" class="text-teal-400 hover:underline font-bold cursor-pointer">🔄 ৯০° ঘোরান</button>
             </div>

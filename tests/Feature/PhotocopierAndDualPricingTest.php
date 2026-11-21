@@ -65,6 +65,7 @@ class PhotocopierAndDualPricingTest extends TestCase
             'rate_photo_passport' => 30.00,
             'rate_nid_bw' => 10.00,
             'rate_nid_color' => 20.00,
+            'has_bw_print' => '1',
             'has_photocopier' => '1',
             'has_color_print' => '1',
             'has_duplex_print' => '1',
@@ -73,10 +74,42 @@ class PhotocopierAndDualPricingTest extends TestCase
         $response->assertRedirect();
         $shop->refresh();
 
+        $this->assertTrue((bool) $shop->has_bw_print);
         $this->assertTrue((bool) $shop->has_photocopier);
         $this->assertEquals(5.00, (float) $shop->rate_bw_single);
         $this->assertEquals(2.50, (float) $shop->rate_photocopy_single);
         $this->assertEquals(4.00, (float) $shop->rate_photocopy_double);
+    }
+
+    public function test_shopkeeper_can_disable_bw_laser_and_only_keep_photocopier(): void
+    {
+        [$user, $shop] = $this->createShop(false);
+
+        $response = $this->actingAs($user)->post(route('shop.rates.update'), [
+            'name' => 'Dhaka Copy Center',
+            'phone' => '01711223344',
+            'bkash_number' => '01711223344',
+            'nagad_number' => '01811223344',
+            'rate_bw_single' => 4.00,
+            'rate_bw_double' => 6.00,
+            'rate_photocopy_single' => 2.00,
+            'rate_photocopy_double' => 3.00,
+            'rate_color_single' => 10.00,
+            'rate_color_double' => 16.00,
+            // Notice: has_bw_print is omitted (unchecked)
+            'has_photocopier' => '1',
+        ]);
+
+        $response->assertRedirect();
+        $shop->refresh();
+
+        $this->assertFalse((bool) $shop->has_bw_print);
+        $this->assertTrue((bool) $shop->has_photocopier);
+
+        // Verify customer view renders cleanly with photocopy
+        $viewResponse = $this->get(route('customer.upload', $shop->slug));
+        $viewResponse->assertStatus(200);
+        $viewResponse->assertSee('ফটোকপি');
     }
 
     public function test_office_mode_can_enable_photocopier_with_zero_rates(): void

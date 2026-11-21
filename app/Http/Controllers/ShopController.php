@@ -152,6 +152,7 @@ class ShopController extends Controller
 
         if ($isOffice) {
             $data = $request->only(['name', 'phone']);
+            $data['has_bw_print'] = $request->boolean('has_bw_print');
             $data['has_color_print'] = $request->boolean('has_color_print');
             $data['has_duplex_print'] = $request->boolean('has_duplex_print');
             $data['has_photocopier'] = $request->boolean('has_photocopier');
@@ -179,6 +180,7 @@ class ShopController extends Controller
                 'rate_nid_bw',
                 'rate_nid_color',
             ]);
+            $data['has_bw_print'] = $request->boolean('has_bw_print');
             $data['has_color_print'] = $request->boolean('has_color_print');
             $data['has_duplex_print'] = $request->boolean('has_duplex_print');
             $data['has_photocopier'] = $request->boolean('has_photocopier');

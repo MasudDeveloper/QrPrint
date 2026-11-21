@@ -57,7 +57,7 @@
                 </h3>
                 <ul class="space-y-2 text-xs text-slate-400">
                     <li class="flex items-center gap-1.5"><span class="text-rose-500">›</span> কিউআর কোড সেলফ প্রিন্টিং</li>
-                    <li class="flex items-center gap-1.5"><span class="text-rose-500">›</span> ৪×৬ পাসপোর্ট ও স্ট্যাম্প সাইজ গ্রিড</li>
+                    <li class="flex items-center gap-1.5"><span class="text-rose-500">›</span> স্মার্ট এনআইডি কার্ড ২-সাইড প্রিন্ট</li>
                     <li class="flex items-center gap-1.5"><span class="text-rose-500">›</span> বিকাশ ও নগদ এসএমএস অটো-রিলিজ</li>
                     <li class="flex items-center gap-1.5"><span class="text-rose-500">›</span> সাদাকালো ও কালার অটো-রাউটিং</li>
                     <li class="flex items-center gap-1.5"><span class="text-rose-500">›</span> অফলাইন প্রিন্ট কিউ ও রিকভারি</li>

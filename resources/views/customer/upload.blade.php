@@ -191,44 +191,62 @@
                 </span>
 
                 <!-- Mode: B&W Laser vs Photocopier Machine vs Color -->
-                @if($shop->has_color_print || $shop->has_photocopier)
+                @php
+                    $hasBw = (bool)($shop->has_bw_print ?? true);
+                    $hasPhotocopy = (bool)($shop->has_photocopier ?? false);
+                    $hasColor = (bool)($shop->has_color_print ?? false);
+                    $modeCount = ($hasBw ? 1 : 0) + ($hasPhotocopy ? 1 : 0) + ($hasColor ? 1 : 0);
+                    $defaultMode = $hasBw ? 'bw' : ($hasPhotocopy ? 'photocopy' : ($hasColor ? 'color' : 'bw'));
+                @endphp
+
+                @if($modeCount > 1)
                 <div>
                     <label class="block text-xs font-bold text-slate-700 mb-2">প্রিন্ট মোড / মেশিন নির্বাচন করুন:</label>
-                    <div class="grid grid-cols-1 sm:grid-cols-{{ ($shop->has_color_print && $shop->has_photocopier) ? '3' : '2' }} gap-2.5">
+                    <div class="grid grid-cols-1 sm:grid-cols-{{ min($modeCount, 3) }} gap-2.5">
+                        @if($hasBw)
                         <label class="border-2 border-slate-200 rounded-2xl p-3 flex items-center justify-between cursor-pointer has-[:checked]:border-slate-900 has-[:checked]:bg-slate-50 transition-all">
                             <div>
                                 <span class="text-xs font-bold text-slate-900 block">⚪⚫ সাদাকালো লেজার</span>
                                 <span class="text-[10px] text-slate-500 font-medium">৳{{ $shop->rate_bw_single }}/পেজ</span>
                             </div>
-                            <input type="radio" name="color_mode" value="bw" checked class="accent-slate-900 rate-trigger">
+                            <input type="radio" name="color_mode" value="bw" {{ $defaultMode === 'bw' ? 'checked' : '' }} class="accent-slate-900 rate-trigger">
                         </label>
+                        @endif
 
-                        @if($shop->has_photocopier)
+                        @if($hasPhotocopy)
                         <label class="border-2 border-slate-200 rounded-2xl p-3 flex items-center justify-between cursor-pointer has-[:checked]:border-amber-500 has-[:checked]:bg-amber-50/40 transition-all">
                             <div>
                                 <span class="text-xs font-bold text-amber-900 block">📠 ফটোকপি (সাশ্রয়ী)</span>
                                 <span class="text-[10px] text-amber-700 font-bold">৳{{ $shop->rate_photocopy_single }}/পেজ</span>
                             </div>
-                            <input type="radio" name="color_mode" value="photocopy" class="accent-amber-500 rate-trigger">
+                            <input type="radio" name="color_mode" value="photocopy" {{ $defaultMode === 'photocopy' ? 'checked' : '' }} class="accent-amber-500 rate-trigger">
                         </label>
                         @endif
 
-                        @if($shop->has_color_print)
+                        @if($hasColor)
                         <label class="border-2 border-slate-200 rounded-2xl p-3 flex items-center justify-between cursor-pointer has-[:checked]:border-rose-500 has-[:checked]:bg-rose-50/30 transition-all">
                             <div>
                                 <span class="text-xs font-bold text-slate-900 block">🎨 রঙিন (Color)</span>
                                 <span class="text-[10px] text-rose-600 font-medium">৳{{ $shop->rate_color_single }}/পেজ</span>
                             </div>
-                            <input type="radio" name="color_mode" value="color" class="accent-rose-500 rate-trigger">
+                            <input type="radio" name="color_mode" value="color" {{ $defaultMode === 'color' ? 'checked' : '' }} class="accent-rose-500 rate-trigger">
                         </label>
                         @endif
                     </div>
                 </div>
                 @else
-                    <input type="hidden" name="color_mode" value="bw">
+                    <input type="hidden" name="color_mode" value="{{ $defaultMode }}">
                     <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between text-xs">
-                        <span class="font-bold text-slate-700">কালার মোড: সাদাকালো লেজার</span>
-                        <span class="text-[11px] font-bold text-slate-500">৳{{ $shop->rate_bw_single }}/পেজ</span>
+                        @if($defaultMode === 'photocopy')
+                            <span class="font-bold text-slate-700">প্রিন্ট মোড: 📠 ফটোকপি মেশিন (সাশ্রয়ী)</span>
+                            <span class="text-[11px] font-bold text-amber-600">৳{{ $shop->rate_photocopy_single }}/পেজ</span>
+                        @elseif($defaultMode === 'color')
+                            <span class="font-bold text-slate-700">কালার মোড: 🎨 রঙিন (Color)</span>
+                            <span class="text-[11px] font-bold text-rose-600">৳{{ $shop->rate_color_single }}/পেজ</span>
+                        @else
+                            <span class="font-bold text-slate-700">কালার মোড: ⚪⚫ সাদাকালো লেজার</span>
+                            <span class="text-[11px] font-bold text-slate-500">৳{{ $shop->rate_bw_single }}/পেজ</span>
+                        @endif
                     </div>
                 @endif
 

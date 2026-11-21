@@ -182,7 +182,7 @@
                     </div>
                     <ul class="space-y-2 text-xs text-slate-300">
                         <li class="flex items-center gap-2"><span class="text-rose-500 font-bold">✓</span> আনলিমিটেড প্রিন্ট কিউ</li>
-                        <li class="flex items-center gap-2"><span class="text-rose-500 font-bold">✓</span> ৪x৬ পাসপোর্ট সাইজ ফটো মেকার</li>
+                        <li class="flex items-center gap-2"><span class="text-rose-500 font-bold">✓</span> স্মার্ট এনআইডি কার্ড ২-সাইড প্রিন্ট</li>
                         <li class="flex items-center gap-2"><span class="text-rose-500 font-bold">✓</span> ৫টি প্রিন্টার পর্যন্ত কানেকশন</li>
                         <li class="flex items-center gap-2"><span class="text-rose-500 font-bold">✓</span> ফোন ও AnyDesk প্রায়োরিটি সাপোর্ট</li>
                     </ul>

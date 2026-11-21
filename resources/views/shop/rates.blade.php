@@ -81,7 +81,7 @@
             </div>
         @endif
 
-        <!-- Service Availability Toggles (Color, Duplex, Passport) -->
+        <!-- Service Availability Toggles (B&W, Photocopier, Color, Duplex, NID) -->
         <div class="space-y-4 pt-2">
             <h3 class="text-sm font-bold text-white uppercase tracking-wider border-b border-slate-800 pb-2 flex items-center justify-between">
                 <span>{{ $shop->is_office_mode ? 'অফিসের প্রিন্টিং সার্ভিসসমূহ (চালু / বন্ধ)' : 'দোকানের প্রিন্টিং সার্ভিসসমূহ (চালু / বন্ধ)' }}</span>
@@ -90,14 +90,14 @@
                 </span>
             </h3>
 
-            <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <!-- Color Print Toggle -->
+            <div class="grid sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
+                <!-- B&W Laser Print Toggle -->
                 <label class="p-4 rounded-2xl bg-slate-950 border border-slate-800 cursor-pointer flex items-center justify-between hover:border-slate-700 transition-all">
                     <div>
-                        <span class="text-xs font-bold text-pink-400 block">🎨 কালার প্রিন্ট</span>
-                        <span class="text-[10px] text-slate-400">রঙিন প্রিন্টার আছে কি?</span>
+                        <span class="text-xs font-bold text-slate-200 block">⚪⚫ সাদাকালো লেজার</span>
+                        <span class="text-[10px] text-slate-400">লেজার প্রিন্টার আছে কি?</span>
                     </div>
-                    <input type="checkbox" name="has_color_print" value="1" {{ old('has_color_print', $shop->has_color_print) ? 'checked' : '' }} class="w-5 h-5 accent-pink-500 rounded">
+                    <input type="checkbox" name="has_bw_print" value="1" {{ old('has_bw_print', $shop->has_bw_print ?? true) ? 'checked' : '' }} class="w-5 h-5 {{ $shop->is_office_mode ? 'accent-indigo-500' : 'accent-rose-500' }} rounded">
                 </label>
 
                 <!-- Photocopier Machine Toggle -->
@@ -107,6 +107,15 @@
                         <span class="text-[10px] text-slate-400">সাশ্রয়ী সাদা-কালো কপির</span>
                     </div>
                     <input type="checkbox" name="has_photocopier" value="1" {{ old('has_photocopier', $shop->has_photocopier) ? 'checked' : '' }} class="w-5 h-5 accent-amber-500 rounded">
+                </label>
+
+                <!-- Color Print Toggle -->
+                <label class="p-4 rounded-2xl bg-slate-950 border border-slate-800 cursor-pointer flex items-center justify-between hover:border-slate-700 transition-all">
+                    <div>
+                        <span class="text-xs font-bold text-pink-400 block">🎨 কালার প্রিন্ট</span>
+                        <span class="text-[10px] text-slate-400">রঙিন প্রিন্টার আছে কি?</span>
+                    </div>
+                    <input type="checkbox" name="has_color_print" value="1" {{ old('has_color_print', $shop->has_color_print) ? 'checked' : '' }} class="w-5 h-5 accent-pink-500 rounded">
                 </label>
 
                 <!-- Duplex Print Toggle -->

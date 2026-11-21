@@ -178,7 +178,7 @@ class AgentController extends Controller
         $photocopyPrinter = $request->input('photocopy_printer');
 
         // 1. Process B&W selected printer from Windows Agent
-        if (!empty($bwPrinter) && $bwPrinter !== '-- উইন্ডোজ ডিফল্ট প্রিন্টার --') {
+        if (!empty($bwPrinter) && $bwPrinter !== '-- উইন্ডোজ ডিফল্ট প্রিন্টার --' && $bwPrinter !== '-- কোনো সাদাকালো প্রিন্টার নেই --') {
             Printer::where('shop_id', $shop->id)
                 ->where('type', 'bw')
                 ->where('system_printer_name', '!=', $bwPrinter)
@@ -194,6 +194,10 @@ class AgentController extends Controller
                     'last_heartbeat_at' => now(),
                 ]
             );
+            $shop->update(['has_bw_print' => true]);
+        } elseif ($bwPrinter === '-- কোনো সাদাকালো প্রিন্টার নেই --') {
+            Printer::where('shop_id', $shop->id)->where('type', 'bw')->update(['status' => 'offline']);
+            $shop->update(['has_bw_print' => false]);
         }
 
         // 2. Process Color selected printer from Windows Agent

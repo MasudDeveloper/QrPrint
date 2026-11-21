@@ -219,6 +219,7 @@ namespace PrintSheba
             cmbColorPrinter.Items.Clear();
             cmbPhotocopyPrinter.Items.Clear();
 
+            cmbBwPrinter.Items.Add("-- কোনো সাদাকালো প্রিন্টার নেই --");
             cmbBwPrinter.Items.Add("-- উইন্ডোজ ডিফল্ট প্রিন্টার --");
             cmbColorPrinter.Items.Add("-- কোনো কালার প্রিন্টার নেই --");
             cmbColorPrinter.Items.Add("-- উইন্ডোজ ডিফল্ট প্রিন্টার --");
@@ -490,9 +491,13 @@ namespace PrintSheba
             {
                 return config.photocopy_printer;
             }
-            if (!string.IsNullOrEmpty(config.bw_printer) && config.bw_printer != "-- উইন্ডোজ ডিফল্ট প্রিন্টার --")
+            if (!string.IsNullOrEmpty(config.bw_printer) && config.bw_printer != "-- উইন্ডোজ ডিফল্ট প্রিন্টার --" && config.bw_printer != "-- কোনো সাদাকালো প্রিন্টার নেই --")
             {
                 return config.bw_printer;
+            }
+            if (!string.IsNullOrEmpty(config.photocopy_printer) && config.photocopy_printer != "-- উইন্ডোজ ডিফল্ট প্রিন্টার --" && config.photocopy_printer != "-- কোনো ফটোকপি মেশিন নেই --")
+            {
+                return config.photocopy_printer;
             }
 
             var defaultSettings = new PrinterSettings();
