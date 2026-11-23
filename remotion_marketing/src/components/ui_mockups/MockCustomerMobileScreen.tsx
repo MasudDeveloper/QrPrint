@@ -5,7 +5,7 @@ export interface CustomerScreenState {
   hasFile?: boolean;
   fileName?: string;
   totalPages?: number;
-  colorMode?: 'bw' | 'color';
+  colorMode?: 'bw' | 'photocopy' | 'color';
   copies?: number;
   isDuplex?: boolean;
   totalBill?: number;
@@ -230,42 +230,54 @@ export const MockCustomerMobileScreen: React.FC<CustomerScreenState> = ({
             প্রিন্ট সেটিংস
           </span>
 
-          {/* Color vs B&W Selector */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+          {/* Color vs Photocopier vs B&W Selector */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 6 }}>
             <div
               style={{
-                padding: '8px 10px',
+                padding: '8px 6px',
                 borderRadius: 12,
                 border: colorMode === 'bw' ? '2px solid #0f172a' : '1.5px solid #e2e8f0',
                 backgroundColor: colorMode === 'bw' ? '#f1f5f9' : '#ffffff',
                 display: 'flex',
-                justifyContent: 'space-between',
+                flexDirection: 'column',
                 alignItems: 'center',
+                textAlign: 'center',
               }}
             >
-              <div>
-                <div style={{ fontSize: 11, fontWeight: 800 }}>সাদাকালো</div>
-                <div style={{ fontSize: 9, color: '#64748b' }}>৳৩/পেজ</div>
-              </div>
-              <input type="radio" checked={colorMode === 'bw'} readOnly style={{ accentColor: '#0f172a' }} />
+              <div style={{ fontSize: 10, fontWeight: 800 }}>সাদাকালো</div>
+              <div style={{ fontSize: 9, color: '#64748b' }}>৳৩/পেজ</div>
             </div>
 
             <div
               style={{
-                padding: '8px 10px',
+                padding: '8px 6px',
+                borderRadius: 12,
+                border: colorMode === 'photocopy' ? '2px solid #0284c7' : '1.5px solid #e2e8f0',
+                backgroundColor: colorMode === 'photocopy' ? '#e0f2fe' : '#ffffff',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                textAlign: 'center',
+              }}
+            >
+              <div style={{ fontSize: 10, fontWeight: 800, color: '#0369a1' }}>ফটোকপি</div>
+              <div style={{ fontSize: 9, color: '#0284c7', fontWeight: 800 }}>৳২/পেজ</div>
+            </div>
+
+            <div
+              style={{
+                padding: '8px 6px',
                 borderRadius: 12,
                 border: colorMode === 'color' ? '2px solid #f43f5e' : '1.5px solid #e2e8f0',
                 backgroundColor: colorMode === 'color' ? '#fff1f2' : '#ffffff',
                 display: 'flex',
-                justifyContent: 'space-between',
+                flexDirection: 'column',
                 alignItems: 'center',
+                textAlign: 'center',
               }}
             >
-              <div>
-                <div style={{ fontSize: 11, fontWeight: 800, color: '#e11d48' }}>রঙিন (Color)</div>
-                <div style={{ fontSize: 9, color: '#f43f5e' }}>৳১০/পেজ</div>
-              </div>
-              <input type="radio" checked={colorMode === 'color'} readOnly style={{ accentColor: '#f43f5e' }} />
+              <div style={{ fontSize: 10, fontWeight: 800, color: '#e11d48' }}>রঙিন</div>
+              <div style={{ fontSize: 9, color: '#f43f5e' }}>৳১০/পেজ</div>
             </div>
           </div>
 

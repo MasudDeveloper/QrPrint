@@ -591,8 +591,8 @@
                 if (!aiSuccess) {
                     detectCardAndCrop(side);
                     if (statusBadge) {
-                        statusBadge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800';
-                        statusBadge.innerText = '✓ ক্রপ রেডি';
+                        statusBadge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800';
+                        statusBadge.innerText = '⚠️ সাধারণ ক্রপ (অ্যাডজাস্ট করুন)';
                     }
                 }
             } catch (err) {

@@ -7,6 +7,7 @@ export interface AgentWindowModalProps {
   apiToken?: string;
   bwPrinter?: string;
   colorPrinter?: string;
+  photocopyPrinter?: string;
   isSaved?: boolean;
   isTestPrinting?: boolean;
   isMinimizedToTray?: boolean;
@@ -19,6 +20,7 @@ export const MockAgentWindowModal: React.FC<AgentWindowModalProps> = ({
   apiToken = 'ps_live_89f02c4819e4a3b70e',
   bwPrinter = 'HP LaserJet Pro MFP M428fdw',
   colorPrinter = 'Epson EcoTank L8050 Photo',
+  photocopyPrinter = 'Toshiba e-Studio 2523A (ফটোকপিয়ার)',
   isSaved = true,
   isTestPrinting = false,
   isMinimizedToTray = false,
@@ -139,12 +141,22 @@ export const MockAgentWindowModal: React.FC<AgentWindowModalProps> = ({
                 </div>
 
                 <div>
-                  <label style={{ fontSize: 11, fontWeight: 800, color: '#94a3b8', display: 'block', marginBottom: 4 }}>
+                  <label style={{ fontSize: 11, fontWeight: 800, color: '#ec4899', display: 'block', marginBottom: 4 }}>
                     রঙিন (Color) প্রিন্টার
                   </label>
                   <div style={{ padding: '8px 12px', borderRadius: 8, backgroundColor: '#020617', border: '1.5px solid #ec4899', fontSize: 12, color: '#ffffff', fontWeight: 800, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span>{colorPrinter}</span>
                     <span style={{ color: '#ec4899', fontSize: 10 }}>✓ কালার অটো-রাউট</span>
+                  </div>
+                </div>
+
+                <div>
+                  <label style={{ fontSize: 11, fontWeight: 800, color: '#38bdf8', display: 'block', marginBottom: 4 }}>
+                    ফটোকপি মেশিন (Photocopier Mode)
+                  </label>
+                  <div style={{ padding: '8px 12px', borderRadius: 8, backgroundColor: '#020617', border: '1.5px solid #0284c7', fontSize: 12, color: '#ffffff', fontWeight: 800, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span>{photocopyPrinter}</span>
+                    <span style={{ color: '#38bdf8', fontSize: 10 }}>✓ সাশ্রয়ী ফটোকপি অটো-রাউট</span>
                   </div>
                 </div>
 

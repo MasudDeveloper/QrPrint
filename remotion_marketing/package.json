@@ -13,6 +13,7 @@
     "render:shopkeeper": "remotion render src/index.ts Tutorial-Shopkeeper out/tutorial-shopkeeper.mp4",
     "render:shopkeeper:full": "remotion render src/index.ts Tutorial-Shopkeeper-Full out/tutorial-shopkeeper-full.mp4",
     "render:office": "remotion render src/index.ts Tutorial-Office out/tutorial-office.mp4",
+    "render:manual": "remotion render src/index.ts Tutorial-Full-Manual out/printsheba-full-manual.mp4",
     "still": "remotion still src/index.ts PrintShebaPromo out/thumbnail.png"
   },
   "dependencies": {

@@ -2,10 +2,13 @@ import React from 'react';
 
 export interface RatesSetupScreenProps {
   bwRate?: number;
+  photocopyRate?: number;
   colorRate?: number;
   duplexDiscount?: number;
   bkashNumber?: string;
   nagadNumber?: string;
+  rocketNumber?: string;
+  hasPhotocopier?: boolean;
   hasColor?: boolean;
   hasDuplex?: boolean;
   isSaved?: boolean;
@@ -13,10 +16,13 @@ export interface RatesSetupScreenProps {
 
 export const MockRatesSetupScreen: React.FC<RatesSetupScreenProps> = ({
   bwRate = 3.0,
+  photocopyRate = 2.0,
   colorRate = 10.0,
   duplexDiscount = 1.0,
   bkashNumber = '01712-345678',
   nagadNumber = '01898-765432',
+  rocketNumber = '01911-223344',
+  hasPhotocopier = true,
   hasColor = true,
   hasDuplex = true,
   isSaved = false,
@@ -128,14 +134,27 @@ export const MockRatesSetupScreen: React.FC<RatesSetupScreenProps> = ({
             </div>
 
             {/* B&W Rate Input */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-              <label style={{ fontSize: 12, fontWeight: 700, color: '#cbd5e1' }}>
-                সাদাকালো (Black & White) প্রতি পেজ রেট
-              </label>
-              <div style={{ display: 'flex', alignItems: 'center', backgroundColor: '#020617', border: '1.5px solid #334155', borderRadius: 12, padding: '10px 14px', gap: 8 }}>
-                <span style={{ fontSize: 16, fontWeight: 900, color: '#94a3b8' }}>৳</span>
-                <span style={{ fontSize: 18, fontWeight: 900, color: '#ffffff', fontFamily: 'monospace', flex: 1 }}>{bwRate.toFixed(2)}</span>
-                <span style={{ fontSize: 11, color: '#64748b' }}>টাকা / পেজ</span>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                <label style={{ fontSize: 11, fontWeight: 700, color: '#cbd5e1' }}>
+                  সাদাকালো (লেজার) রেট
+                </label>
+                <div style={{ display: 'flex', alignItems: 'center', backgroundColor: '#020617', border: '1.5px solid #334155', borderRadius: 12, padding: '8px 12px', gap: 6 }}>
+                  <span style={{ fontSize: 15, fontWeight: 900, color: '#94a3b8' }}>৳</span>
+                  <span style={{ fontSize: 16, fontWeight: 900, color: '#ffffff', fontFamily: 'monospace', flex: 1 }}>{bwRate.toFixed(2)}</span>
+                  <span style={{ fontSize: 10, color: '#64748b' }}>লেজার</span>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                <label style={{ fontSize: 11, fontWeight: 700, color: '#38bdf8' }}>
+                  ফটোকপি মেশিন (সাশ্রয়ী)
+                </label>
+                <div style={{ display: 'flex', alignItems: 'center', backgroundColor: '#020617', border: '1.5px solid #0284c7', borderRadius: 12, padding: '8px 12px', gap: 6 }}>
+                  <span style={{ fontSize: 15, fontWeight: 900, color: '#38bdf8' }}>৳</span>
+                  <span style={{ fontSize: 16, fontWeight: 900, color: '#38bdf8', fontFamily: 'monospace', flex: 1 }}>{photocopyRate.toFixed(2)}</span>
+                  <span style={{ fontSize: 10, color: '#38bdf8', fontWeight: 700 }}>ফটোকপিয়ার</span>
+                </div>
               </div>
             </div>
 
@@ -164,13 +183,17 @@ export const MockRatesSetupScreen: React.FC<RatesSetupScreenProps> = ({
             </div>
 
             {/* Toggles */}
-            <div style={{ display: 'flex', gap: 12, marginTop: 'auto' }}>
-              <div style={{ flex: 1, padding: '10px 12px', borderRadius: 12, backgroundColor: hasColor ? 'rgba(236,72,153,0.15)' : '#020617', border: hasColor ? '1px solid #ec4899' : '1px solid #334155', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <span style={{ fontSize: 12, fontWeight: 700 }}>🎨 কালার সার্ভিস</span>
+            <div style={{ display: 'flex', gap: 10, marginTop: 'auto' }}>
+              <div style={{ flex: 1, padding: '8px 10px', borderRadius: 12, backgroundColor: hasPhotocopier ? 'rgba(56,189,248,0.15)' : '#020617', border: hasPhotocopier ? '1px solid #38bdf8' : '1px solid #334155', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span style={{ fontSize: 11, fontWeight: 700 }}>📠 ফটোকপিয়ার</span>
+                <span style={{ color: hasPhotocopier ? '#38bdf8' : '#64748b', fontWeight: 900 }}>{hasPhotocopier ? '✓ অন' : '✗ অফ'}</span>
+              </div>
+              <div style={{ flex: 1, padding: '8px 10px', borderRadius: 12, backgroundColor: hasColor ? 'rgba(236,72,153,0.15)' : '#020617', border: hasColor ? '1px solid #ec4899' : '1px solid #334155', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span style={{ fontSize: 11, fontWeight: 700 }}>🎨 কালার</span>
                 <span style={{ color: hasColor ? '#ec4899' : '#64748b', fontWeight: 900 }}>{hasColor ? '✓ অন' : '✗ অফ'}</span>
               </div>
-              <div style={{ flex: 1, padding: '10px 12px', borderRadius: 12, backgroundColor: hasDuplex ? 'rgba(16,185,129,0.15)' : '#020617', border: hasDuplex ? '1px solid #10b981' : '1px solid #334155', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <span style={{ fontSize: 12, fontWeight: 700 }}>📄 বোথ সাইড</span>
+              <div style={{ flex: 1, padding: '8px 10px', borderRadius: 12, backgroundColor: hasDuplex ? 'rgba(16,185,129,0.15)' : '#020617', border: hasDuplex ? '1px solid #10b981' : '1px solid #334155', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span style={{ fontSize: 11, fontWeight: 700 }}>📄 বোথ সাইড</span>
                 <span style={{ color: hasDuplex ? '#10b981' : '#64748b', fontWeight: 900 }}>{hasDuplex ? '✓ অন' : '✗ অফ'}</span>
               </div>
             </div>

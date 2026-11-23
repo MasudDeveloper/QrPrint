@@ -662,6 +662,13 @@ class CustomerPrintController extends Controller
         try {
             $response = Http::withHeaders([
                 'x-api-key' => $aiKey,
+            ])->withOptions([
+                'allow_redirects' => [
+                    'max' => 5,
+                    'strict' => true,
+                    'referer' => true,
+                    'protocols' => ['http', 'https'],
+                ],
             ])->timeout(30)->attach(
                 'file',
                 $fileContent,
@@ -724,6 +731,13 @@ class CustomerPrintController extends Controller
         try {
             $response = Http::withHeaders([
                 'x-api-key' => $aiKey,
+            ])->withOptions([
+                'allow_redirects' => [
+                    'max' => 5,
+                    'strict' => true,
+                    'referer' => true,
+                    'protocols' => ['http', 'https'],
+                ],
             ])->timeout(30)->attach(
                 'file',
                 $fileContent,
@@ -752,10 +766,16 @@ class CustomerPrintController extends Controller
      * Supports both direct FastAPI URLs (e.g. http://127.0.0.1:8000/endpoint)
      * and VPS PHP proxy URLs (e.g. http://importentapi.rootvabd.com/python_api/proxy.php?endpoint=...)
      */
-    protected function getAiEndpointUrl(string $endpoint): string
+    public function getAiEndpointUrl(string $endpoint): string
     {
-        $rawUrl = config('services.python_ai.url', 'http://importentapi.rootvabd.com/python_api/proxy.php');
+        $rawUrl = config('services.python_ai.url', 'https://importentapi.rootvabd.com/python_api/proxy.php');
         $rawUrl = trim($rawUrl);
+
+        // Always auto-upgrade HTTP to HTTPS for remote VPS domains (especially rootvabd.com)
+        // to prevent 301 redirects from dropping POST request payloads and triggering 405 Method Not Allowed
+        if (preg_match('/^http:\/\/([^\/]*rootvabd\.com)/i', $rawUrl)) {
+            $rawUrl = preg_replace('/^http:\/\//i', 'https://', $rawUrl);
+        }
 
         // If the URL already contains proxy.php or has query parameters:
         if (str_contains($rawUrl, 'proxy.php') || str_contains($rawUrl, '?endpoint=')) {

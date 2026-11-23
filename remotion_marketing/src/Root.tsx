@@ -12,6 +12,7 @@ import { TutorialCustomer } from './tutorials/TutorialCustomer';
 import { TutorialShopkeeper } from './tutorials/TutorialShopkeeper';
 import { TutorialShopkeeperFull } from './tutorials/TutorialShopkeeperFull';
 import { TutorialOffice } from './tutorials/TutorialOffice';
+import { TutorialFullManual } from './tutorials/TutorialFullManual';
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -129,6 +130,16 @@ export const RemotionRoot: React.FC = () => {
         id="Tutorial-Office"
         component={TutorialOffice}
         durationInFrames={1800}
+        fps={30}
+        width={1920}
+        height={1080}
+      />
+
+      {/* 4. Master Full Website Manual Video (200s = 6000 frames @ 30 FPS, Complete 7-Chapter Guide) */}
+      <Composition
+        id="Tutorial-Full-Manual"
+        component={TutorialFullManual}
+        durationInFrames={6000}
         fps={30}
         width={1920}
         height={1080}
