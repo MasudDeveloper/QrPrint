@@ -18,10 +18,22 @@
 
         <!-- Left: Shop Info -->
         <div class="space-y-2.5 z-10">
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full {{ $isAgentOnline ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30' : 'bg-amber-500/15 text-amber-400 border-amber-500/30' }} text-xs font-bold border">
-                <span class="w-2 h-2 rounded-full {{ $isAgentOnline ? 'bg-emerald-400 animate-ping' : 'bg-amber-400' }}"></span>
-                <span>{{ $isAgentOnline ? 'লাইভ অটো-প্রিন্ট ক্লাউড লিংক সক্রিয়' : 'উইন্ডোজ এজেন্ট ডিসকানেক্টেড (অফলাইন)' }}</span>
-            </div>
+            @if(!$shop->is_active)
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/20 text-red-400 border border-red-500/40 text-xs font-bold animate-pulse">
+                    <span class="w-2 h-2 rounded-full bg-red-400"></span>
+                    <span>অ্যাকাউন্ট স্থগিত (সুপার এডমিন কর্তৃক সাময়িক নিষ্ক্রিয়)</span>
+                </div>
+            @elseif(!$shop->is_lifetime && !$shop->isSubscriptionActive())
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/20 text-rose-400 border border-rose-500/40 text-xs font-bold animate-pulse">
+                    <span class="w-2 h-2 rounded-full bg-rose-400"></span>
+                    <span>{{ $shop->is_office_mode ? 'অফিস লাইসেন্সের মেয়াদ শেষ' : 'সাবস্ক্রিপশনের মেয়াদ শেষ (রিনিউ প্রয়োজন)' }}</span>
+                </div>
+            @else
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full {{ $isAgentOnline ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30' : 'bg-amber-500/15 text-amber-400 border-amber-500/30' }} text-xs font-bold border">
+                    <span class="w-2 h-2 rounded-full {{ $isAgentOnline ? 'bg-emerald-400 animate-ping' : 'bg-amber-400' }}"></span>
+                    <span>{{ $isAgentOnline ? 'লাইভ অটো-প্রিন্ট ক্লাউড লিংক সক্রিয়' : 'উইন্ডোজ এজেন্ট ডিসকানেক্টেড (অফলাইন)' }}</span>
+                </div>
+            @endif
             <h1 class="text-2xl sm:text-3xl font-black tracking-tight text-white flex items-center gap-2">
                 <span>{{ $shop->name }}</span>
             </h1>
@@ -50,9 +62,9 @@
         <!-- Right: Animated Compact Hardware Visualizer -->
         <div class="w-64 bg-slate-900/90 rounded-2xl p-4 border border-slate-800 shadow-xl flex flex-col items-center relative overflow-hidden shrink-0 z-10">
             <div class="flex items-center justify-between w-full text-[10px] font-mono text-slate-400 pb-2 border-b border-slate-800">
-                <span class="{{ $isAgentOnline ? 'text-emerald-400' : 'text-amber-400' }} flex items-center gap-1.5 font-bold">
-                    <span class="w-1.5 h-1.5 rounded-full {{ $isAgentOnline ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400' }}"></span>
-                    {{ $isAgentOnline ? 'RELAY ACTIVE' : 'RELAY STANDBY' }}
+                <span class="{{ !$shop->is_active ? 'text-red-400' : ($isAgentOnline ? 'text-emerald-400' : 'text-amber-400') }} flex items-center gap-1.5 font-bold">
+                    <span class="w-1.5 h-1.5 rounded-full {{ !$shop->is_active ? 'bg-red-400 animate-pulse' : ($isAgentOnline ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400') }}"></span>
+                    {{ !$shop->is_active ? 'SUSPENDED' : ($isAgentOnline ? 'RELAY ACTIVE' : 'RELAY STANDBY') }}
                 </span>
                 <span class="text-slate-500 font-bold">PORT #{{ $shop->id }}</span>
             </div>

@@ -302,6 +302,20 @@ namespace PrintSheba
             }
         }
 
+        private string lastThrottledLog = "";
+        private DateTime lastThrottledLogTime = DateTime.MinValue;
+
+        private void LogThrottled(string message, int cooldownSeconds = 60)
+        {
+            if (message == lastThrottledLog && (DateTime.Now - lastThrottledLogTime).TotalSeconds < cooldownSeconds)
+            {
+                return;
+            }
+            lastThrottledLog = message;
+            lastThrottledLogTime = DateTime.Now;
+            Log(message);
+        }
+
         private void UpdateStats()
         {
             if (InvokeRequired)
@@ -348,7 +362,7 @@ namespace PrintSheba
                     request.Timeout = 8000;
 
                     using (var response = (HttpWebResponse)request.GetResponse())
-                    using (var reader = new StreamReader(response.GetResponseStream()))
+                    using (var reader = new StreamReader(response.GetResponseStream(), Encoding.UTF8))
                     {
                         string json = reader.ReadToEnd();
                         var ser = new JavaScriptSerializer();
@@ -378,9 +392,50 @@ namespace PrintSheba
                 catch (WebException wex)
                 {
                     HttpWebResponse errRes = wex.Response as HttpWebResponse;
-                    if (errRes != null && errRes.StatusCode == HttpStatusCode.Unauthorized)
+                    if (errRes != null)
                     {
-                        SetStatus("✕ ইনভ্যালিড টোকেন (Unauthorized)", Color.FromArgb(254, 226, 226), Color.FromArgb(185, 28, 28));
+                        string errBody = "";
+                        try
+                        {
+                            using (var s = errRes.GetResponseStream())
+                            using (var r = new StreamReader(s, Encoding.UTF8))
+                            {
+                                errBody = r.ReadToEnd();
+                            }
+                        }
+                        catch { }
+
+                        if (errRes.StatusCode == HttpStatusCode.Unauthorized)
+                        {
+                            SetStatus("✕ ইনভ্যালিড টোকেন (Unauthorized)", Color.FromArgb(254, 226, 226), Color.FromArgb(185, 28, 28));
+                            LogThrottled("❌ [ভুল টোকেন] শপ API টোকেন সঠিক নয়। অনুগ্রহ করে ড্যাশবোর্ড থেকে সঠিক টোকেন প্রদান করুন।");
+                        }
+                        else if (errRes.StatusCode == HttpStatusCode.Forbidden || (int)errRes.StatusCode == 403)
+                        {
+                            if (errBody.IndexOf("suspended", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                                errBody.IndexOf("account_suspended", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                                errBody.Contains("স্থগিত"))
+                            {
+                                SetStatus("🔴 অ্যাকাউন্ট স্থগিত (Suspended)", Color.FromArgb(254, 226, 226), Color.FromArgb(185, 28, 28));
+                                LogThrottled("⚠️ [সতর্কবার্তা] আপনার অ্যাকাউন্টটি বর্তমানে স্থগিত (Suspended) রয়েছে। নতুন প্রিন্ট বন্ধ আছে। অনুগ্রহ করে সুপার এডমিনের সাথে যোগাযোগ করুন।");
+                            }
+                            else if (errBody.IndexOf("expired", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                                     errBody.IndexOf("subscription_expired", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                                     errBody.Contains("মেয়াদ"))
+                            {
+                                SetStatus("⚠️ মেয়াদ উত্তীর্ণ (Expired)", Color.FromArgb(254, 243, 199), Color.FromArgb(180, 83, 9));
+                                LogThrottled("⚠️ [সতর্কবার্তা] অ্যাকাউন্টের সাবস্ক্রিপশন মেয়াদ শেষ হয়েছে। সরাসরি স্বয়ংক্রিয় প্রিন্ট সচল করতে প্যাকেজ রিনিউ করুন।");
+                            }
+                            else
+                            {
+                                SetStatus("✕ এক্সেস নিষিদ্ধ (403 Forbidden)", Color.FromArgb(254, 226, 226), Color.FromArgb(185, 28, 28));
+                                LogThrottled("⚠️ [সার্ভার ত্রুটি] সার্ভার থেকে এক্সেস নিষিদ্ধ (403 Forbidden)।");
+                            }
+                        }
+                        else
+                        {
+                            SetStatus("● সার্ভার সংযোগ অপেক্ষা...", Color.FromArgb(254, 243, 199), Color.FromArgb(180, 83, 9));
+                        }
                     }
                     else
                     {
@@ -620,7 +675,7 @@ namespace PrintSheba
                             string downloadUrl = txtServerUrl.Text.Trim().TrimEnd('/') + "/downloads/SumatraPDF.exe";
                             using (var wc = new WebClient())
                             {
-                                wc.Headers.Add("User-Agent", "PrintShebaAgent-v2.6");
+                                wc.Headers.Add("User-Agent", "PrintShebaAgent-v2.7");
                                 wc.DownloadFile(downloadUrl, localSumatra);
                                 if (File.Exists(localSumatra))
                                 {
@@ -857,6 +912,9 @@ namespace PrintSheba
             });
         }
 
+        private string lastHeartbeatPrinterDesc = "";
+        private DateTime lastHeartbeatLogTime = DateTime.MinValue;
+
         private void SendHeartbeat()
         {
             if (string.IsNullOrEmpty(config.api_token)) return;
@@ -898,7 +956,44 @@ namespace PrintSheba
                     if (response.StatusCode == HttpStatusCode.OK)
                     {
                         string pDesc = !string.IsNullOrEmpty(config.bw_printer) ? config.bw_printer : "সিস্টেম ডিফল্ট";
-                        Log("🔄 ক্লাউড সার্ভারে প্রিন্টার সিঙ্ক সফল: " + pDesc);
+                        if (pDesc != lastHeartbeatPrinterDesc || (DateTime.Now - lastHeartbeatLogTime).TotalMinutes >= 5)
+                        {
+                            lastHeartbeatPrinterDesc = pDesc;
+                            lastHeartbeatLogTime = DateTime.Now;
+                            Log("🔄 ক্লাউড সার্ভারে প্রিন্টার সিঙ্ক সফল: " + pDesc);
+                        }
+                    }
+                }
+            }
+            catch (WebException wex)
+            {
+                HttpWebResponse errRes = wex.Response as HttpWebResponse;
+                if (errRes != null && (errRes.StatusCode == HttpStatusCode.Forbidden || (int)errRes.StatusCode == 403))
+                {
+                    string errBody = "";
+                    try
+                    {
+                        using (var s = errRes.GetResponseStream())
+                        using (var r = new StreamReader(s, Encoding.UTF8))
+                        {
+                            errBody = r.ReadToEnd();
+                        }
+                    }
+                    catch { }
+
+                    if (errBody.IndexOf("suspended", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                        errBody.IndexOf("account_suspended", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                        errBody.Contains("স্থগিত"))
+                    {
+                        SetStatus("🔴 অ্যাকাউন্ট স্থগিত (Suspended)", Color.FromArgb(254, 226, 226), Color.FromArgb(185, 28, 28));
+                        LogThrottled("⚠️ [ক্লাউড সিঙ্ক স্থগিত] আপনার অ্যাকাউন্টটি বর্তমানে স্থগিত (Suspended) রয়েছে।");
+                    }
+                    else if (errBody.IndexOf("expired", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                             errBody.IndexOf("subscription_expired", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                             errBody.Contains("মেয়াদ"))
+                    {
+                        SetStatus("⚠️ মেয়াদ উত্তীর্ণ (Expired)", Color.FromArgb(254, 243, 199), Color.FromArgb(180, 83, 9));
+                        LogThrottled("⚠️ [ক্লাউড সিঙ্ক স্থগিত] অ্যাকাউন্টের সাবস্ক্রিপশন মেয়াদ শেষ হয়েছে।");
                     }
                 }
             }
@@ -976,6 +1071,33 @@ namespace PrintSheba
             }
         }
 
+        private void LoadAppIcon()
+        {
+            try
+            {
+                string iconPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "app_icon.ico");
+                if (File.Exists(iconPath))
+                {
+                    this.Icon = new Icon(iconPath);
+                }
+                else
+                {
+                    this.Icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath);
+                }
+            }
+            catch
+            {
+                try
+                {
+                    this.Icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath);
+                }
+                catch
+                {
+                    this.Icon = SystemIcons.Application;
+                }
+            }
+        }
+
         // ==================== MODERN PREMIUM BRANDED UI ====================
         private void InitializeComponent()
         {
@@ -984,14 +1106,9 @@ namespace PrintSheba
             this.StartPosition = FormStartPosition.CenterScreen;
             this.Font = new Font("Segoe UI", 9F, FontStyle.Regular);
             this.BackColor = Color.FromArgb(9, 13, 22); // Deep Luxury OLED Dark Canvas
-            try
-            {
-                this.Icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath);
-            }
-            catch
-            {
-                this.Icon = SystemIcons.Application;
-            }
+            this.ShowIcon = true;
+            this.ShowInTaskbar = true;
+            LoadAppIcon();
             this.FormBorderStyle = FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
 
@@ -1440,7 +1557,7 @@ namespace PrintSheba
 
             trayIcon = new NotifyIcon
             {
-                Text = "PrintSheba Windows Agent v2.6",
+                Text = "PrintSheba Windows Agent v2.7",
                 Icon = appIcon,
                 ContextMenuStrip = trayMenu,
                 Visible = true

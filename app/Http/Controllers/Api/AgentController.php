@@ -30,10 +30,25 @@ class AgentController extends Controller
 
         $shop->update(['last_agent_heartbeat_at' => now()]);
 
-        // Check if shop subscription has expired
-        if (!$shop->is_active || !$shop->isSubscriptionActive()) {
+        // 1. Check if shop is suspended by super admin
+        if (!$shop->is_active) {
+            return response()->json([
+                'status' => 'suspended',
+                'error' => 'account_suspended',
+                'shop_status' => 'suspended',
+                'shop_name' => $shop->name,
+                'message' => 'আপনার প্রতিষ্ঠানটি সুপার এডমিন কর্তৃক সাময়িকভাবে স্থগিত (Suspended) রয়েছে।',
+                'jobs' => [],
+            ], 403);
+        }
+
+        // 2. Check if shop subscription has expired
+        if (!$shop->isSubscriptionActive() && !$shop->is_lifetime) {
             return response()->json([
                 'status' => 'subscription_expired',
+                'error' => 'subscription_expired',
+                'shop_status' => 'expired',
+                'shop_name' => $shop->name,
                 'message' => 'দোকানের সাবস্ক্রিপশন মেয়াদোত্তীর্ণ। সরাসরি স্বয়ংক্রিয় প্রিন্ট পেতে প্যাকেজ রিনিউ করুন।',
                 'jobs' => [],
             ], 403);
@@ -181,6 +196,28 @@ class AgentController extends Controller
 
         $shop->update(['last_agent_heartbeat_at' => now()]);
 
+        if (!$shop->is_active) {
+            return response()->json([
+                'status' => 'suspended',
+                'error' => 'account_suspended',
+                'shop_status' => 'suspended',
+                'shop_name' => $shop->name,
+                'message' => 'আপনার প্রতিষ্ঠানটি সুপার এডমিন কর্তৃক সাময়িকভাবে স্থগিত (Suspended) রয়েছে।',
+                'printers' => [],
+            ], 403);
+        }
+
+        if (!$shop->isSubscriptionActive() && !$shop->is_lifetime) {
+            return response()->json([
+                'status' => 'subscription_expired',
+                'error' => 'subscription_expired',
+                'shop_status' => 'expired',
+                'shop_name' => $shop->name,
+                'message' => 'দোকানের সাবস্ক্রিপশন মেয়াদোত্তীর্ণ। সরাসরি স্বয়ংক্রিয় প্রিন্ট পেতে প্যাকেজ রিনিউ করুন।',
+                'printers' => [],
+            ], 403);
+        }
+
         $printersList = $request->input('printers', []);
         $bwPrinter = $request->input('bw_printer');
         $colorPrinter = $request->input('color_printer');
@@ -290,6 +327,10 @@ class AgentController extends Controller
         $shop = $this->authenticateShop($request);
         if (!$shop) {
             return response()->json(['error' => 'Unauthorized shop token'], 401);
+        }
+
+        if (!$shop->is_active) {
+            return response()->json(['error' => 'Shop is suspended'], 403);
         }
 
         $job = PrintJob::where('shop_id', $shop->id)

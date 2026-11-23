@@ -294,6 +294,12 @@ class ShopController extends Controller
             $zip->addFile($sumatraPath, 'PrintSheba/SumatraPDF.exe');
         }
 
+        // Add application icon
+        $iconPath = base_path('agent/app_icon.ico');
+        if (file_exists($iconPath)) {
+            $zip->addFile($iconPath, 'PrintSheba/app_icon.ico');
+        }
+
         // 3. Add Shop-specific config.json (Pre-configured with shop API token)
         $config = [
             'server_url' => url('/'),
@@ -356,6 +362,12 @@ class ShopController extends Controller
         }
         if (file_exists($sumatraPath)) {
             $zip->addFile($sumatraPath, 'PrintSheba/SumatraPDF.exe');
+        }
+
+        // Add application icon
+        $iconPath = base_path('agent/app_icon.ico');
+        if (file_exists($iconPath)) {
+            $zip->addFile($iconPath, 'PrintSheba/app_icon.ico');
         }
 
         // 3. Add Shop-specific config.json
@@ -438,6 +450,10 @@ class ShopController extends Controller
         $shop = $this->getShop();
         $user = Auth::user();
 
+        if (!$shop->is_active) {
+            return back()->with('error', 'আপনার প্রতিষ্ঠানটি বর্তমানে স্থগিত (Suspended) রয়েছে। কোনো প্রিন্ট প্রসেস করা সম্ভব নয়।');
+        }
+
         // Check ownership: current active shop OR user's own shop OR super admin
         $isOwner = ((int) $job->shop_id === (int) $shop->id) || 
                    ($user && Shop::where('id', $job->shop_id)->where('user_id', $user->id)->exists()) ||
@@ -461,6 +477,10 @@ class ShopController extends Controller
     {
         $shop = $this->getShop();
         $user = Auth::user();
+
+        if (!$shop->is_active) {
+            return back()->with('error', 'আপনার প্রতিষ্ঠানটি বর্তমানে স্থগিত (Suspended) রয়েছে। কোনো প্রিন্ট প্রসেস করা সম্ভব নয়।');
+        }
 
         // Check ownership: current active shop OR user's own shop OR super admin
         $isOwner = ((int) $job->shop_id === (int) $shop->id) || 
@@ -614,6 +634,8 @@ class ShopController extends Controller
 
         return response()->json([
             'status' => 'success',
+            'is_active' => (bool) $shop->is_active,
+            'is_subscription_active' => (bool) $shop->isSubscriptionActive(),
             'is_office_mode' => (bool) $shop->is_office_mode,
             'today_earnings' => number_format($todayEarnings, 2),
             'today_prints_count' => $todayPrintsCount,
@@ -946,6 +968,10 @@ class ShopController extends Controller
     public function submitQuickPrint(Request $request)
     {
         $shop = $this->getShop();
+
+        if (!$shop->is_active) {
+            return back()->with('error_alert', 'আপনার প্রতিষ্ঠানটি বর্তমানে স্থগিত (Suspended) রয়েছে। নতুন কোনো প্রিন্ট অর্ডার গ্রহণ করা সম্ভব নয়। সুপার এডমিনের সাথে যোগাযোগ করুন।');
+        }
 
         if (!$shop->isSubscriptionActive() && !$shop->is_lifetime) {
             return back()->with('error_alert', 'আপনার সাবস্ক্রিপশন মেয়াদোত্তীর্ণ। সরাসরি প্রিন্ট করতে প্যাকেজ রিনিউ করুন।');

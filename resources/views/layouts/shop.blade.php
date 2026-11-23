@@ -99,6 +99,30 @@
                     <span class="text-[9px] font-mono text-slate-500">#{{ $shop->id ?? '---' }}</span>
                 </div>
 
+                @if(isset($shop) && !$shop->is_active)
+                <div class="flex items-center justify-between pt-1 border-t border-red-500/30">
+                    <div class="flex items-center gap-1.5">
+                        <span class="text-xs">🚫</span>
+                        <span class="text-[10px] text-red-400 font-bold">স্ট্যাটাস:</span>
+                    </div>
+                    <span class="inline-flex items-center gap-1 text-[9px] font-bold px-2 py-0.5 rounded-full text-red-300 bg-red-500/20 border border-red-500/40 animate-pulse">
+                        <span class="w-1.5 h-1.5 rounded-full bg-red-400"></span>
+                        স্থগিত (Suspended)
+                    </span>
+                </div>
+                @elseif(isset($shop) && !$shop->is_lifetime && !$shop->isSubscriptionActive())
+                <div class="flex items-center justify-between pt-1 border-t border-rose-500/30">
+                    <div class="flex items-center gap-1.5">
+                        <span class="text-xs">⚠️</span>
+                        <span class="text-[10px] text-rose-400 font-bold">লাইসেন্স:</span>
+                    </div>
+                    <span class="inline-flex items-center gap-1 text-[9px] font-bold px-2 py-0.5 rounded-full text-rose-300 bg-rose-500/20 border border-rose-500/40 animate-pulse">
+                        <span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span>
+                        মেয়াদ শেষ
+                    </span>
+                </div>
+                @endif
+
                 <!-- Windows Agent Status -->
                 <div class="flex items-center justify-between pt-1 border-t border-slate-800/80">
                     <div class="flex items-center gap-1.5">
@@ -304,17 +328,37 @@
 
             <!-- Page Content Container -->
             <main class="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto bg-slate-950">
-                @if(isset($shop) && !$shop->is_lifetime && !$shop->isSubscriptionActive() && !request()->routeIs('shop.subscription'))
+                @if(isset($shop) && !$shop->is_active)
+                    <div class="mb-6 p-5 rounded-3xl bg-gradient-to-r from-red-950/90 via-red-900/40 to-slate-950 border-2 border-red-500 text-white flex flex-col sm:flex-row items-center justify-between gap-4 shadow-2xl backdrop-blur-sm">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-2xl bg-red-500/20 border border-red-500/40 text-red-400 flex items-center justify-center text-2xl shrink-0 animate-pulse">
+                                🚫
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <h4 class="text-sm sm:text-base font-black text-red-200">আপনার প্রতিষ্ঠানটি বর্তমানে স্থগিত (Suspended) রয়েছে!</h4>
+                                    <span class="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-red-500/30 text-red-300 border border-red-500/50">SUSPENDED</span>
+                                </div>
+                                <p class="text-xs text-red-300/90 mt-1 leading-relaxed">
+                                    সুপার এডমিন কর্তৃক আপনার প্রতিষ্ঠানটির কার্যক্রমে সাময়িক বিরতি দেওয়া হয়েছে। উইন্ডোজ এজেন্ট সরাসরি কোনো প্রিন্ট অর্ডার প্রসেস করবে না। পুনরায় সচল করতে অবিলম্বে এডমিন সাপোর্টের সাথে যোগাযোগ করুন।
+                                </p>
+                            </div>
+                        </div>
+                        <a href="https://wa.me/8801644416378?text={{ urlencode('আমার প্রিন্টসেবা একাউন্টটি স্থগিত রয়েছে, পুনরায় সচল করতে সহায়তা চাই। শপ আইডি: #' . ($shop->id ?? '') . ' (' . ($shop->name ?? '') . ')') }}" target="_blank" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white font-bold text-xs shadow-lg shadow-red-500/20 shrink-0 transition-transform hover:scale-105 flex items-center gap-1.5">
+                            <span>এডমিন সাপোর্ট (WhatsApp)</span> →
+                        </a>
+                    </div>
+                @elseif(isset($shop) && !$shop->is_lifetime && !$shop->isSubscriptionActive() && !request()->routeIs('shop.subscription'))
                     <div class="mb-6 p-4 rounded-2xl bg-gradient-to-r from-rose-600/30 via-rose-500/20 to-rose-600/30 border border-rose-500/60 text-white flex flex-col sm:flex-row items-center justify-between gap-3 shadow-xl backdrop-blur-sm">
                         <div class="flex items-center gap-3">
                             <span class="w-10 h-10 rounded-xl bg-rose-500/30 text-rose-300 flex items-center justify-center text-xl shrink-0">⚠️</span>
                             <div>
-                                <h4 class="text-sm font-black text-rose-300">আপনার সফটওয়্যার সাবস্ক্রিপশনের মেয়াদ শেষ হয়েছে!</h4>
-                                <p class="text-xs text-slate-300 mt-0.5">কাস্টমার প্রিন্ট পোর্টাল এবং ব্যাকগ্রাউন্ড অটো-প্রিন্ট সাময়িকভাবে স্থগিত রয়েছে। আনলিমিটেড সার্ভিস সচল রাখতে এখনই প্যাকেজ রিনিউ করুন।</p>
+                                <h4 class="text-sm font-black text-rose-300">{{ (isset($shop) && $shop->is_office_mode) ? 'আপনার অফিস লাইসেন্সের মেয়াদ শেষ হয়েছে!' : 'আপনার সফটওয়্যার সাবস্ক্রিপশনের মেয়াদ শেষ হয়েছে!' }}</h4>
+                                <p class="text-xs text-slate-300 mt-0.5">{{ (isset($shop) && $shop->is_office_mode) ? 'অফিস কর্মীদের প্রিন্ট কিউ এবং ক্লাউড অটো-প্রিন্ট সচল রাখতে অনুগ্রহ করে কর্পোরেট লাইসেন্স রিনিউ করুন।' : 'কাস্টমার প্রিন্ট পোর্টাল এবং ব্যাকগ্রাউন্ড অটো-প্রিন্ট সাময়িকভাবে স্থগিত রয়েছে। আনলিমিটেড সার্ভিস সচল রাখতে এখনই প্যাকেজ রিনিউ করুন।' }}</p>
                             </div>
                         </div>
                         <a href="{{ route('shop.subscription') }}" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white font-bold text-xs shadow-md shrink-0 transition-transform hover:scale-105">
-                            প্যাকেজ রিনিউ করুন →
+                            {{ (isset($shop) && $shop->is_office_mode) ? 'লাইসেন্স রিনিউ করুন →' : 'প্যাকেজ রিনিউ করুন →' }}
                         </a>
                     </div>
                 @endif
