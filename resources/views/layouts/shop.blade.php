@@ -111,7 +111,7 @@
                     </span>
                 </div>
                 @elseif(isset($shop) && !$shop->is_lifetime && !$shop->isSubscriptionActive())
-                <div class="flex items-center justify-between pt-1 border-t border-rose-500/30">
+                <div id="sidebarLicenseExpiredBlock" class="flex items-center justify-between pt-1 border-t border-rose-500/30">
                     <div class="flex items-center gap-1.5">
                         <span class="text-xs">⚠️</span>
                         <span class="text-[10px] text-rose-400 font-bold">লাইসেন্স:</span>
@@ -228,9 +228,11 @@
                         <span>{{ $isOffice ? 'কর্পোরেট লাইসেন্স' : 'প্যাকেজ ও বিলিং' }}</span>
                     </span>
                     @if(isset($shop) && $shop->is_lifetime)
-                        <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30">LIFETIME</span>
+                        <span id="sidebarSubNavBadge" class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30">LIFETIME</span>
                     @elseif(isset($shop) && !$shop->isSubscriptionActive())
-                        <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-rose-500/20 text-rose-400 border border-rose-500/30 animate-pulse">EXPIRED</span>
+                        <span id="sidebarSubNavBadge" class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-rose-500/20 text-rose-400 border border-rose-500/30 animate-pulse">EXPIRED</span>
+                    @else
+                        <span id="sidebarSubNavBadge" class="hidden px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">ACTIVE</span>
                     @endif
                 </a>
 
@@ -349,7 +351,7 @@
                         </a>
                     </div>
                 @elseif(isset($shop) && !$shop->is_lifetime && !$shop->isSubscriptionActive() && !request()->routeIs('shop.subscription'))
-                    <div class="mb-6 p-4 rounded-2xl bg-gradient-to-r from-rose-600/30 via-rose-500/20 to-rose-600/30 border border-rose-500/60 text-white flex flex-col sm:flex-row items-center justify-between gap-3 shadow-xl backdrop-blur-sm">
+                    <div id="topExpiredWarningBanner" class="mb-6 p-4 rounded-2xl bg-gradient-to-r from-rose-600/30 via-rose-500/20 to-rose-600/30 border border-rose-500/60 text-white flex flex-col sm:flex-row items-center justify-between gap-3 shadow-xl backdrop-blur-sm">
                         <div class="flex items-center gap-3">
                             <span class="w-10 h-10 rounded-xl bg-rose-500/30 text-rose-300 flex items-center justify-center text-xl shrink-0">⚠️</span>
                             <div>
@@ -447,6 +449,133 @@
         }
 
         setInterval(pollSyncStatus, 5000);
+
+        // Global Shop/Office Real-Time Subscription Status Poller (Updates without reload + Sound)
+        @if(isset($shop))
+        @php
+            $initialLatestSub = \App\Models\ShopSubscription::where('shop_id', $shop->id)->latest()->first();
+            $initialSubStatus = $initialLatestSub ? $initialLatestSub->status : 'none';
+            $initialSubActive = ($shop->isSubscriptionActive() || $shop->is_lifetime) ? 'true' : 'false';
+        @endphp
+        let shopAudioCtx = null;
+        function unlockShopAudio() {
+            try {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (AudioCtx && !shopAudioCtx) shopAudioCtx = new AudioCtx();
+                if (shopAudioCtx && shopAudioCtx.state === 'suspended') shopAudioCtx.resume();
+            } catch (e) {}
+        }
+        document.addEventListener('click', unlockShopAudio, { once: true });
+        document.addEventListener('keydown', unlockShopAudio, { once: true });
+
+        function playShopSubChime(isSuccess) {
+            try {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (!AudioCtx) return;
+                const ctx = shopAudioCtx || new AudioCtx();
+                if (ctx.state === 'suspended') ctx.resume();
+                const now = ctx.currentTime;
+                const notes = isSuccess
+                    ? [
+                        { freq: 523.25, start: 0, dur: 0.2 },    // C5
+                        { freq: 659.25, start: 0.1, dur: 0.2 },  // E5
+                        { freq: 783.99, start: 0.2, dur: 0.25 }, // G5
+                        { freq: 1046.5, start: 0.32, dur: 0.45 } // C6
+                      ]
+                    : [
+                        { freq: 440, start: 0, dur: 0.25 },
+                        { freq: 349.23, start: 0.18, dur: 0.35 }
+                      ];
+                notes.forEach(n => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(n.freq, now + n.start);
+                    gain.gain.setValueAtTime(0.15, now + n.start);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + n.start + n.dur);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(now + n.start);
+                    osc.stop(now + n.start + n.dur);
+                });
+            } catch (e) {}
+        }
+
+        function showShopSubLiveToast(title, body, isSuccess) {
+            let toast = document.getElementById('shopSubLiveToast');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = 'shopSubLiveToast';
+                toast.className = 'fixed top-5 right-5 z-[100] max-w-sm w-full transition-all duration-300';
+                document.body.appendChild(toast);
+            }
+            const borderClass = isSuccess ? 'border-emerald-500/70' : 'border-rose-500/70';
+            const iconBg = isSuccess ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400';
+            const titleColor = isSuccess ? 'text-emerald-300' : 'text-rose-300';
+            toast.innerHTML = `
+                <div class="bg-slate-900 border-2 ${borderClass} text-white p-4 rounded-2xl shadow-2xl flex items-start gap-3 backdrop-blur-xl">
+                    <div class="w-10 h-10 rounded-xl ${iconBg} flex items-center justify-center text-xl shrink-0">${isSuccess ? '🎉' : '❌'}</div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-xs font-black ${titleColor}">${title}</p>
+                        <p class="text-xs text-slate-200 mt-0.5">${body}</p>
+                    </div>
+                    <button type="button" onclick="this.closest('#shopSubLiveToast').remove()" class="text-slate-400 hover:text-white text-sm font-bold">&times;</button>
+                </div>`;
+            setTimeout(() => { if (toast && toast.parentNode) toast.remove(); }, 9000);
+        }
+
+        let lastGlobalSubStatus = '{{ $initialSubStatus }}';
+        let wasGlobalSubActive = {{ $initialSubActive }};
+
+        window.pollShopSubscriptionStatus = function() {
+            fetch('{{ route("shop.subscription.status") }}', {
+                headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(r => r.json())
+            .then(data => {
+                // Update global layout badges/banners if subscription became active
+                if (data.is_active) {
+                    const expiredBlock = document.getElementById('sidebarLicenseExpiredBlock');
+                    if (expiredBlock) expiredBlock.classList.add('hidden');
+
+                    const topBanner = document.getElementById('topExpiredWarningBanner');
+                    if (topBanner) topBanner.classList.add('hidden');
+
+                    const navBadge = document.getElementById('sidebarSubNavBadge');
+                    if (navBadge) {
+                        if (data.is_lifetime) {
+                            navBadge.className = 'px-1.5 py-0.5 rounded text-[9px] font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30';
+                            navBadge.innerText = 'LIFETIME';
+                        } else {
+                            navBadge.className = 'px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
+                            navBadge.innerText = 'ACTIVE';
+                        }
+                    }
+                }
+
+                // Trigger sound + toast when status transitions to approved or active
+                const newlyApproved = (data.status === 'approved' && lastGlobalSubStatus !== 'approved') ||
+                                      (data.is_active && !wasGlobalSubActive);
+                const newlyRejected = (data.status === 'rejected' && lastGlobalSubStatus === 'pending');
+
+                if (newlyApproved) {
+                    playShopSubChime(true);
+                    showShopSubLiveToast('সাবস্ক্রিপশন অনুমোদিত ও সক্রিয়!', 'অভিনন্দন! আপনার প্যাকেজটি সফলভাবে চালু হয়েছে।', true);
+                } else if (newlyRejected) {
+                    playShopSubChime(false);
+                    showShopSubLiveToast('আবেদন বাতিল হয়েছে', data.rejection_reason || 'অনুগ্রহ করে সঠিক TrxID দিয়ে আবার চেষ্টা করুন।', false);
+                }
+
+                lastGlobalSubStatus = data.status;
+                wasGlobalSubActive = !!data.is_active;
+
+                window.dispatchEvent(new CustomEvent('shop:subscription-updated', { detail: data }));
+            })
+            .catch(() => {});
+        };
+
+        setInterval(window.pollShopSubscriptionStatus, 5000);
+        @endif
 
         // Register PWA Service Worker for Instant Web Share Target
         if ('serviceWorker' in navigator) {

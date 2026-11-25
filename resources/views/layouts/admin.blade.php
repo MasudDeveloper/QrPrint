@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'সুপার এডমিন কন্ট্রোল') – PrintSheba</title>
     <link rel="icon" type="image/svg+xml" href="{{ asset('logo.svg') }}">
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800;900&display=swap" rel="stylesheet">
@@ -81,12 +82,11 @@
                     </span>
                     @php
                         $pendingSubs = \App\Models\ShopSubscription::where('status', 'pending')->count();
+                        $latestPendingSubId = \App\Models\ShopSubscription::where('status', 'pending')->max('id') ?? 0;
                     @endphp
-                    @if($pendingSubs > 0)
-                        <span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-rose-500 text-white animate-pulse">
-                            {{ $pendingSubs }}
-                        </span>
-                    @endif
+                    <span id="adminPendingSubBadge" class="px-2 py-0.5 rounded-full text-[10px] font-black bg-rose-500 text-white animate-pulse {{ $pendingSubs > 0 ? '' : 'hidden' }}">
+                        {{ $pendingSubs }}
+                    </span>
                 </a>
 
                 <a href="{{ route('admin.jobs') }}" 
@@ -179,7 +179,12 @@
                         <nav class="mt-4 space-y-1.5">
                             <a href="{{ route('admin.dashboard') }}" class="block px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('admin.dashboard') ? 'bg-rose-600 text-white' : 'text-slate-300 hover:bg-slate-800' }}">📊 সেন্ট্রাল ড্যাশবোর্ড</a>
                             <a href="{{ route('admin.shops') }}" class="block px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('admin.shops') ? 'bg-rose-600 text-white' : 'text-slate-300 hover:bg-slate-800' }}">🏪 দোকানসমূহ (Shops)</a>
-                            <a href="{{ route('admin.subscriptions') }}" class="block px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('admin.subscriptions') ? 'bg-rose-600 text-white' : 'text-slate-300 hover:bg-slate-800' }}">💎 সাবস্ক্রিপশন কিউ</a>
+                            <a href="{{ route('admin.subscriptions') }}" class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('admin.subscriptions') ? 'bg-rose-600 text-white' : 'text-slate-300 hover:bg-slate-800' }}">
+                                <span>💎 সাবস্ক্রিপশন কিউ</span>
+                                <span id="adminMobilePendingSubBadge" class="px-2 py-0.5 rounded-full text-[10px] font-black bg-rose-500 text-white animate-pulse {{ $pendingSubs > 0 ? '' : 'hidden' }}">
+                                    {{ $pendingSubs }}
+                                </span>
+                            </a>
                             <a href="{{ route('admin.jobs') }}" class="block px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('admin.jobs') ? 'bg-rose-600 text-white' : 'text-slate-300 hover:bg-slate-800' }}">📄 সকল প্রিন্ট টাস্ক</a>
                             <a href="{{ route('admin.settings') }}" class="block px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('admin.settings') ? 'bg-rose-600 text-white' : 'text-slate-300 hover:bg-slate-800' }}">🎬 ভিডিও ও সাইট সেটিংস</a>
                             <a href="{{ route('admin.logs') }}" class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('admin.logs*') ? 'bg-rose-600 text-white' : 'text-slate-300 hover:bg-slate-800' }}">
@@ -220,6 +225,27 @@
         </div>
     </div>
 
+    <!-- Live Admin Subscription Toast -->
+    <div id="adminSubToast" class="fixed top-5 right-5 z-[100] max-w-sm w-full transform translate-y-[-140px] opacity-0 transition-all duration-300 pointer-events-none">
+        <div class="bg-slate-900 border-2 border-rose-500/70 text-white p-4 rounded-2xl shadow-2xl flex items-start gap-3 backdrop-blur-xl pointer-events-auto">
+            <div class="w-10 h-10 rounded-xl bg-rose-500/20 text-rose-400 flex items-center justify-center text-xl shrink-0 animate-bounce">
+                💎
+            </div>
+            <div class="flex-1 min-w-0">
+                <p id="adminSubToastTitle" class="text-xs font-black text-rose-300">নতুন সাবস্ক্রিপশন রিকোয়েস্ট!</p>
+                <p id="adminSubToastBody" class="text-xs text-slate-200 mt-0.5 truncate"></p>
+                <div class="mt-2 flex items-center gap-2">
+                    <a href="{{ route('admin.subscriptions') }}" class="px-3 py-1 rounded-lg bg-rose-600 hover:bg-rose-500 text-white text-[11px] font-bold transition">
+                        এখনই দেখুন →
+                    </a>
+                    <button type="button" onclick="hideAdminSubToast()" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 text-[11px] font-bold">
+                        বন্ধ করুন
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         const adminBtn = document.getElementById('adminMobileMenuBtn');
         const adminDrawer = document.getElementById('adminMobileDrawer');
@@ -231,6 +257,114 @@
                 if (e.target === adminDrawer) adminDrawer.classList.add('hidden');
             });
         }
+
+        // Global AudioContext & Real-Time Admin Subscription Poller
+        let adminAudioCtx = null;
+        function unlockAdminAudio() {
+            try {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (AudioCtx && !adminAudioCtx) {
+                    adminAudioCtx = new AudioCtx();
+                }
+                if (adminAudioCtx && adminAudioCtx.state === 'suspended') {
+                    adminAudioCtx.resume();
+                }
+            } catch (e) {}
+        }
+        document.addEventListener('click', unlockAdminAudio, { once: true });
+        document.addEventListener('keydown', unlockAdminAudio, { once: true });
+
+        function playAdminSubscriptionSound() {
+            try {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (!AudioCtx) return;
+                const ctx = adminAudioCtx || new AudioCtx();
+                if (ctx.state === 'suspended') ctx.resume();
+                const now = ctx.currentTime;
+
+                const notes = [
+                    { freq: 659.25, start: 0, dur: 0.22 },    // E5
+                    { freq: 880.00, start: 0.12, dur: 0.25 }, // A5
+                    { freq: 1046.50, start: 0.24, dur: 0.40 } // C6
+                ];
+                notes.forEach(n => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(n.freq, now + n.start);
+                    gain.gain.setValueAtTime(0.16, now + n.start);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + n.start + n.dur);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(now + n.start);
+                    osc.stop(now + n.start + n.dur);
+                });
+            } catch (e) {}
+        }
+
+        let adminToastTimeout = null;
+        function showAdminSubToast(title, body) {
+            const toast = document.getElementById('adminSubToast');
+            const titleEl = document.getElementById('adminSubToastTitle');
+            const bodyEl = document.getElementById('adminSubToastBody');
+            if (!toast || !titleEl || !bodyEl) return;
+            titleEl.innerText = title;
+            bodyEl.innerText = body;
+            toast.classList.remove('translate-y-[-140px]', 'opacity-0', 'pointer-events-none');
+            toast.classList.add('translate-y-0', 'opacity-100');
+            if (adminToastTimeout) clearTimeout(adminToastTimeout);
+            adminToastTimeout = setTimeout(hideAdminSubToast, 8000);
+        }
+
+        function hideAdminSubToast() {
+            const toast = document.getElementById('adminSubToast');
+            if (!toast) return;
+            toast.classList.add('translate-y-[-140px]', 'opacity-0', 'pointer-events-none');
+            toast.classList.remove('translate-y-0', 'opacity-100');
+        }
+
+        let lastAdminPendingCount = {{ $pendingSubs }};
+        let lastAdminLatestPendingId = {{ $latestPendingSubId }};
+
+        window.pollAdminSubscriptions = function() {
+            fetch('{{ route("admin.subscriptions.live") }}', {
+                headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(res => res.json())
+            .then(data => {
+                // Update sidebar & mobile badges
+                const deskBadge = document.getElementById('adminPendingSubBadge');
+                const mobBadge = document.getElementById('adminMobilePendingSubBadge');
+                [deskBadge, mobBadge].forEach(b => {
+                    if (!b) return;
+                    b.innerText = data.pending_count;
+                    if (data.pending_count > 0) b.classList.remove('hidden');
+                    else b.classList.add('hidden');
+                });
+
+                // Detect new pending request
+                const hasNew = (data.latest_pending_id > lastAdminLatestPendingId) ||
+                               (data.pending_count > lastAdminPendingCount);
+
+                if (hasNew && data.pending_count > 0) {
+                    playAdminSubscriptionSound();
+                    const info = data.latest_pending;
+                    const typeIcon = info && info.is_office_mode ? '🏢' : '🏬';
+                    const msg = info
+                        ? `${typeIcon} ${info.shop_name} • ${info.plan_name} (৳${info.amount})`
+                        : `নতুন ${data.pending_count}টি রিকোয়েস্ট অপেক্ষমান`;
+                    showAdminSubToast('নতুন সাবস্ক্রিপশন রিকোয়েস্ট!', msg);
+                }
+
+                lastAdminPendingCount = data.pending_count;
+                lastAdminLatestPendingId = data.latest_pending_id;
+
+                window.dispatchEvent(new CustomEvent('admin:subscriptions-updated', { detail: data }));
+            })
+            .catch(() => {});
+        };
+
+        setInterval(window.pollAdminSubscriptions, 4000);
     </script>
 </body>
 </html>

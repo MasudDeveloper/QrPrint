@@ -24,19 +24,22 @@
         </div>
 
         <!-- Current Active Plan Card on Header -->
-        <div class="p-4 rounded-2xl bg-slate-900/90 border border-slate-800 text-left sm:text-right shrink-0 z-10 space-y-1">
+        <div id="headerPlanCard" class="p-4 rounded-2xl bg-slate-900/90 border border-slate-800 text-left sm:text-right shrink-0 z-10 space-y-1">
             <span class="text-[10px] text-slate-400 uppercase tracking-wider block font-bold">বর্তমান প্যাকেজ:</span>
-            <div class="text-lg font-black {{ $shop->is_office_mode ? 'text-indigo-400' : 'text-rose-400' }}">{{ $shop->plan_label }}</div>
+            <div id="headerPlanLabel" class="text-lg font-black {{ $shop->is_office_mode ? 'text-indigo-400' : 'text-rose-400' }}">{{ $shop->plan_label }}</div>
             
             @if($shop->is_lifetime)
-                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300 text-[10px] font-bold border border-purple-500/30">
-                    👑 আজীবন ফ্রি লাইসেন্স
-                </span>
+                <div id="headerSubStatusWrapper">
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300 text-[10px] font-bold border border-purple-500/30">
+                        👑 আজীবন ফ্রি লাইসেন্স
+                    </span>
+                </div>
+                <div id="headerExpiresAt" class="text-[11px] text-slate-400 hidden"></div>
             @else
                 @php
                     $isActive = $shop->isSubscriptionActive();
                 @endphp
-                <div class="flex items-center sm:justify-end gap-1.5 pt-1">
+                <div id="headerSubStatusWrapper" class="flex items-center sm:justify-end gap-1.5 pt-1">
                     @if($isActive)
                         <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
                         <span class="text-xs font-bold text-emerald-400">{{ $shop->time_remaining_label }}</span>
@@ -45,7 +48,7 @@
                         <span class="text-xs font-bold text-rose-400">মেয়াদ উত্তীর্ণ (Expired)</span>
                     @endif
                 </div>
-                <div class="text-[11px] text-slate-400">
+                <div id="headerExpiresAt" class="text-[11px] text-slate-400">
                     মেয়াদ শেষ: <span class="font-bold text-slate-300">{{ $shop->formatted_expires_at }}</span>
                 </div>
             @endif
@@ -62,7 +65,7 @@
 
     <!-- Expired Warning Banner -->
     @if(!$shop->isSubscriptionActive() && !$shop->is_lifetime)
-        <div class="p-5 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs sm:text-sm font-bold flex items-start gap-3">
+        <div id="subPageExpiredBanner" class="p-5 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs sm:text-sm font-bold flex items-start gap-3">
             <span class="text-2xl mt-0.5">⚠️</span>
             <div>
                 <span class="font-black text-white text-base block mb-0.5">আপনার সাবস্ক্রিপশনের মেয়াদ শেষ হয়েছে!</span>
@@ -744,7 +747,7 @@
                 <h3 class="text-base font-black text-white">পেমেন্ট ও সাবস্ক্রিপশন হিস্ট্রি</h3>
                 <p class="text-xs text-slate-400 mt-0.5">আপনার পূর্বের সকল প্যাকেজ রিকোয়েস্ট, ইনভয়েস ও অনুমোদনের স্ট্যাটাস</p>
             </div>
-            <span class="text-xs text-slate-400 font-mono">{{ count($subscriptionsHistory) }} টি রেকর্ড</span>
+            <span id="subHistoryCount" class="text-xs text-slate-400 font-mono">{{ count($subscriptionsHistory) }} টি রেকর্ড</span>
         </div>
 
         <div class="overflow-x-auto">
@@ -760,7 +763,7 @@
                         <th class="px-6 py-3.5 text-right">রসিদ</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-800/80">
+                <tbody id="subHistoryTbody" class="divide-y divide-slate-800/80">
                     @forelse($subscriptionsHistory as $sub)
                         <tr class="hover:bg-slate-800/40 transition-colors">
                             <td class="px-6 py-4 text-slate-300 font-mono">{{ $sub->created_at->format('d M, Y h:i A') }}</td>
@@ -1327,6 +1330,120 @@
         }, 5000);
     }
 
+    function handleSubscriptionLivePayload(data) {
+        // Update Top Plan Card & Expired Banner Live
+        const headerPlanLabel = document.getElementById('headerPlanLabel');
+        const headerStatusWrap = document.getElementById('headerSubStatusWrapper');
+        const headerExpiresAt = document.getElementById('headerExpiresAt');
+        const expiredBanner = document.getElementById('subPageExpiredBanner');
+
+        if (headerPlanLabel && data.plan_label) {
+            headerPlanLabel.innerText = data.plan_label;
+        }
+        if (headerStatusWrap) {
+            if (data.is_lifetime) {
+                headerStatusWrap.innerHTML = '<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300 text-[10px] font-bold border border-purple-500/30">👑 আজীবন ফ্রি লাইসেন্স</span>';
+                if (headerExpiresAt) headerExpiresAt.classList.add('hidden');
+            } else if (data.is_active) {
+                headerStatusWrap.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span><span class="text-xs font-bold text-emerald-400">${data.time_remaining_label || 'সক্রিয়'}</span>`;
+                if (headerExpiresAt) {
+                    headerExpiresAt.classList.remove('hidden');
+                    headerExpiresAt.innerHTML = `মেয়াদ শেষ: <span class="font-bold text-slate-300">${data.formatted_expires_at || ''}</span>`;
+                }
+            } else {
+                headerStatusWrap.innerHTML = '<span class="w-2 h-2 rounded-full bg-rose-500"></span><span class="text-xs font-bold text-rose-400">মেয়াদ উত্তীর্ণ (Expired)</span>';
+            }
+        }
+        if (expiredBanner && data.is_active) {
+            expiredBanner.classList.add('hidden');
+        }
+
+        // Update History Table Live
+        const historyTbody = document.getElementById('subHistoryTbody');
+        const historyCount = document.getElementById('subHistoryCount');
+        if (historyTbody && Array.isArray(data.subscriptions_history)) {
+            if (historyCount) historyCount.innerText = `${data.subscriptions_history.length} টি রেকর্ড`;
+            if (data.subscriptions_history.length > 0) {
+                const isOffice = {{ $shop->is_office_mode ? 'true' : 'false' }};
+                historyTbody.innerHTML = data.subscriptions_history.map(sub => {
+                    const m = sub.payment_method;
+                    const methodBadge = m === 'bkash'
+                        ? '<span class="px-2 py-0.5 rounded-md bg-pink-500/15 text-pink-400 font-bold border border-pink-500/30">bKash</span>'
+                        : m === 'nagad'
+                        ? '<span class="px-2 py-0.5 rounded-md bg-amber-500/15 text-amber-400 font-bold border border-amber-500/30">Nagad</span>'
+                        : m === 'rocket'
+                        ? '<span class="px-2 py-0.5 rounded-md bg-purple-500/15 text-purple-400 font-bold border border-purple-500/30">Rocket</span>'
+                        : `<span class="px-2 py-0.5 rounded-md bg-slate-800 text-slate-300 font-bold">${m}</span>`;
+
+                    const statusBadge = sub.status === 'approved'
+                        ? '<span class="px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold text-[10px]">● অনুমোদিত (Active)</span>'
+                        : sub.status === 'rejected'
+                        ? '<span class="px-2.5 py-1 rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/20 font-bold text-[10px]">✕ বাতিল (Rejected)</span>'
+                        : '<span class="px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 font-bold text-[10px] animate-pulse">⏳ পেন্ডিং (Verifying)</span>';
+
+                    const receiptBtn = sub.status === 'approved'
+                        ? `<button type="button" onclick="showInvoiceDirect('${sub.invoice_no}', '${sub.plan_name}', '${sub.amount}', '${String(m).toUpperCase()}', '${sub.transaction_id}', '${sub.sender_number}', '${sub.created_date}', '${sub.approved_date}')" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-[11px] transition cursor-pointer">🧾 রসিদ</button>`
+                        : '<span class="text-slate-600 text-[11px]">—</span>';
+
+                    return `<tr class="hover:bg-slate-800/40 transition-colors">
+                        <td class="px-6 py-4 text-slate-300 font-mono">${sub.created_at}</td>
+                        <td class="px-6 py-4 font-bold text-white">${sub.plan_name}</td>
+                        <td class="px-6 py-4 font-en font-bold text-emerald-400">৳ ${sub.amount_formatted}</td>
+                        <td class="px-6 py-4 uppercase font-bold">${methodBadge}</td>
+                        <td class="px-6 py-4">
+                            <div class="font-mono font-bold ${isOffice ? 'text-indigo-400' : 'text-rose-400'}">${sub.transaction_id}</div>
+                            <div class="text-[10px] text-slate-500 font-mono">${sub.sender_number}</div>
+                        </td>
+                        <td class="px-6 py-4">${statusBadge}</td>
+                        <td class="px-6 py-4 text-right">${receiptBtn}</td>
+                    </tr>`;
+                }).join('');
+            }
+        }
+
+        // Update Stepper Verification Box
+        if (data.status === 'approved') {
+            const progressFill = document.getElementById('liveProgressFill');
+            const verifyingCircle = document.getElementById('verifyingCircle');
+            const verifyingLabel = document.getElementById('verifyingLabel');
+            const activeCircle = document.getElementById('activeCircle');
+            const activeLabel = document.getElementById('activeLabel');
+            const successBox = document.getElementById('approvedSuccessContainer');
+
+            if (progressFill) progressFill.style.width = '100%';
+            if (verifyingCircle) {
+                verifyingCircle.classList.remove('bg-amber-500', 'animate-pulse');
+                verifyingCircle.classList.add('bg-emerald-500');
+                verifyingCircle.innerText = '✓';
+            }
+            if (verifyingLabel) verifyingLabel.className = 'text-xs sm:text-sm font-bold text-emerald-400 mt-2';
+            if (activeCircle) {
+                activeCircle.classList.remove('bg-slate-800', 'text-slate-500');
+                activeCircle.classList.add('bg-emerald-500', 'text-white', 'shadow-lg', 'shadow-emerald-500/40');
+                activeCircle.innerText = '✓';
+            }
+            if (activeLabel) {
+                activeLabel.className = 'text-xs sm:text-sm font-bold text-emerald-400 mt-2';
+                activeLabel.innerText = 'সফলভাবে সক্রিয়!';
+            }
+            if (successBox) successBox.classList.remove('hidden');
+            if (pollingInterval) clearInterval(pollingInterval);
+
+        } else if (data.status === 'rejected') {
+            const rejectedBox = document.getElementById('rejectedNoticeContainer');
+            const reasonText = document.getElementById('rejectionReasonText');
+            if (reasonText && data.rejection_reason) {
+                reasonText.innerText = 'বাতিলের কারণ: ' + data.rejection_reason;
+            }
+            if (rejectedBox) rejectedBox.classList.remove('hidden');
+            if (pollingInterval) clearInterval(pollingInterval);
+        }
+    }
+
+    window.addEventListener('shop:subscription-updated', (e) => {
+        if (e.detail) handleSubscriptionLivePayload(e.detail);
+    });
+
     function checkLiveStatus(isManualClick) {
         const icon = document.getElementById('refreshIcon');
         if (icon && isManualClick) icon.classList.add('animate-spin');
@@ -1338,45 +1455,7 @@
                     setTimeout(() => icon.classList.remove('animate-spin'), 500);
                     showToast('স্ট্যাটাস আপডেট চেক সম্পন্ন');
                 }
-
-                if (data.status === 'approved') {
-                    // Update Stepper to Completed
-                    const progressFill = document.getElementById('liveProgressFill');
-                    const verifyingCircle = document.getElementById('verifyingCircle');
-                    const verifyingLabel = document.getElementById('verifyingLabel');
-                    const activeCircle = document.getElementById('activeCircle');
-                    const activeLabel = document.getElementById('activeLabel');
-                    const successBox = document.getElementById('approvedSuccessContainer');
-
-                    if (progressFill) progressFill.style.width = '100%';
-                    if (verifyingCircle) {
-                        verifyingCircle.classList.remove('bg-amber-500', 'animate-pulse');
-                        verifyingCircle.classList.add('bg-emerald-500');
-                        verifyingCircle.innerText = '✓';
-                    }
-                    if (verifyingLabel) verifyingLabel.className = 'text-xs sm:text-sm font-bold text-emerald-400 mt-2';
-                    if (activeCircle) {
-                        activeCircle.classList.remove('bg-slate-800', 'text-slate-500');
-                        activeCircle.classList.add('bg-emerald-500', 'text-white', 'shadow-lg', 'shadow-emerald-500/40');
-                        activeCircle.innerText = '✓';
-                    }
-                    if (activeLabel) {
-                        activeLabel.className = 'text-xs sm:text-sm font-bold text-emerald-400 mt-2';
-                        activeLabel.innerText = 'সফলভাবে সক্রিয়!';
-                    }
-                    if (successBox) successBox.classList.remove('hidden');
-
-                    if (pollingInterval) clearInterval(pollingInterval);
-
-                } else if (data.status === 'rejected') {
-                    const rejectedBox = document.getElementById('rejectedNoticeContainer');
-                    const reasonText = document.getElementById('rejectionReasonText');
-                    if (reasonText && data.rejection_reason) {
-                        reasonText.innerText = 'বাতিলের কারণ: ' + data.rejection_reason;
-                    }
-                    if (rejectedBox) rejectedBox.classList.remove('hidden');
-                    if (pollingInterval) clearInterval(pollingInterval);
-                }
+                handleSubscriptionLivePayload(data);
             })
             .catch(err => {
                 if (icon && isManualClick) icon.classList.remove('animate-spin');

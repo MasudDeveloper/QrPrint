@@ -178,14 +178,14 @@
                         </div>
                     <!-- Filter Toggle Toolbar -->
                     <div class="flex items-center gap-1 p-1 bg-slate-100 rounded-xl">
-                        <button type="button" onclick="setSideFilter('front', 'clean_bw')" id="frontFilter_clean_bw" class="flex-1 py-1 px-1 rounded-lg text-[10px] font-bold bg-white text-emerald-800 shadow-xs border border-emerald-300">
-                            📄 ক্লিন সাদা (CamScanner)
+                        <button type="button" onclick="setSideFilter('front', 'original')" id="frontFilter_original" class="flex-1 py-1 px-1 rounded-lg text-[10px] font-bold bg-white text-emerald-800 shadow-xs border border-emerald-300">
+                            🖼️ অরিজিনাল (নরমাল)
+                        </button>
+                        <button type="button" onclick="setSideFilter('front', 'clean_bw')" id="frontFilter_clean_bw" class="flex-1 py-1 px-1 rounded-lg text-[10px] font-bold text-slate-600 hover:text-slate-900">
+                            📄 ক্লিন সাদা (B&amp;W)
                         </button>
                         <button type="button" onclick="setSideFilter('front', 'magic_color')" id="frontFilter_magic_color" class="flex-1 py-1 px-1 rounded-lg text-[10px] font-bold text-slate-600 hover:text-slate-900">
                             🎨 ম্যাজিক কালার
-                        </button>
-                        <button type="button" onclick="setSideFilter('front', 'original')" id="frontFilter_original" class="flex-1 py-1 px-1 rounded-lg text-[10px] font-bold text-slate-600 hover:text-slate-900">
-                            🖼️ অরিজিনাল
                         </button>
                     </div>
 
@@ -257,14 +257,14 @@
                         </div>
                     <!-- Filter Toggle Toolbar -->
                     <div class="flex items-center gap-1 p-1 bg-slate-100 rounded-xl">
-                        <button type="button" onclick="setSideFilter('back', 'clean_bw')" id="backFilter_clean_bw" class="flex-1 py-1 px-1 rounded-lg text-[10px] font-bold bg-white text-teal-800 shadow-xs border border-teal-300">
-                            📄 ক্লিন সাদা (CamScanner)
+                        <button type="button" onclick="setSideFilter('back', 'original')" id="backFilter_original" class="flex-1 py-1 px-1 rounded-lg text-[10px] font-bold bg-white text-teal-800 shadow-xs border border-teal-300">
+                            🖼️ অরিজিনাল (নরমাল)
+                        </button>
+                        <button type="button" onclick="setSideFilter('back', 'clean_bw')" id="backFilter_clean_bw" class="flex-1 py-1 px-1 rounded-lg text-[10px] font-bold text-slate-600 hover:text-slate-900">
+                            📄 ক্লিন সাদা (B&amp;W)
                         </button>
                         <button type="button" onclick="setSideFilter('back', 'magic_color')" id="backFilter_magic_color" class="flex-1 py-1 px-1 rounded-lg text-[10px] font-bold text-slate-600 hover:text-slate-900">
                             🎨 ম্যাজিক কালার
-                        </button>
-                        <button type="button" onclick="setSideFilter('back', 'original')" id="backFilter_original" class="flex-1 py-1 px-1 rounded-lg text-[10px] font-bold text-slate-600 hover:text-slate-900">
-                            🖼️ অরিজিনাল
                         </button>
                     </div>
 
@@ -494,7 +494,7 @@
         </div>
 
         <div class="flex-1 flex items-center justify-center my-2 relative overflow-hidden" id="cropperCanvasContainer">
-            <canvas id="cropperCanvas" class="max-w-full max-h-[60vh] object-contain shadow-2xl rounded-lg"></canvas>
+            <canvas id="cropperCanvas" class="max-w-full max-h-[68vh] w-auto h-auto shadow-2xl rounded-lg cursor-crosshair touch-none"></canvas>
         </div>
 
         <div class="space-y-2 pt-2 border-t border-slate-800">
@@ -531,14 +531,14 @@
                 rotation: 0,
                 corners: null, // [tl, tr, br, bl]
                 croppedCanvas: null,
-                filter: 'clean_bw'
+                filter: 'original'
             },
             back: {
                 originalImage: null,
                 rotation: 0,
                 corners: null,
                 croppedCanvas: null,
-                filter: 'clean_bw'
+                filter: 'original'
             }
         };
 
@@ -551,28 +551,103 @@
 
             if (filterMode === 'original') return out;
 
-            const imgData = ctx.getImageData(0, 0, out.width, out.height);
+            const w = out.width, h = out.height;
+            const imgData = ctx.getImageData(0, 0, w, h);
             const d = imgData.data;
             const len = d.length;
 
             if (filterMode === 'clean_bw') {
-                // CamScanner Clean B&W (হোয়াইট ব্যাকগ্রাউন্ড / কালি অপচয় রোধ)
-                for (let i = 0; i < len; i += 4) {
-                    const r = d[i], g = d[i + 1], b = d[i + 2];
+                // Pro Laser-Ready Ink-Saving B&W: preserves red/green text & lamination glare while keeping paper pure white
+                const totalPx = w * h;
+                const eff = new Float32Array(totalPx);
+                for (let i = 0; i < totalPx; i++) {
+                    const idx = i * 4;
+                    const r = d[idx], g = d[idx + 1], b = d[idx + 2];
                     const lum = 0.299 * r + 0.587 * g + 0.114 * b;
-                    if (lum > 148) {
-                        d[i] = 255;
-                        d[i + 1] = 255;
-                        d[i + 2] = 255;
-                    } else if (lum < 112) {
-                        d[i] = 0;
-                        d[i + 1] = 0;
-                        d[i + 2] = 0;
-                    } else {
-                        const val = Math.min(255, Math.floor(((lum - 112) / 36) * 255));
-                        d[i] = val;
-                        d[i + 1] = val;
-                        d[i + 2] = val;
+                    const minCh = Math.min(r, g, b);
+                    eff[i] = 0.55 * lum + 0.45 * minCh;
+                }
+
+                // Separable 2D local dilation (radius 6) to estimate true paper brightness ignoring thin text strokes
+                const dRad = 6;
+                const hMax = new Float32Array(totalPx);
+                for (let y = 0; y < h; y++) {
+                    const rowOff = y * w;
+                    for (let x = 0; x < w; x++) {
+                        let m = 0;
+                        const x0 = Math.max(0, x - dRad), x1 = Math.min(w - 1, x + dRad);
+                        for (let kx = x0; kx <= x1; kx++) {
+                            if (eff[rowOff + kx] > m) m = eff[rowOff + kx];
+                        }
+                        hMax[rowOff + x] = m;
+                    }
+                }
+                const dilated = new Float32Array(totalPx);
+                for (let y = 0; y < h; y++) {
+                    const y0 = Math.max(0, y - dRad), y1 = Math.min(h - 1, y + dRad);
+                    for (let x = 0; x < w; x++) {
+                        let m = 0;
+                        for (let ky = y0; ky <= y1; ky++) {
+                            const v = hMax[ky * w + x];
+                            if (v > m) m = v;
+                        }
+                        dilated[y * w + x] = m;
+                    }
+                }
+
+                // 2D Integral Image over dilated paper estimate for smooth local illumination normalization
+                const integral = new Float64Array((w + 1) * (h + 1));
+                for (let y = 0; y < h; y++) {
+                    let rowSum = 0;
+                    for (let x = 0; x < w; x++) {
+                        rowSum += dilated[y * w + x];
+                        integral[(y + 1) * (w + 1) + (x + 1)] = integral[y * (w + 1) + (x + 1)] + rowSum;
+                    }
+                }
+
+                const rad = Math.max(25, Math.floor(Math.min(w, h) * 0.08));
+                const rawOut = new Float32Array(totalPx);
+                for (let y = 0; y < h; y++) {
+                    const y1 = Math.max(0, y - rad);
+                    const y2 = Math.min(h - 1, y + rad);
+                    for (let x = 0; x < w; x++) {
+                        const x1 = Math.max(0, x - rad);
+                        const x2 = Math.min(w - 1, x + rad);
+                        const area = (x2 - x1 + 1) * (y2 - y1 + 1);
+                        const sum = integral[(y2 + 1) * (w + 1) + (x2 + 1)]
+                                  - integral[y1 * (w + 1) + (x2 + 1)]
+                                  - integral[(y2 + 1) * (w + 1) + x1]
+                                  + integral[y1 * (w + 1) + x1];
+                        const localPaper = Math.max(sum / area, 40);
+                        const ratio = eff[y * w + x] / localPaper;
+                        const norm = Math.max(0, Math.min(1, (ratio - 0.42) / 0.52));
+                        rawOut[y * w + x] = Math.pow(norm, 1.45) * 255;
+                    }
+                }
+
+                // 3x3 Unsharp Mask for razor-sharp Bengali text & barcode + clean white outer rim (saves black ink)
+                const rimX = Math.floor(w * 0.016);
+                const rimY = Math.floor(h * 0.022);
+                for (let y = 0; y < h; y++) {
+                    const ym = Math.max(0, y - 1), yp = Math.min(h - 1, y + 1);
+                    const inRimY = (y < rimY || y >= h - rimY);
+                    for (let x = 0; x < w; x++) {
+                        const idx = (y * w + x) * 4;
+                        if (inRimY || x < rimX || x >= w - rimX) {
+                            d[idx] = 255; d[idx + 1] = 255; d[idx + 2] = 255;
+                            continue;
+                        }
+                        const xm = Math.max(0, x - 1), xp = Math.min(w - 1, x + 1);
+                        const blur = (
+                            rawOut[ym * w + xm] + rawOut[ym * w + x] + rawOut[ym * w + xp] +
+                            rawOut[y * w + xm]  + rawOut[y * w + x]  + rawOut[y * w + xp] +
+                            rawOut[yp * w + xm] + rawOut[yp * w + x] + rawOut[yp * w + xp]
+                        ) / 9;
+                        const center = rawOut[y * w + x];
+                        const sharp = Math.max(0, Math.min(255, Math.round(center + 0.55 * (center - blur))));
+                        d[idx] = sharp;
+                        d[idx + 1] = sharp;
+                        d[idx + 2] = sharp;
                     }
                 }
             } else if (filterMode === 'magic_color') {
@@ -583,14 +658,14 @@
                     const max = Math.max(r, g, b), min = Math.min(r, g, b);
                     const sat = max === 0 ? 0 : (max - min) / max;
 
-                    if (lum > 145 && (sat < 0.45 || (b > r && b > g && lum > 155))) {
+                    if (lum > 165 && (sat < 0.35 || (b > r && b > g && lum > 175))) {
                         d[i] = 255;
                         d[i + 1] = 255;
                         d[i + 2] = 255;
-                    } else if (lum < 100) {
-                        d[i] = Math.max(0, r - 30);
-                        d[i + 1] = Math.max(0, g - 30);
-                        d[i + 2] = Math.max(0, b - 30);
+                    } else if (lum < 105) {
+                        d[i] = Math.max(0, r - 25);
+                        d[i + 1] = Math.max(0, g - 25);
+                        d[i + 2] = Math.max(0, b - 25);
                     }
                 }
             }
@@ -602,16 +677,24 @@
             const state = cardState[side];
             if (!state.croppedCanvas) return;
 
-            const mode = state.filter || 'clean_bw';
-            const finalCanvas = applyFilterToCanvas(state.croppedCanvas, mode);
+            // 1. Card Preview: shows what the user selected (default 'original' = normal preview)
+            const previewMode = state.filter || 'original';
+            const previewOut = applyFilterToCanvas(state.croppedCanvas, previewMode);
 
             const previewCanvas = document.getElementById(`${side}Canvas`);
             previewCanvas.width = TARGET_WIDTH;
             previewCanvas.height = TARGET_HEIGHT;
             const pCtx = previewCanvas.getContext('2d');
-            pCtx.drawImage(finalCanvas, 0, 0);
+            pCtx.drawImage(previewOut, 0, 0);
 
-            document.getElementById(`${side}CroppedData`).value = finalCanvas.toDataURL('image/jpeg', 0.95);
+            // 2. Print Output: if on 'original', automatically optimize for selected print mode (B&W ink-saving vs Color)
+            const colorMode = document.querySelector('input[name="color_mode"]:checked')?.value || 'bw';
+            let printOut = previewOut;
+            if (previewMode === 'original' && colorMode === 'bw') {
+                printOut = applyFilterToCanvas(state.croppedCanvas, 'clean_bw');
+            }
+
+            document.getElementById(`${side}CroppedData`).value = printOut.toDataURL('image/jpeg', 0.95);
             updateA4Mockup();
         }
 
@@ -719,7 +802,13 @@
                             outCanvas.width = TARGET_WIDTH;
                             outCanvas.height = TARGET_HEIGHT;
                             const outCtx = outCanvas.getContext('2d');
-                            outCtx.drawImage(croppedImg, 0, 0, TARGET_WIDTH, TARGET_HEIGHT);
+                            const trimX = croppedImg.width * 0.022;
+                            const trimY = croppedImg.height * 0.030;
+                            outCtx.drawImage(
+                                croppedImg,
+                                trimX, trimY, croppedImg.width - trimX * 2, croppedImg.height - trimY * 2,
+                                0, 0, TARGET_WIDTH, TARGET_HEIGHT
+                            );
 
                             cardState[side].croppedCanvas = outCanvas;
                             document.getElementById(`${side}UploadBox`).classList.add('hidden');
@@ -765,12 +854,15 @@
         // Fetch AI Corners for Cropper Modal
         async function fetchAiCorners(side, file, dataUrl, origW, origH) {
             try {
-                const formData = new FormData();
-                if (file) {
-                    formData.append('file', file);
-                } else {
-                    formData.append('image_data', dataUrl);
+                // Use browser-oriented canvas so EXIF rotation matches origW x origH 1:1
+                let orientedDataUrl = dataUrl;
+                if (cardState[side]?.originalImage) {
+                    const c = getRotatedCanvas(cardState[side].originalImage, cardState[side].rotation || 0);
+                    orientedDataUrl = c.toDataURL('image/jpeg', 0.9);
                 }
+
+                const formData = new FormData();
+                formData.append('image_data', orientedDataUrl);
 
                 const res = await fetch('{{ route("api.ai.detect_corners") }}', {
                     method: 'POST',
@@ -788,6 +880,11 @@
                             x: pt.x * origW,
                             y: pt.y * origH
                         }));
+                        // If modal is currently open on this side, update corners live
+                        if (activeModalSide === side) {
+                            modalCorners = JSON.parse(JSON.stringify(cardState[side].corners));
+                            drawCropperModal();
+                        }
                     }
                 }
             } catch (e) {
@@ -1171,14 +1268,8 @@
         }
 
         function onColorModeChanged() {
-            const colorMode = document.querySelector('input[name="color_mode"]:checked')?.value || 'bw';
-            if (colorMode === 'bw') {
-                if (cardState.front.croppedCanvas && cardState.front.filter === 'original') setSideFilter('front', 'clean_bw');
-                if (cardState.back.croppedCanvas && cardState.back.filter === 'original') setSideFilter('back', 'clean_bw');
-            } else {
-                if (cardState.front.croppedCanvas && cardState.front.filter === 'clean_bw') setSideFilter('front', 'magic_color');
-                if (cardState.back.croppedCanvas && cardState.back.filter === 'clean_bw') setSideFilter('back', 'magic_color');
-            }
+            if (cardState.front.croppedCanvas) renderSideOutput('front');
+            if (cardState.back.croppedCanvas) renderSideOutput('back');
             updateA4Mockup();
             calculateNidBill();
         }
@@ -1217,11 +1308,16 @@
 
             modalRotCanvas = getRotatedCanvas(state.originalImage, state.rotation);
             
-            // Deep copy corners or recalculate
-            modalCorners = state.corners ? JSON.parse(JSON.stringify(state.corners)) : findCardCorners(modalRotCanvas);
+            // Deep copy AI corners or trigger AI detection
+            const hasSavedCorners = Array.isArray(state.corners) && state.corners.length === 4;
+            modalCorners = hasSavedCorners ? JSON.parse(JSON.stringify(state.corners)) : findCardCorners(modalRotCanvas);
 
             document.getElementById('cropperModal').classList.remove('hidden');
             drawCropperModal();
+
+            if (!hasSavedCorners) {
+                autoDetectCurrentModal();
+            }
         }
 
         function closeCropperModal() {
@@ -1236,8 +1332,48 @@
             closeCropperModal();
         }
 
-        function autoDetectCurrentModal() {
+        async function autoDetectCurrentModal() {
             if (!modalRotCanvas) return;
+            const autoBtn = document.querySelector('#cropperModal button[onclick="autoDetectCurrentModal()"]');
+            const origHtml = autoBtn ? autoBtn.innerHTML : null;
+            if (autoBtn) {
+                autoBtn.disabled = true;
+                autoBtn.innerHTML = '⏳ AI ডিটেক্ট হচ্ছে...';
+            }
+
+            try {
+                const formData = new FormData();
+                formData.append('image_data', modalRotCanvas.toDataURL('image/jpeg', 0.9));
+
+                const res = await fetch('{{ route("api.ai.detect_corners") }}', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    }
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.success && Array.isArray(data.corners) && data.corners.length === 4) {
+                        modalCorners = data.corners.map(pt => ({
+                            x: pt.x * modalRotCanvas.width,
+                            y: pt.y * modalRotCanvas.height
+                        }));
+                        drawCropperModal();
+                        return;
+                    }
+                }
+            } catch (e) {
+                console.warn('Modal AI auto-detect failed, using fallback:', e);
+            } finally {
+                if (autoBtn && origHtml !== null) {
+                    autoBtn.disabled = false;
+                    autoBtn.innerHTML = origHtml;
+                }
+            }
+
             modalCorners = findCardCorners(modalRotCanvas);
             drawCropperModal();
         }
@@ -1246,9 +1382,11 @@
             if (!activeModalSide) return;
             const state = cardState[activeModalSide];
             state.rotation = (state.rotation + 90) % 360;
+            state.corners = null;
             modalRotCanvas = getRotatedCanvas(state.originalImage, state.rotation);
             modalCorners = findCardCorners(modalRotCanvas);
             drawCropperModal();
+            autoDetectCurrentModal();
         }
 
         function resetCurrentModalCorners() {
@@ -1473,26 +1611,33 @@
             const clientY = evt.touches ? evt.touches[0].clientY : evt.clientY;
 
             return {
-                x: (clientX - rect.left) / modalScale,
-                y: (clientY - rect.top) / modalScale
+                x: ((clientX - rect.left) / rect.width) * modalRotCanvas.width,
+                y: ((clientY - rect.top) / rect.height) * modalRotCanvas.height
             };
         }
 
-        function findNearCorner(pt) {
-            const hitRadius = 35 / modalScale;
+        function findNearCorner(evt) {
+            const rect = modalCanvas.getBoundingClientRect();
+            const clientX = evt.touches ? evt.touches[0].clientX : evt.clientX;
+            const clientY = evt.touches ? evt.touches[0].clientY : evt.clientY;
+            let bestIdx = -1;
+            let bestDist = 44; // 44px screen-space radius for mouse & touch
             for (let i = 0; i < modalCorners.length; i++) {
-                const c = modalCorners[i];
-                if (Math.hypot(c.x - pt.x, c.y - pt.y) <= hitRadius) {
-                    return i;
+                const screenX = rect.left + (modalCorners[i].x / modalRotCanvas.width) * rect.width;
+                const screenY = rect.top + (modalCorners[i].y / modalRotCanvas.height) * rect.height;
+                const dist = Math.hypot(screenX - clientX, screenY - clientY);
+                if (dist <= bestDist) {
+                    bestDist = dist;
+                    bestIdx = i;
                 }
             }
-            return -1;
+            return bestIdx;
         }
 
         function onPointerDown(e) {
+            if (!modalRotCanvas) return;
             e.preventDefault();
-            const pt = getCanvasPoint(e);
-            activeHandleIndex = findNearCorner(pt);
+            activeHandleIndex = findNearCorner(e);
             if (activeHandleIndex !== -1) {
                 drawCropperModal();
             }

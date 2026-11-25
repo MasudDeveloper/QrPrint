@@ -917,14 +917,14 @@
         </div>
     </section>
 
-    <!-- LIVE PROFIT CALCULATOR SECTION -->
+    <!-- LIVE TIME SAVINGS CALCULATOR SECTION -->
     <section id="calculator" class="py-20 bg-slate-50 border-t border-slate-200">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="bg-white p-8 sm:p-12 rounded-3xl card-shadow border border-slate-200 space-y-8">
                 <div class="text-center space-y-2">
-                    <span class="text-xs font-bold text-emerald-600 uppercase tracking-wider">লাভের হিসাব</span>
+                    <span class="text-xs font-bold text-emerald-600 uppercase tracking-wider">সময় সাশ্রয়ের হিসাব</span>
                     <h2 class="text-2xl sm:text-3xl font-black text-slate-900">
-                        আপনার দোকানের মাসিক আয় ও সময় সাশ্রয়
+                        আপনার দোকানের মাসিক সময় সাশ্রয়
                     </h2>
                 </div>
 
@@ -932,7 +932,7 @@
                     <div class="space-y-6">
                         <div>
                             <div class="flex justify-between text-xs sm:text-sm font-bold mb-2">
-                                <span class="text-slate-600">দৈনিক গড়ে প্রিন্ট ও ফটোকপি পেজ:</span>
+                                <span class="text-slate-600">দৈনিক গড়ে প্রিন্ট ও ফটোকপি কাজ:</span>
                                 <span id="dailyPrintVal" class="text-emerald-600 font-black text-base">150 টি</span>
                             </div>
                             <input id="dailyPrintRange" type="range" min="30" max="600" step="10" value="150" class="w-full accent-emerald-500 h-2 bg-slate-200 rounded-lg cursor-pointer">
@@ -940,25 +940,25 @@
 
                         <div>
                             <div class="flex justify-between text-xs sm:text-sm font-bold mb-2">
-                                <span class="text-slate-600">গড়ে প্রতি পেজ প্রিন্ট রেট (টাকা):</span>
-                                <span id="rateVal" class="text-rose-500 font-black text-base">৳ 6</span>
+                                <span class="text-slate-600">প্রতি প্রিন্টে গড়ে সময় বাঁচে (মিনিট):</span>
+                                <span id="timePerPrintVal" class="text-cyan-600 font-black text-base">1.5 মিনিট</span>
                             </div>
-                            <input id="rateRange" type="range" min="3" max="25" step="1" value="6" class="w-full accent-rose-500 h-2 bg-slate-200 rounded-lg cursor-pointer">
+                            <input id="timePerPrintRange" type="range" min="1" max="5" step="0.5" value="1.5" class="w-full accent-cyan-500 h-2 bg-slate-200 rounded-lg cursor-pointer">
                         </div>
 
                         <div class="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-xs text-slate-700">
-                            💡 প্রতি প্রিন্টে গড়ে ১.৫ মিনিট বাঁচলে, মাসে আপনার বাঁচবে <strong id="hoursSaved" class="text-emerald-700 font-bold">113 ঘণ্টা সময়</strong>!
+                            ⚡ পেনড্রাইভ, হোয়াটসঅ্যাপ ও কেবল ছাড়াই দৈনিক আপনার বাঁচবে <strong id="dailyTimeSaved" class="text-emerald-700 font-bold">3 ঘণ্টা 45 মিনিট</strong>!
                         </div>
                     </div>
 
                     <!-- Output Showcase -->
                     <div class="p-8 rounded-3xl bg-slate-900 text-white text-center space-y-3 shadow-xl">
-                        <span class="text-xs uppercase tracking-wider font-bold text-slate-400">মাসিক আনুমানিক রেভিনিউ</span>
-                        <div id="monthlyIncome" class="text-4xl sm:text-5xl font-black text-emerald-400 font-en">
-                            ৳ 27,000
+                        <span class="text-xs uppercase tracking-wider font-bold text-slate-400">মাসিক মোট সময় সাশ্রয়</span>
+                        <div id="monthlyHoursSaved" class="text-4xl sm:text-5xl font-black text-emerald-400 font-en">
+                            113 ঘণ্টা
                         </div>
                         <p class="text-xs text-slate-400 pb-2">
-                            (১০০% টাকা আপনার নিজস্ব একাউন্টে, ০% কমিশন)
+                            (বাঁচানো সময়ে আরও বেশি কাস্টমার ও অন্য কাজে ফোকাস করুন)
                         </p>
                         <a href="#pricing" class="w-full inline-block py-3.5 px-6 rounded-xl bg-gradient-to-r from-emerald-400 to-cyan-400 text-slate-950 font-black text-xs hover:from-emerald-300 hover:to-cyan-300 transition-all shadow-md">
                             আজই সফটওয়্যারটি টেস্ট করুন
@@ -1422,27 +1422,34 @@
 
     <!-- Interactive Simulator Scripts -->
     <script>
-        // Calculator Logic
+        // Time Savings Calculator Logic
         const dailyRange = document.getElementById('dailyPrintRange');
-        const rateRange = document.getElementById('rateRange');
+        const timePerPrintRange = document.getElementById('timePerPrintRange');
         const dailyPrintVal = document.getElementById('dailyPrintVal');
-        const rateVal = document.getElementById('rateVal');
-        const monthlyIncome = document.getElementById('monthlyIncome');
-        const hoursSaved = document.getElementById('hoursSaved');
+        const timePerPrintVal = document.getElementById('timePerPrintVal');
+        const monthlyHoursSaved = document.getElementById('monthlyHoursSaved');
+        const dailyTimeSaved = document.getElementById('dailyTimeSaved');
 
         function updateCalc() {
             const prints = parseInt(dailyRange.value);
-            const rate = parseInt(rateRange.value);
+            const minsPerPrint = parseFloat(timePerPrintRange.value);
             dailyPrintVal.innerText = prints + ' টি';
-            rateVal.innerText = '৳ ' + rate;
-            const total = prints * rate * 30;
-            monthlyIncome.innerText = '৳ ' + total.toLocaleString('en-US');
-            const hours = Math.round((prints * 1.5 * 30) / 60);
-            hoursSaved.innerText = hours + ' ঘণ্টা সময়';
+            timePerPrintVal.innerText = minsPerPrint + ' মিনিট';
+
+            const dailyTotalMins = Math.round(prints * minsPerPrint);
+            const dailyHrs = Math.floor(dailyTotalMins / 60);
+            const dailyRemMins = dailyTotalMins % 60;
+            dailyTimeSaved.innerText = dailyHrs > 0
+                ? (dailyRemMins > 0 ? `${dailyHrs} ঘণ্টা ${dailyRemMins} মিনিট` : `${dailyHrs} ঘণ্টা`)
+                : `${dailyRemMins} মিনিট`;
+
+            const monthlyHours = Math.round((dailyTotalMins * 30) / 60);
+            monthlyHoursSaved.innerText = monthlyHours.toLocaleString('en-US') + ' ঘণ্টা';
         }
 
         dailyRange.addEventListener('input', updateCalc);
-        rateRange.addEventListener('input', updateCalc);
+        timePerPrintRange.addEventListener('input', updateCalc);
+        updateCalc();
 
         // Simulator button celebration
         const simBtn = document.getElementById('simBtn');

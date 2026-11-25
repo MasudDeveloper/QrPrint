@@ -19,7 +19,7 @@
         <div class="flex items-center gap-3">
             <span class="px-4 py-2 rounded-2xl bg-amber-500/15 text-amber-400 border border-amber-500/30 text-xs font-bold flex items-center gap-2">
                 <span>⏳ অপেক্ষমান রিকোয়েস্ট:</span>
-                <span class="font-black text-sm">{{ $pendingCount }} টি</span>
+                <span id="adminPagePendingCount" class="font-black text-sm">{{ $pendingCount }} টি</span>
             </span>
         </div>
     </div>
@@ -46,7 +46,7 @@
                         <th class="px-6 py-4 text-right">অ্যাকশন</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-800/80">
+                <tbody id="adminSubscriptionsTbody" class="divide-y divide-slate-800/80">
                     @forelse($subscriptions as $sub)
                         <tr class="hover:bg-slate-800/40 transition-colors">
                             <td class="px-6 py-4 text-slate-400 font-mono">
@@ -104,18 +104,12 @@
                             <td class="px-6 py-4 text-right">
                                 @if($sub->status === 'pending')
                                     <div class="flex items-center justify-end gap-2">
-                                        <form action="{{ route('admin.subscriptions.approve', $sub) }}" method="POST">
-                                            @csrf
-                                            <button type="submit" onclick="return confirm('আপনি কি নিশ্চিত যে TrxID ভেরিফাই করে প্যাকেজটি সক্রিয় করতে চান?')" class="px-3 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs shadow-md transition-all cursor-pointer">
-                                                ✓ অনুমোদন (Approve)
-                                            </button>
-                                        </form>
-                                        <form action="{{ route('admin.subscriptions.reject', $sub) }}" method="POST">
-                                            @csrf
-                                            <button type="submit" onclick="return confirm('আপনি কি এই রিকোয়েস্টটি বাতিল করতে চান?')" class="px-3 py-1.5 rounded-xl bg-rose-500/20 hover:bg-rose-500 text-rose-300 hover:text-white border border-rose-500/30 font-bold text-xs transition-all cursor-pointer">
-                                                ✕ বাতিল
-                                            </button>
-                                        </form>
+                                        <button type="button" onclick="handleAdminSubAction('{{ route('admin.subscriptions.approve', $sub) }}', 'approve', this)" class="px-3 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs shadow-md transition-all cursor-pointer">
+                                            ✓ অনুমোদন (Approve)
+                                        </button>
+                                        <button type="button" onclick="handleAdminSubAction('{{ route('admin.subscriptions.reject', $sub) }}', 'reject', this)" class="px-3 py-1.5 rounded-xl bg-rose-500/20 hover:bg-rose-500 text-rose-300 hover:text-white border border-rose-500/30 font-bold text-xs transition-all cursor-pointer">
+                                            ✕ বাতিল
+                                        </button>
                                     </div>
                                 @else
                                     <span class="text-[10px] text-slate-500 font-mono">
@@ -140,4 +134,112 @@
         @endif
     </div>
 </div>
+
+<script>
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
+    }
+
+    function renderMethodBadge(method) {
+        if (method === 'bkash') return '<span class="px-2 py-0.5 rounded-md bg-pink-500/15 text-pink-400 font-bold border border-pink-500/30">bKash</span>';
+        if (method === 'nagad') return '<span class="px-2 py-0.5 rounded-md bg-amber-500/15 text-amber-400 font-bold border border-amber-500/30">Nagad</span>';
+        if (method === 'rocket') return '<span class="px-2 py-0.5 rounded-md bg-purple-500/15 text-purple-400 font-bold border border-purple-500/30">Rocket</span>';
+        return `<span class="px-2 py-0.5 rounded-md bg-slate-800 text-slate-300 font-bold">${escapeHtml(method)}</span>`;
+    }
+
+    function renderStatusBadge(status) {
+        if (status === 'approved') return '<span class="px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold text-[10px]">● অনুমোদিত (Active)</span>';
+        if (status === 'rejected') return '<span class="px-2.5 py-1 rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/20 font-bold text-[10px]">✕ বাতিল (Rejected)</span>';
+        return '<span class="px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 font-bold text-[10px] animate-pulse">⏳ অপেক্ষমান (Pending)</span>';
+    }
+
+    window.handleAdminSubAction = function(url, actionType, btn) {
+        const confirmMsg = actionType === 'approve'
+            ? 'আপনি কি নিশ্চিত যে TrxID ভেরিফাই করে প্যাকেজটি সক্রিয় করতে চান?'
+            : 'আপনি কি এই রিকোয়েস্টটি বাতিল করতে চান?';
+        if (!confirm(confirmMsg)) return;
+
+        const origText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerText = 'অপেক্ষা...';
+
+        const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}';
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': csrf,
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                if (typeof showAdminSubToast === 'function') {
+                    showAdminSubToast(actionType === 'approve' ? 'প্যাকেজ অনুমোদিত ✓' : 'রিকোয়েস্ট বাতিল', data.message);
+                }
+                if (typeof window.pollAdminSubscriptions === 'function') {
+                    window.pollAdminSubscriptions();
+                }
+            } else {
+                alert(data.message || 'সমস্যা হয়েছে!');
+                btn.disabled = false;
+                btn.innerHTML = origText;
+            }
+        })
+        .catch(() => {
+            alert('সার্ভারে সংযোগ করা যায়নি!');
+            btn.disabled = false;
+            btn.innerHTML = origText;
+        });
+    };
+
+    window.addEventListener('admin:subscriptions-updated', (e) => {
+        const data = e.detail;
+        const countEl = document.getElementById('adminPagePendingCount');
+        if (countEl) countEl.innerText = `${data.pending_count} টি`;
+
+        const tbody = document.getElementById('adminSubscriptionsTbody');
+        if (!tbody || !Array.isArray(data.subscriptions)) return;
+
+        if (data.subscriptions.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="8" class="px-6 py-8 text-center text-slate-500">কোনো সাবস্ক্রিপশন রিকোয়েস্ট পাওয়া যায়নি</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = data.subscriptions.map(sub => {
+            const typeBadge = sub.is_office_mode
+                ? '<span class="px-1.5 py-0.5 rounded text-[8px] font-black bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">🏢 অফিস</span>'
+                : '<span class="px-1.5 py-0.5 rounded text-[8px] font-black bg-rose-500/10 text-rose-400 border border-rose-500/20">🏬 দোকান</span>';
+
+            const actionCell = sub.status === 'pending'
+                ? `<div class="flex items-center justify-end gap-2">
+                        <button type="button" onclick="handleAdminSubAction('${escapeHtml(sub.approve_url)}', 'approve', this)" class="px-3 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs shadow-md transition-all cursor-pointer">✓ অনুমোদন (Approve)</button>
+                        <button type="button" onclick="handleAdminSubAction('${escapeHtml(sub.reject_url)}', 'reject', this)" class="px-3 py-1.5 rounded-xl bg-rose-500/20 hover:bg-rose-500 text-rose-300 hover:text-white border border-rose-500/30 font-bold text-xs transition-all cursor-pointer">✕ বাতিল</button>
+                   </div>`
+                : `<span class="text-[10px] text-slate-500 font-mono">${escapeHtml(sub.approved_at)}</span>`;
+
+            return `<tr class="hover:bg-slate-800/40 transition-colors">
+                <td class="px-6 py-4 text-slate-400 font-mono">${escapeHtml(sub.created_at)}</td>
+                <td class="px-6 py-4 font-bold text-white">
+                    <div class="flex items-center gap-1.5">
+                        <span class="text-sm">${escapeHtml(sub.shop_name)}</span>
+                        ${typeBadge}
+                    </div>
+                    <div class="text-[10px] text-slate-400 font-mono">${escapeHtml(sub.shop_phone)}</div>
+                </td>
+                <td class="px-6 py-4"><span class="font-bold text-rose-400">${escapeHtml(sub.plan_name)}</span></td>
+                <td class="px-6 py-4 font-en font-black text-emerald-400 text-sm">৳ ${escapeHtml(sub.amount)}</td>
+                <td class="px-6 py-4 uppercase font-bold text-slate-300">${renderMethodBadge(sub.payment_method)}</td>
+                <td class="px-6 py-4">
+                    <div class="font-mono font-black text-white text-xs tracking-wider bg-slate-950 px-2.5 py-1 rounded-lg border border-slate-800 inline-block">${escapeHtml(sub.transaction_id)}</div>
+                    <div class="text-[10px] text-slate-400 font-mono mt-1">সেন্ডার: ${escapeHtml(sub.sender_number)}</div>
+                </td>
+                <td class="px-6 py-4">${renderStatusBadge(sub.status)}</td>
+                <td class="px-6 py-4 text-right">${actionCell}</td>
+            </tr>`;
+        }).join('');
+    });
+</script>
 @endsection

@@ -731,10 +731,27 @@ class ShopController extends Controller
         $shop = $this->getShop();
         $latest = ShopSubscription::where('shop_id', $shop->id)->latest()->first();
         $pending = ShopSubscription::where('shop_id', $shop->id)->where('status', 'pending')->latest()->first();
+        $history = ShopSubscription::where('shop_id', $shop->id)->latest()->take(15)->get()->map(function ($sub) {
+            return [
+                'id' => $sub->id,
+                'invoice_no' => 'PS-INV-' . str_pad($sub->id, 5, '0', STR_PAD_LEFT),
+                'plan_name' => $sub->plan_name,
+                'amount' => (float)$sub->amount,
+                'amount_formatted' => number_format($sub->amount, 0),
+                'payment_method' => $sub->payment_method,
+                'transaction_id' => $sub->transaction_id ?? 'N/A',
+                'sender_number' => $sub->sender_number,
+                'status' => $sub->status,
+                'created_at' => $sub->created_at ? $sub->created_at->format('d M, Y h:i A') : '',
+                'created_date' => $sub->created_at ? $sub->created_at->format('d M, Y') : '',
+                'approved_date' => $sub->approved_at ? $sub->approved_at->format('d M, Y') : ($sub->created_at ? $sub->created_at->format('d M, Y') : ''),
+            ];
+        });
 
         return response()->json([
             'has_pending' => (bool)$pending,
             'status' => $latest ? $latest->status : 'none',
+            'rejection_reason' => ($latest && $latest->status === 'rejected') ? $latest->notes : null,
             'subscription' => $latest ? [
                 'id' => $latest->id,
                 'invoice_no' => 'PS-INV-' . str_pad($latest->id, 5, '0', STR_PAD_LEFT),
@@ -749,9 +766,12 @@ class ShopController extends Controller
                 'notes' => $latest->notes,
             ] : null,
             'is_active' => (bool)($shop->isSubscriptionActive() || $shop->is_lifetime),
+            'is_lifetime' => (bool)$shop->is_lifetime,
+            'is_shop_active' => (bool)$shop->is_active,
             'plan_label' => $shop->plan_label,
             'formatted_expires_at' => $shop->formatted_expires_at,
             'time_remaining_label' => $shop->time_remaining_label,
+            'subscriptions_history' => $history,
         ]);
     }
 

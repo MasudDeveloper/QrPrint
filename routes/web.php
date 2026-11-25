@@ -142,6 +142,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::post('/shops/{shop}/plan', [AdminController::class, 'updateShopPlan'])->name('shops.plan');
     Route::get('/shops/{shop}/login', [AdminController::class, 'loginAsShop'])->name('shops.login_as');
     Route::get('/subscriptions', [AdminController::class, 'subscriptions'])->name('subscriptions');
+    Route::get('/subscriptions/live', [AdminController::class, 'liveSubscriptions'])->name('subscriptions.live');
     Route::post('/subscriptions/{subscription}/approve', [AdminController::class, 'approveSubscription'])->name('subscriptions.approve');
     Route::post('/subscriptions/{subscription}/reject', [AdminController::class, 'rejectSubscription'])->name('subscriptions.reject');
     Route::get('/print-jobs', [AdminController::class, 'printJobs'])->name('jobs');

@@ -331,12 +331,56 @@ class AdminController extends Controller
     }
 
     /**
+     * Real-time JSON endpoint for admin subscription queue & notifications
+     */
+    public function liveSubscriptions()
+    {
+        $pendingCount = ShopSubscription::where('status', 'pending')->count();
+        $latestPending = ShopSubscription::with('shop')->where('status', 'pending')->latest('id')->first();
+        $subscriptions = ShopSubscription::with('shop')->latest()->take(20)->get()->map(function ($sub) {
+            return [
+                'id' => $sub->id,
+                'created_at' => $sub->created_at ? $sub->created_at->format('d M, Y h:i A') : '',
+                'approved_at' => $sub->approved_at ? $sub->approved_at->format('d M, h:i A') : 'সম্পন্ন',
+                'shop_name' => $sub->shop->name ?? 'প্রতিষ্ঠান নেই',
+                'shop_phone' => $sub->shop->phone ?? '',
+                'is_office_mode' => (bool) ($sub->shop->is_office_mode ?? false),
+                'plan_name' => $sub->plan_name,
+                'amount' => number_format($sub->amount, 0),
+                'payment_method' => $sub->payment_method,
+                'transaction_id' => $sub->transaction_id ?? 'N/A',
+                'sender_number' => $sub->sender_number,
+                'status' => $sub->status,
+                'approve_url' => route('admin.subscriptions.approve', $sub),
+                'reject_url' => route('admin.subscriptions.reject', $sub),
+            ];
+        });
+
+        return response()->json([
+            'pending_count' => $pendingCount,
+            'latest_pending_id' => $latestPending ? $latestPending->id : 0,
+            'latest_pending' => $latestPending ? [
+                'id' => $latestPending->id,
+                'shop_name' => $latestPending->shop->name ?? 'নতুন প্রতিষ্ঠান',
+                'is_office_mode' => (bool) ($latestPending->shop->is_office_mode ?? false),
+                'plan_name' => $latestPending->plan_name,
+                'amount' => number_format($latestPending->amount, 0),
+                'payment_method' => strtoupper($latestPending->payment_method),
+            ] : null,
+            'subscriptions' => $subscriptions,
+        ]);
+    }
+
+    /**
      * Approve a shop subscription payment request
      */
     public function approveSubscription(Request $request, ShopSubscription $subscription)
     {
         $shop = $subscription->shop;
         if (!$shop) {
+            if ($request->expectsJson()) {
+                return response()->json(['success' => false, 'message' => 'দোকান পাওয়া যায়নি।'], 404);
+            }
             return back()->with('error', 'দোকান পাওয়া যায়নি।');
         }
 
@@ -374,7 +418,16 @@ class AdminController extends Controller
             'notes' => $request->notes ?? 'সুপার এডমিন কর্তৃক অনুমোদিত',
         ]);
 
-        return back()->with('success', "পেমেন্ট সফলভাবে অনুমোদিত হয়েছে এবং {$shop->name} এর প্যাকেজ সক্রিয় করা হয়েছে!");
+        $msg = "পেমেন্ট সফলভাবে অনুমোদিত হয়েছে এবং {$shop->name} এর প্যাকেজ সক্রিয় করা হয়েছে!";
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => $msg,
+                'pending_count' => ShopSubscription::where('status', 'pending')->count(),
+            ]);
+        }
+
+        return back()->with('success', $msg);
     }
 
     /**
@@ -388,7 +441,16 @@ class AdminController extends Controller
             'notes' => $request->notes ?? 'পেমেন্ট ভেরিফাই করা সম্ভব হয়নি',
         ]);
 
-        return back()->with('success', "সাবস্ক্রিপশন আবেদনটি বাতিল (Rejected) করা হয়েছে।");
+        $msg = "সাবস্ক্রিপশন আবেদনটি বাতিল (Rejected) করা হয়েছে।";
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => $msg,
+                'pending_count' => ShopSubscription::where('status', 'pending')->count(),
+            ]);
+        }
+
+        return back()->with('success', $msg);
     }
 
     public function printJobs()
